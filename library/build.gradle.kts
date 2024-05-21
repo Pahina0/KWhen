@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
@@ -17,19 +15,25 @@ kotlin {
             }
         }
     }
+    
     iosX64()
     iosArm64()
     iosSimulatorArm64()
+
     linuxX64()
+
+    mingwX64()
 
     sourceSets {
         val commonMain by getting {
             dependencies {
+                // dependencies for main
                 implementation(libs.kotlinx.datetime)
             }
         }
         val commonTest by getting {
             dependencies {
+                // dependencies for tests
                 implementation(libs.kotlin.test)
             }
         }
