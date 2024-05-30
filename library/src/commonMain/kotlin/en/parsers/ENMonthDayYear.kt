@@ -55,7 +55,7 @@ class ENMonthDayYear(override val config: ENConfig) : ParserByWord(config) {
                     },
 
 
-                    tagsTime = date.tagsTime + TagTime.YEAR
+                    tagsTimeStart = date.tagsTimeStart + TagTime.YEAR
 
                 )
             }
@@ -70,7 +70,7 @@ class ENMonthDayYear(override val config: ENConfig) : ParserByWord(config) {
                     dayOfMonth = ordinal[day] ?: day.replace("th|st|rd".toRegex(), "").toInt(),
 
                     ),
-                tagsTime = tagsTime + TagTime.DAY + TagTime.MONTH
+                tagsTimeStart = tagsTimeStart + TagTime.DAY + TagTime.MONTH
             )
         }
 

@@ -17,12 +17,12 @@ class ENBasicDate(override val config: ENConfig) : ParserByWord(config) {
         var date = DateTime()
 
         when (match.groupValues.first().lowercase()) {
-            "today" -> date = date.copy(tagsTime = setOf(TagTime.DAY))
+            "today" -> date = date.copy(tagsTimeStart = setOf(TagTime.DAY))
 
             "tmrw", "tmr", "tmw" -> date = date.run {
                 copy(
                     startTime = startTime.copy(startTime.date.plus(1, DateTimeUnit.DAY)),
-                    tagsTime = setOf(TagTime.DAY)
+                    tagsTimeStart = setOf(TagTime.DAY)
                 )
             }
 
@@ -30,11 +30,11 @@ class ENBasicDate(override val config: ENConfig) : ParserByWord(config) {
             "yesterday" -> date = date.run {
                 copy(
                     startTime = startTime.copy(startTime.date.minus(1, DateTimeUnit.DAY)),
-                    tagsTime = setOf(TagTime.DAY)
+                    tagsTimeStart = setOf(TagTime.DAY)
                 )
             }
 
-            "now", "rn", "right now" -> date = date.copy(tagsTime = setOf(TagTime.DAY, TagTime.MINUTE, TagTime.SECOND))
+            "now", "rn", "right now" -> date = date.copy(tagsTimeStart = setOf(TagTime.DAY, TagTime.MINUTE, TagTime.SECOND))
         }
 
         return date

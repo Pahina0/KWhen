@@ -17,7 +17,7 @@ class ENBasicTime(override val config: ENConfig) : ParserByWord(config) {
             "evening" -> date = date.run {
                 copy(
                     startTime = startTime.copy(hour = config.evening),
-                    tagsTime = tagsTime + TagTime.HOUR
+                    tagsTimeStart = tagsTimeStart + TagTime.HOUR
                 )
             }
 
@@ -25,35 +25,35 @@ class ENBasicTime(override val config: ENConfig) : ParserByWord(config) {
             "morning" -> date = date.run {
                 copy(
                     startTime = startTime.copy(hour = config.morning),
-                    tagsTime = tagsTime + TagTime.HOUR
+                    tagsTimeStart = tagsTimeStart + TagTime.HOUR
                 )
             }
 
             "afternoon" -> date = date.run {
                 copy(
                     startTime = startTime.copy(hour = config.afternoon),
-                    tagsTime = tagsTime + TagTime.HOUR
+                    tagsTimeStart = tagsTimeStart + TagTime.HOUR
                 )
             }
 
             "night" -> date = date.run {
                 copy(
                     startTime = startTime.copy(hour = config.night),
-                    tagsTime = tagsTime + TagTime.HOUR
+                    tagsTimeStart = tagsTimeStart + TagTime.HOUR
                 )
             }
 
             "tonight" -> date = date.run {
                 copy(
                     startTime = startTime.copy(hour = config.night),
-                    tagsTime = tagsTime + TagTime.HOUR + TagTime.DAY
+                    tagsTimeStart = tagsTimeStart + TagTime.HOUR + TagTime.DAY
                 )
             }
 
             "midnight" -> date = date.run {
                 copy(
                     startTime = startTime.copy(hour = 24),
-                    tagsTime = tagsTime + TagTime.HOUR
+                    tagsTimeStart = tagsTimeStart + TagTime.HOUR
                 )
             }
 
@@ -61,7 +61,7 @@ class ENBasicTime(override val config: ENConfig) : ParserByWord(config) {
             "midday", "noon" -> date = date.run {
                 copy(
                     startTime = startTime.copy(hour = 12),
-                    tagsTime = tagsTime + TagTime.HOUR
+                    tagsTimeStart = tagsTimeStart + TagTime.HOUR
                 )
             }
 

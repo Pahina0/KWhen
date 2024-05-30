@@ -5,7 +5,7 @@ import common.MergerWhitespaceTrimmed
 
 class ENFiller : MergerWhitespaceTrimmed() {
     override val prefixMatchPattern: Regex
-        get() = "(?:starting\\s+)?(?:from|on|at|during)(?:\\s+the)?|the".toRegex()
+        get() = "(?:from|on|at|during)(?:\\s+the)?|the".toRegex()
 
     override val mergePrefixWithLeft: Boolean
         get() = true
@@ -16,8 +16,8 @@ class ENFiller : MergerWhitespaceTrimmed() {
         prefix: MatchResult?,
         between: MatchResult?,
     ): DateTime? {
-        if (prefix == null) return null
+        prefix ?: return null
 
-        return DateTime()
+        return left
     }
 }

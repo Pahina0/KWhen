@@ -25,13 +25,14 @@ abstract class Merger {
     protected open val betweenMatchPattern: Regex = "[\\s\\S]*".toRegex()
 
     open val mergePrefixWithLeft = false
-    open val mergeBetweenWithLeft = false
     open val mergeRightWithLeft = false
 
     /**
      * what is called when there is a match with all the patterns
      *
-     * @return DateTime: the other information when merging, null if you cannot merge
+     * usual parsing will be prefix left between right
+     *
+     * @return DateTime: null if cannot merge, else a merged version of the date times besides text and range
      * */
     abstract fun onMatch(
         left: DateTime?,

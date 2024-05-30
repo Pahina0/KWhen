@@ -5,6 +5,7 @@ import common.Merger
 import common.MergerConsecutive
 import common.Parser
 import en.mergers.ENFiller
+import en.mergers.ENRange
 import en.parsers.*
 
 class ENController(override val config: ENConfig = ENConfig()) : Controller(config) {
@@ -21,6 +22,7 @@ class ENController(override val config: ENConfig = ENConfig()) : Controller(conf
     override val mergers: List<Merger>
         get() = listOf(
             ENFiller(),
+            ENRange(),
             MergerConsecutive()
         )
 }

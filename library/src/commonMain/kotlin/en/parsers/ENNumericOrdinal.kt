@@ -40,7 +40,7 @@ class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
                     dayOfMonth = ordinal[timeOrdinal] ?: return null
                 ),
 
-                tagsTime = date.tagsTime + TagTime.DAY
+                tagsTimeStart = date.tagsTimeStart + TagTime.DAY
             )
 
 
@@ -56,7 +56,7 @@ class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
 
                 ),
 
-                tagsTime = date.tagsTime + TagTime.DAY
+                tagsTimeStart = date.tagsTimeStart + TagTime.DAY
             )
 
         } else {
@@ -99,7 +99,7 @@ class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
                         else minute.toIntOrNull() ?: return null
                     ),
 
-                    tagsTime = tagsTime + TagTime.HOUR + TagTime.MINUTE
+                    tagsTimeStart = tagsTimeStart + TagTime.HOUR + TagTime.MINUTE
                 )
             }
 

@@ -1,6 +1,7 @@
 package common
 
 import DateTime
+import kotlin.math.min
 
 abstract class Controller(open val config: Config) {
     protected abstract val parsers: List<Parser>
@@ -44,21 +45,26 @@ abstract class Controller(open val config: Config) {
         mergers.forEach {
             current = ret
             ret = mutableListOf()
+            println(it::class.simpleName)
 
             for (i in current.indices) {
                 println("\n$i")
 
                 // substrings from previous items last index or 0, to the beginning of the current item
-                val left =
-                    input.substring(
-                        (current.getOrNull(i - 1)?.range?.last?.plus(1) ?: 0)
-                                ..<current[i].range.first)
-                val leftMatch = it.prefixPattern.find(left)
+                val prefix = input.substring(
+                    min(
+                        current.getOrNull(i - 1)?.range?.last?.plus(1) ?: 0,
+                        input.length - 1
+                    )..<current[i].range.first
+                )
+                val prefixMatch = it.prefixPattern.find(prefix)
 
-                println("Left $left, found ${leftMatch?.value ?: "NOT FOUND"}")
+                println("prefix $prefix, found ${prefixMatch?.value ?: "NOT FOUND"}")
 
                 val between = input.substring(
-                    current[i].range.last + 1..<(current.getOrNull(i + 1)?.range?.first ?: input.length)
+                    min(
+                        current[i].range.last + 1, input.length
+                    )..<(current.getOrNull(i + 1)?.range?.first ?: input.length)
                 )
                 val betweenMatch = it.betweenPattern.find(between)
 
@@ -66,49 +72,45 @@ abstract class Controller(open val config: Config) {
 
 
                 val date = it.onMatch(
-                    if (i - 1 < 0) null else current[i - 1],
-                    if (i >= current.size) null else current[i],
-                    leftMatch,
+                    current[i],
+                    current.getOrNull(i + 1),
+                    prefixMatch,
                     betweenMatch,
                 )
 
                 if (date == null) {
-                    ret += current[i]
+                    // only adds current if it's range is not in the last in ret range
+                    if (ret.isEmpty() || !(ret.last().range.first <= current[i].range.first && ret.last().range.last >= current[i].range.last)) {
+                        ret += current[i]
+                    }
 
                     continue
                 }
 
                 println("MERGING")
 
-                var merged = current[i]
+                var merged = DateTime(
+                    range = current[i].range
+                )
 
-                if (it.mergePrefixWithLeft && leftMatch != null) {
+                if (it.mergePrefixWithLeft && prefixMatch != null) {
+                    val range = merged.range.first - prefixMatch.value.length..merged.range.last
                     merged = merged.copy(
-                        range = merged.range.first - leftMatch.value.length..merged.range.last,
-                        text = leftMatch.value + merged.text
+                        range = range, text = input.substring(range)
                     )
                 }
 
-                if (it.mergeBetweenWithLeft && betweenMatch != null) {
-                    merged = merged.copy(
-                        range = merged.range.first..merged.range.last + betweenMatch.value.length,
-                        text = merged.text + betweenMatch.value
-                    )
-                }
 
                 if (it.mergeRightWithLeft && i + 1 < current.size) {
-                    if (!it.mergeBetweenWithLeft) {
-                        throw RuntimeException("Merge right with left must also merge between with left")
-                    }
+                    val range = merged.range.first..current[i + 1].range.last
 
                     merged = merged.copy(
-                        range = merged.range.first..current[i + 1].range.last,
-                        text = merged.text + current[i + 1].text
+                        range = range, text = input.substring(range)
                     )
                 }
 
-                ret += merged.merge(date)
 
+                ret += date.copy(text = merged.text, range = merged.range, points = date.points)
 
             }
         }
