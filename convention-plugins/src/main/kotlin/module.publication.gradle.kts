@@ -19,7 +19,7 @@ publishing {
         // Provide artifacts information required by Maven Central
         pom {
             // TODO change stuff here
-            name.set("Kotlin Multiplatform library template")
+            name.set("KWhen")
             description.set("Dummy library to test deployment to Maven Central")
             url.set("https://github.com/Kotlin/multiplatform-library-template")
 
@@ -34,9 +34,7 @@ publishing {
             developers {
                 developer {
                     id.set("JetBrains")
-                    name.set("JetBrains Team")
-                    organization.set("JetBrains")
-                    organizationUrl.set("https://www.jetbrains.com")
+                    name.set("Alexander Wu")
                 }
             }
             scm {

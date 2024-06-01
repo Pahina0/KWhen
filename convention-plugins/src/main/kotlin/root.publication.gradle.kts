@@ -3,7 +3,7 @@ plugins {
 }
 
 allprojects {
-    group = "org.jetbrains.kotlinx.multiplatform-library-template"
+    group = "ap.panini.kwhen"
     version = "0.0.1"
 }
 

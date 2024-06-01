@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
@@ -9,13 +11,13 @@ kotlin {
     jvm()
     androidTarget {
         publishLibraryVariants("release")
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "1.8"
+        tasks.withType(KotlinCompilationTask::class.java).configureEach {
+            compilerOptions {
+                // default sets to jvm 1.8
             }
         }
     }
-    
+
     iosX64()
     iosArm64()
     iosSimulatorArm64()

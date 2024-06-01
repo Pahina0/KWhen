@@ -59,7 +59,7 @@ abstract class Controller(open val config: Config) {
                 )
                 val prefixMatch = it.prefixPattern.find(prefix)
 
-                println("prefix $prefix, found ${prefixMatch?.value ?: "NOT FOUND"}")
+                println("prefix \"$prefix\", found ${prefixMatch?.value ?: "NOT FOUND"}")
 
                 val between = input.substring(
                     min(
@@ -68,7 +68,7 @@ abstract class Controller(open val config: Config) {
                 )
                 val betweenMatch = it.betweenPattern.find(between)
 
-                println("between $between, found ${betweenMatch?.value ?: "NOT FOUND"}")
+                println("between \"$between\", found ${betweenMatch?.value ?: "NOT FOUND"}")
 
 
                 val date = it.onMatch(
@@ -113,6 +113,7 @@ abstract class Controller(open val config: Config) {
                 ret += date.copy(text = merged.text, range = merged.range, points = date.points)
 
             }
+            println(ret)
         }
 
 

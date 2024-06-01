@@ -211,7 +211,7 @@ class ENTests {
 
 
     @Test
-    fun testFillerRangeMerge() {
+    fun testFillerEndMerge() {
         timeParser.parseAndMerge("im busy from 4 to 6").let {
             assertEquals("from 4 to 6", it[0].text.trim())
             assertEquals(DateTime().startTime.run { copy(hour = 4, minute = 0) }, it[0].startTime)
@@ -229,13 +229,21 @@ class ENTests {
         }
 
         timeParser.parseAndMerge("i have nothing to do today till tmrw").let {
-            println(it)
             assertEquals("today till tmrw", it[0].text.trim())
             assertEquals(DateTime().startTime, it[0].startTime)
             assertEquals(DateTime().startTime.run { copy(date.plus(1, DateTimeUnit.DAY)) }, it[0].endTime)
             assertEquals(setOf(TagTime.DAY), it[0].tagsTimeStart)
             assertEquals(setOf(TagTime.DAY), it[0].tagsTimeEnd)
         }
-        //println(timeParser.parseAndMerge("on the 3rd at 6"))
+
+        timeParser.parseAndMerge("in the morning i will go eat until the night").let {
+            assertEquals("in the morning", it[0].text.trim())
+            assertEquals(DateTime().startTime.copy(hour = 9), it[0].startTime)
+            assertEquals(setOf(TagTime.HOUR), it[0].tagsTimeStart)
+
+            assertEquals("until the night", it[1].text.trim())
+            assertEquals(DateTime().startTime.copy(hour = 20), it[1].endTime)
+            assertEquals(setOf(TagTime.HOUR), it[1].tagsTimeEnd)
+        }
     }
 }

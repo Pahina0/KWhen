@@ -10,9 +10,8 @@ class MergerConsecutive : MergerWhitespaceTrimmed() {
         get() = true
 
 
-
     override fun onMatch(left: DateTime?, right: DateTime?, prefix: MatchResult?, between: MatchResult?): DateTime? {
-        if (left == null || right == null) return null
+        if (left == null || right == null || between == null) return null
         println("MERGING $left with $right")
         return left.merge(right)
     }
