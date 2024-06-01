@@ -1,6 +1,7 @@
 package en
 
 import TagDayOfWeek
+import TagTime
 
 val months = mapOf(
     "january" to 1,
@@ -114,4 +115,27 @@ val weekdays = mapOf(
     "sunday" to TagDayOfWeek.SUNDAY,
     "sun." to TagDayOfWeek.SUNDAY,
     "sun" to TagDayOfWeek.SUNDAY,
+)
+
+val generalTimes = mapOf(
+    "days" to TagTime.DAY,
+    "day" to TagTime.DAY,
+    "months" to TagTime.MONTH,
+    "month" to TagTime.MONTH,
+    "years" to TagTime.YEAR,
+    "year" to TagTime.YEAR,
+    "yrs" to TagTime.YEAR,
+    "yr" to TagTime.YEAR,
+    "hrs" to TagTime.HOUR,
+    "hr" to TagTime.HOUR,
+    "hours" to TagTime.HOUR,
+    "hour" to TagTime.HOUR,
+    "secs" to TagTime.SECOND,
+    "sec" to TagTime.SECOND,
+    "seconds" to TagTime.SECOND,
+    "second" to TagTime.SECOND,
+    "mins" to TagTime.MINUTE,
+    "min" to TagTime.MINUTE,
+    "minutes" to TagTime.MINUTE,
+    "minute" to TagTime.MINUTE,
 )

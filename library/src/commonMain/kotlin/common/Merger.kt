@@ -2,7 +2,7 @@ package common
 
 import DateTime
 
-abstract class Merger {
+abstract class Merger(open val config: Config) {
     /**
      * regex that should be applied to every pattern for matching prefix (text before first time)
      * */

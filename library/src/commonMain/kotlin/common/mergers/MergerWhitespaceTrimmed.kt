@@ -1,6 +1,9 @@
-package common
+package common.mergers
 
-abstract class MergerWhitespaceTrimmed : Merger() {
+import common.Config
+import common.Merger
+
+abstract class MergerWhitespaceTrimmed(override val config: Config) : Merger(config) {
     final override val prefixPattern: Regex
         get() = "\\b(?:$prefixMatchPattern)\\s*$".toRegex()
 

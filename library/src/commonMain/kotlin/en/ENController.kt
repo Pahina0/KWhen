@@ -2,10 +2,12 @@ package en
 
 import common.Controller
 import common.Merger
-import common.MergerConsecutive
+import common.mergers.MergerConsecutive
+import common.mergers.MergerGeneralTags
 import common.Parser
-import en.mergers.ENFiller
-import en.mergers.ENRange
+import common.parsers.ParserGenericNumbers
+import en.mergers.ENBegin
+import en.mergers.ENEnd
 import en.parsers.*
 
 class ENController(override val config: ENConfig = ENConfig()) : Controller(config) {
@@ -16,13 +18,16 @@ class ENController(override val config: ENConfig = ENConfig()) : Controller(conf
             ENDayMonthYear(config),
             ENMonthDayYear(config),
             ENNumericOrdinal(config),
-            ENDayOfWeek(config)
+            ENDayOfWeek(config),
+            ENGeneralTime(config),
+            ParserGenericNumbers(config)
         )
 
     override val mergers: List<Merger>
         get() = listOf(
-            ENFiller(),
-            ENRange(),
-            MergerConsecutive()
+            MergerGeneralTags(config),
+            ENBegin(config),
+            ENEnd(config),
+            MergerConsecutive(config)
         )
 }

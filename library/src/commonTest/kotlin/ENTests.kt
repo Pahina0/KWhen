@@ -180,12 +180,6 @@ class ENTests {
 
         }
 
-        TimeParser(ENConfig(use24 = true)).parse("im going to swim at 3").let {
-            assertEquals("3", it[0].text)
-            assertEquals(setOf(TagTime.HOUR, TagTime.MINUTE), it[0].tagsTimeStart)
-            assertEquals(DateTime().startTime.run { copy(hour = 3, minute = 0) }, it[0].startTime)
-
-        }
 
         TimeParser(ENConfig(use24 = true)).parse("the fourth will be crazy").let {
             assertEquals("fourth", it[0].text)
@@ -212,14 +206,6 @@ class ENTests {
 
     @Test
     fun testFillerEndMerge() {
-        timeParser.parseAndMerge("im busy from 4 to 6").let {
-            assertEquals("from 4 to 6", it[0].text.trim())
-            assertEquals(DateTime().startTime.run { copy(hour = 4, minute = 0) }, it[0].startTime)
-            assertEquals(DateTime().startTime.run { copy(hour = 6, minute = 0) }, it[0].endTime)
-            assertEquals(setOf(TagTime.MINUTE, TagTime.HOUR), it[0].tagsTimeStart)
-            assertEquals(setOf(TagTime.MINUTE, TagTime.HOUR), it[0].tagsTimeEnd)
-        }
-
         timeParser.parseAndMerge("i will go party from the 4th to 18th").let {
             assertEquals("from the 4th to 18th", it[0].text.trim())
             assertEquals(DateTime().startTime.run { copy(dayOfMonth = 4) }, it[0].startTime)
@@ -245,5 +231,19 @@ class ENTests {
             assertEquals(DateTime().startTime.copy(hour = 20), it[1].endTime)
             assertEquals(setOf(TagTime.HOUR), it[1].tagsTimeEnd)
         }
+    }
+
+    @Test
+    fun testGenericAndMerge() {
+        timeParser.parseAndMerge("im busy from 4 to 6").let {
+            assertEquals("from 4 to 6", it[0].text.trim())
+            assertEquals(DateTime().startTime.run { copy(hour = 4, minute = 0) }, it[0].startTime)
+            assertEquals(DateTime().startTime.run { copy(hour = 6, minute = 0) }, it[0].endTime)
+            assertEquals(setOf(TagTime.MINUTE, TagTime.HOUR), it[0].tagsTimeStart)
+            assertEquals(setOf(TagTime.MINUTE, TagTime.HOUR), it[0].tagsTimeEnd)
+        }
+
+        println(timeParser.parseAndMerge("from 4 to 10"))
+
     }
 }

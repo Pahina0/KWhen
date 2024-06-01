@@ -1,4 +1,5 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -11,9 +12,10 @@ kotlin {
     jvm()
     androidTarget {
         publishLibraryVariants("release")
-        tasks.withType(KotlinCompilationTask::class.java).configureEach {
+
+        tasks.withType<KotlinJvmCompile>().configureEach {
             compilerOptions {
-                // default sets to jvm 1.8
+                jvmTarget.set(JvmTarget.DEFAULT)
             }
         }
     }

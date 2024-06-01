@@ -1,8 +1,9 @@
-package common
+package common.mergers
 
 import DateTime
+import common.Config
 
-class MergerConsecutive : MergerWhitespaceTrimmed() {
+open class MergerConsecutive(override val config: Config) : MergerWhitespaceTrimmed(config) {
     override val betweenMatchPattern: Regex
         get() = "\\s*".toRegex()
 
@@ -12,7 +13,6 @@ class MergerConsecutive : MergerWhitespaceTrimmed() {
 
     override fun onMatch(left: DateTime?, right: DateTime?, prefix: MatchResult?, between: MatchResult?): DateTime? {
         if (left == null || right == null || between == null) return null
-        println("MERGING $left with $right")
         return left.merge(right)
     }
 }

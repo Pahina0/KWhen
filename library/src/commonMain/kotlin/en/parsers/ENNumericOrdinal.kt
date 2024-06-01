@@ -2,7 +2,7 @@ package en.parsers
 
 import DateTime
 import TagTime
-import common.ParserByWord
+import common.parsers.ParserByWord
 import en.ENConfig
 import en.ordinal
 import util.between31
@@ -12,7 +12,6 @@ import util.matchAny
 /**
  * ex:
  * 12th
- * 15
  * 3:05 am
  * */
 class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
@@ -21,7 +20,6 @@ class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
 
     override fun onMatch(match: MatchResult): DateTime? {
         var date = DateTime()
-        println(match.value)
 
 
         val amPm: String? = match.groupValues[4].let {
@@ -45,10 +43,6 @@ class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
 
 
         } else if (isOrdinal) {
-
-            // 3rd:08am it doesn't make sense
-            // if (minute.isNotBlank()) return null
-
             // is date: ex on the 3rd
             date.copy(
                 startTime = date.startTime.copy(
@@ -65,6 +59,7 @@ class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
 
             // above or equals to 24 hrs
             if (hour >= 24) return null // 13:24am doesn't make sense
+            if (amPm == null) return null // remove just numbers
             if (hour > 12 && amPm == "am") return null
 
             if ((minute.toIntOrNull() ?: 0) >= 60) return null
@@ -86,7 +81,7 @@ class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
                                     if (currentHour < hour) {
                                         hour
                                     } else if (currentHour < hour + 12) {
-                                        hour + 12 % 12
+                                        (hour + 12) % 24
                                     } else {
                                         hour
                                     }

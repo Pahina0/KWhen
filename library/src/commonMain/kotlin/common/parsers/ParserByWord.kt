@@ -1,4 +1,7 @@
-package common
+package common.parsers
+
+import common.Config
+import common.Parser
 
 
 abstract class ParserByWord(override val config: Config) : Parser(config) {

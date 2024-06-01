@@ -109,6 +109,8 @@ abstract class Controller(open val config: Config) {
                     )
                 }
 
+                println("DATE: $date")
+
 
                 ret += date.copy(text = merged.text, range = merged.range, points = date.points)
 

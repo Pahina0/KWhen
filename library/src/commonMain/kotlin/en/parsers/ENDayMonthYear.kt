@@ -2,7 +2,7 @@ package en.parsers
 
 import DateTime
 import TagTime
-import common.ParserByWord
+import common.parsers.ParserByWord
 import en.ENConfig
 import en.months
 import en.ordinal
