@@ -25,6 +25,7 @@ class ENTests {
         }
 
         timeParser.parse("it will be a great day tmrw").let {
+            println(it)
             assertEquals("tmrw", it[0].text)
             assertEquals(setOf(TagTime.DAY), it[0].tagsTimeStart)
             assertEquals(DateTime().startTime.run { copy(date.plus(1, DateTimeUnit.DAY)) }, it[0].startTime)
@@ -114,6 +115,7 @@ class ENTests {
     @Test
     fun testMonthDayYear() {
         timeParser.parse(" june  12 07 was an extremely hot day").let {
+            println(it)
             assertEquals("june  12 07", it[0].text)
             assertEquals(setOf(TagTime.DAY, TagTime.MONTH, TagTime.YEAR), it[0].tagsTimeStart)
             assertEquals(
@@ -163,6 +165,13 @@ class ENTests {
             assertEquals(setOf(TagTime.DAY, TagTime.MONTH, TagTime.YEAR), it[0].tagsTimeStart)
             assertEquals(DateTime().startTime.run { copy(year = 2005, monthNumber = 4, dayOfMonth = 13) }, it[0].startTime)
         }
+
+        timeParser.parse("i'm going to leave in december").let {
+            assertEquals("december", it[0].text)
+            assertEquals(setOf(TagTime.MONTH), it[0].tagsTimeStart)
+            assertEquals(DateTime().startTime.run { copy( monthNumber = 12) }, it[0].startTime)
+        }
+
     }
 
     @Test
@@ -235,7 +244,7 @@ class ENTests {
 
     @Test
     fun testGenericAndMerge() {
-        timeParser.parseAndMerge("im busy from 4 to 6").let {
+        TimeParser(config = ENConfig(use24 = true)).parseAndMerge("im busy from 4 to 6").let {
             assertEquals("from 4 to 6", it[0].text.trim())
             assertEquals(DateTime().startTime.run { copy(hour = 4, minute = 0) }, it[0].startTime)
             assertEquals(DateTime().startTime.run { copy(hour = 6, minute = 0) }, it[0].endTime)
@@ -243,7 +252,19 @@ class ENTests {
             assertEquals(setOf(TagTime.MINUTE, TagTime.HOUR), it[0].tagsTimeEnd)
         }
 
-        println(timeParser.parseAndMerge("from 4 to 10"))
+        timeParser.parseAndMerge("the diving team will go on a field trip in 18 months").let {
+            assertEquals("in 18 months", it[0].text.trim())
+            assertEquals(DateTime().startTime.run { copy(monthNumber = monthNumber + 18) }, it[0].startTime)
+            assertEquals(setOf(TagTime.MONTH), it[0].tagsTimeStart)
+        }
+
+        timeParser.parseAndMerge("im going to japan 06/18 - dec 2025").let {
+            assertEquals("06/18 - dec 2025", it[0].text.trim())
+            assertEquals(DateTime().startTime.run { copy(monthNumber = 6, dayOfMonth = 18) }, it[0].startTime)
+            assertEquals(DateTime().startTime.run { copy(monthNumber = 12, year = 2025) }, it[0].endTime)
+            assertEquals(setOf(TagTime.MONTH, TagTime.DAY), it[0].tagsTimeStart)
+            assertEquals(setOf(TagTime.MONTH, TagTime.YEAR), it[0].tagsTimeEnd)
+        }
 
     }
 }

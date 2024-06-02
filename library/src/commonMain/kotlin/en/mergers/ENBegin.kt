@@ -25,65 +25,69 @@ class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
         if (left == null || prefix == null) return null
 
         if (left.generalNumber != null) {
-            when (prefix.value.trim()) {
-                "from", "on", "at", "during" -> {
+            if (/*left.endTime == null &&*/ setOf(
+                    "from",
+                    "on",
+                    "at",
+                    "during"
+                ).contains(prefix.value.trim())
+            ) {
+                if (left.text == "a") return null // on a boat isn't a time
 
-                    if (left.generalTimeTag == TagTime.HOUR || left.generalTimeTag == null) {
-                        val currentHour =
-                            Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
-                        val hour = if (config.use24) {
+                if (left.generalTimeTag == TagTime.HOUR || left.generalTimeTag == null) {
+                    val currentHour =
+                        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
+                    val hour = if (config.use24) {
+                        left.generalNumber
+                    } else {
+                        if (currentHour < left.generalNumber) {
                             left.generalNumber
+                        } else if (currentHour < left.generalNumber + 12) {
+                            (left.generalNumber + 12) % 24
                         } else {
-                            if (currentHour < left.generalNumber) {
-                                left.generalNumber
-                            } else if (currentHour < left.generalNumber + 12) {
-                                (left.generalNumber + 12) % 24
-                            } else {
-                                left.generalNumber
-                            }
+                            left.generalNumber
                         }
-
-                        return left.copy(
-                            startTime = getDateTimeWithGeneral(
-                                hour,
-                                TagTime.HOUR,
-                                null
-                            ),
-                            tagsTimeStart = left.tagsTimeEnd + TagTime.HOUR + TagTime.MINUTE,
-                            generalTimeTag = null,
-                            generalNumber = null,
-                            points = left.points + 1
-                        )
                     }
 
                     return left.copy(
                         startTime = getDateTimeWithGeneral(
-                            left.generalNumber,
-                            left.generalTimeTag,
-                            left.startTime
+                            hour,
+                            TagTime.HOUR,
+                            null
                         ),
-                        tagsTimeStart = left.tagsTimeStart + left.generalTimeTag,
+                        tagsTimeStart = left.tagsTimeEnd + TagTime.HOUR + TagTime.MINUTE,
                         generalTimeTag = null,
                         generalNumber = null,
                         points = left.points + 1
                     )
                 }
 
-                "in" -> {
-                    return left.copy(
-                        startTime = getDateTimeWithGeneral(
-                            left.generalNumber,
-                            left.generalTimeTag ?: TagTime.HOUR,
-                            null
-                        ),
-                        tagsTimeStart = left.tagsTimeStart + (left.generalTimeTag ?: TagTime.HOUR),
-                        generalTimeTag = null,
-                        generalNumber = null,
-                        points = left.points + 1
-                    )
-                }
+                return left.copy(
+                    startTime = getDateTimeWithGeneral(
+                        left.generalNumber,
+                        left.generalTimeTag,
+                        null
+                    ),
+                    tagsTimeStart = left.tagsTimeStart + left.generalTimeTag,
+                    generalTimeTag = null,
+                    generalNumber = null,
+                    points = left.points + 1
+                )
+            } else {
+                return left.copy(
+                    startTime = getDateTimeWithGeneral(
+                        left.generalNumber,
+                        left.generalTimeTag ?: TagTime.HOUR,
+                        left.endTime ?: left.startTime
+                    ),
+                    tagsTimeStart = left.tagsTimeStart + (left.generalTimeTag ?: TagTime.HOUR),
+                    generalTimeTag = null,
+                    generalNumber = null,
+                    points = left.points + 1
+                )
             }
         }
+
 
         return left.copy(points = left.points + 1)
     }

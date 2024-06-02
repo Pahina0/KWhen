@@ -13,11 +13,8 @@ class MergerGeneralTags(override val config: Config) : MergerConsecutive(config)
     ): DateTime? {
         if (left == null || right == null) return null
 
-        val generalTag = left.generalTimeTag ?: right.generalTimeTag
-        val generalNumber = right.generalNumber ?: left.generalNumber
-
-        if (generalTag == null || generalNumber == null) return null
-
+        val generalTag = left.generalTimeTag ?: right.generalTimeTag ?: return null
+        val generalNumber = right.generalNumber ?: left.generalNumber ?: return null
 
         return DateTime(
             generalNumber = generalNumber,

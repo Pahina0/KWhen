@@ -120,6 +120,8 @@ abstract class Controller(open val config: Config) {
 
 
 
-        return ret
+        return ret.cleanGenerics()
     }
+
+    private fun List<DateTime>.cleanGenerics() = filter { it.generalNumber == null && it.generalTimeTag == null }
 }

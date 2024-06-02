@@ -122,6 +122,8 @@ val generalTimes = mapOf(
     "day" to TagTime.DAY,
     "months" to TagTime.MONTH,
     "month" to TagTime.MONTH,
+    "week" to TagTime.DAY_OF_WEEK,
+    "weeks" to TagTime.DAY_OF_WEEK,
     "years" to TagTime.YEAR,
     "year" to TagTime.YEAR,
     "yrs" to TagTime.YEAR,
@@ -138,4 +140,18 @@ val generalTimes = mapOf(
     "min" to TagTime.MINUTE,
     "minutes" to TagTime.MINUTE,
     "minute" to TagTime.MINUTE,
+)
+
+val amounts = mapOf(
+    "a" to 1,
+    "one" to 1,
+    "two" to 2,
+    "three" to 3,
+    "four" to 4,
+    "five" to 5,
+    "six" to 6,
+    "seven" to 7,
+    "eight" to 8,
+    "nine" to 9,
+    "ten" to 10
 )

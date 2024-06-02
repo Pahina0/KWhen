@@ -28,8 +28,7 @@ data class DateTime(
 ) : Comparable<DateTime> {
 
     override fun compareTo(other: DateTime): Int = compareValuesBy(this, other,
-        { it.generalTimeTag != null },
-        { it.generalNumber != null },
+        { points + tagsTimeStart.size + tagsTimeEnd.size },
         { it.range.first },
         { it.range.first - it.range.last }
     )

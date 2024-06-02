@@ -25,8 +25,8 @@ fun LocalDateTime.copy(
     minute: Int = -1,
     second: Int = -1
 ): LocalDateTime = LocalDateTime(
-    if (year < 0) this.year else (year / 12),
-    if (monthNumber < 0) this.monthNumber else (monthNumber % 12),
+    (if (year < 0) this.year else year) + (monthNumber - 1) / 12,
+    if (monthNumber < 0) this.monthNumber else ((monthNumber - 1) % 12 + 1),
     if (dayOfMonth < 0) this.dayOfMonth else dayOfMonth,
     if (hour < 0) this.hour else hour,
     if (minute < 0) this.minute else minute,
@@ -90,8 +90,6 @@ fun getDateTimeWithGeneral(
 
     if (relativeTo == null) {
         return DateTime().run {
-            println("SETTING TIME FROM: $generalTag")
-            println("SETTING TIME FROM: ${startTime.minute}")
             when (generalTag) {
                 TagTime.SECOND -> startTime.copy(second = generalNumber)
                 TagTime.MINUTE -> startTime.copy(minute = generalNumber)
@@ -101,7 +99,7 @@ fun getDateTimeWithGeneral(
                 TagTime.YEAR -> startTime.copy(year = generalNumber)
                 TagTime.DAY_OF_WEEK -> startTime
             }
-        }.also { println("WHY DOESN'T THIS WORK $it") }
+        }
     }
 
 
@@ -110,9 +108,10 @@ fun getDateTimeWithGeneral(
         TagTime.MINUTE -> generalNumber.minutes
         TagTime.HOUR -> generalNumber.hours
         TagTime.DAY -> (generalNumber * 24).hours
-        TagTime.MONTH -> return relativeTo.copy(monthNumber = relativeTo.monthNumber + 1)
-        TagTime.YEAR -> return relativeTo.copy(year = relativeTo.year + 1)
-        TagTime.DAY_OF_WEEK -> return relativeTo
+        TagTime.DAY_OF_WEEK -> (generalNumber * 24 * 7).hours
+        TagTime.MONTH -> return relativeTo.copy(monthNumber = relativeTo.monthNumber + generalNumber)
+        TagTime.YEAR -> return relativeTo.copy(year = relativeTo.year + generalNumber)
+
     }
 
     return relativeTo

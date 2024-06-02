@@ -16,6 +16,7 @@ import util.matchAny
  * 06/27
  * 6/28
  * june 11
+ * april
  * */
 class ENMonthDayYear(override val config: ENConfig) : ParserByWord(config) {
     // @formatter:off
@@ -25,18 +26,20 @@ class ENMonthDayYear(override val config: ENConfig) : ParserByWord(config) {
                             "${months.keys.matchAny()}" +
                             "|$between31" +
                     ")" +
-                    "(?:\\s+|-|/)" +
-                    "(" +
-                        "$between31(?:th|st|rd|nd)?" + // day
-                        "|${ordinal.keys.matchAny()}" +
-                    ")" +
+                    "(?:" +
+                        "(?:\\s+|-|/)" +
+                        "(" +
+                            "$between31(?:th|st|rd|nd)?" + // day
+                            "|${ordinal.keys.matchAny()}" +
+                        ")" +
+                    ")?" +
                     "(?:(?:,|,?\\s+|-|of|/)" +
                         "(\\d{2,4})" + // year
                     ")?"
                 ).toRegex()
     // @formatter:on
 
-    override fun onMatch(match: MatchResult): DateTime {
+    override fun onMatch(match: MatchResult): DateTime? {
         var date = DateTime()
 
         // checking year
@@ -63,15 +66,29 @@ class ENMonthDayYear(override val config: ENConfig) : ParserByWord(config) {
 
         val month = match.groupValues[1].lowercase()
         val day = match.groupValues[2].lowercase()
-        date = date.run {
-            copy(
-                startTime = startTime.copy(
-                    monthNumber = months[month] ?: (month.toInt()),
-                    dayOfMonth = ordinal[day] ?: day.replace("th|st|rd".toRegex(), "").toInt(),
 
+        if (month.toIntOrNull() == null && day == "") {
+            date = date.run {
+                copy(
+                    startTime = startTime.copy(
+                        monthNumber = months[month]!!,
                     ),
-                tagsTimeStart = tagsTimeStart + TagTime.DAY + TagTime.MONTH
-            )
+                    tagsTimeStart = tagsTimeStart + TagTime.MONTH
+                )
+            }
+        } else if (day != ""){
+            date = date.run {
+                copy(
+                    startTime = startTime.copy(
+                        monthNumber = months[month] ?: (month.toInt()),
+                        dayOfMonth = ordinal[day] ?: day.replace("th|st|rd".toRegex(), "").toInt(),
+
+                        ),
+                    tagsTimeStart = tagsTimeStart + TagTime.DAY + TagTime.MONTH
+                )
+            }
+        } else {
+            return null
         }
 
         return date
