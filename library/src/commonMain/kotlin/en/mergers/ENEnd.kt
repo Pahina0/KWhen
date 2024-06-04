@@ -55,7 +55,6 @@ class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
                     tagsTimeEnd = left.tagsTimeEnd + TagTime.HOUR + TagTime.MINUTE,
                     generalTimeTag = null,
                     generalNumber = null,
-                    points = left.points + 1
                 )
             }
 
@@ -69,7 +68,6 @@ class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
                 tagsTimeEnd = left.tagsTimeEnd + left.generalTimeTag,
                 generalTimeTag = null,
                 generalNumber = null,
-                points = left.points + 1
             )
         }
 
@@ -81,7 +79,6 @@ class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
             endTime = left.startTime,
             tagsTimeStart = setOf(),
             tagsTimeEnd = left.tagsTimeStart,
-            points = left.points + 1
         )
     }
 }

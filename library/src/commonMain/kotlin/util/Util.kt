@@ -120,3 +120,15 @@ fun getDateTimeWithGeneral(
         .toLocalDateTime(TimeZone.currentSystemDefault())
 
 }
+
+fun Set<TagTime>.getRepeatTime(): TagTime? {
+    if (contains(TagTime.YEAR)) return null // every 1989 won't make sense
+    if (contains(TagTime.MONTH)) return TagTime.YEAR // every april -> repeat once a year
+    if (contains(TagTime.DAY_OF_WEEK)) return TagTime.DAY_OF_WEEK // every monday -> repeat once a week
+    if (contains(TagTime.DAY)) return TagTime.MONTH // every 5th -> repeat once a month
+    if (contains(TagTime.HOUR)) return TagTime.DAY // every 3am -> repeat once a day
+    if (contains(TagTime.MINUTE)) return TagTime.HOUR // every :03 -> repeat once an hour
+    if (contains(TagTime.SECOND)) return TagTime.MINUTE // every :--:03 -> repeat once an minute
+
+    return null
+}

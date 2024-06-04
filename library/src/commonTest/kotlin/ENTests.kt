@@ -267,4 +267,14 @@ class ENTests {
         }
 
     }
+
+    @Test
+    fun testRepeatMerge() {
+        //println(timeParser.parseAndMerge("in 2 weeks"))
+        //println(timeParser.parseAndMerge("every 4th of july"))
+        //println(timeParser.parseAndMerge("every 4 months from july 8th"))
+        println(timeParser.parseAndMerge("we will swim every week"))
+
+
+    }
 }

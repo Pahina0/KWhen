@@ -19,7 +19,9 @@ data class DateTime(
     val tagsDayOfWeek: Set<TagDayOfWeek> = mutableSetOf(),
     val tagsTimeStart: Set<TagTime> = mutableSetOf(),
     val tagsTimeEnd: Set<TagTime> = mutableSetOf(),
-    val tagsRepeat: Set<TagTime> = mutableSetOf(),
+
+    val repeatTag: TagTime? = null,
+    val repeatOften: Int? = null,
 
     val generalTimeTag: TagTime? = null,
     val generalNumber: Int? = null,
@@ -42,7 +44,10 @@ data class DateTime(
             tagsDayOfWeek = tagsDayOfWeek + other.tagsDayOfWeek,
             tagsTimeStart = tagsTimeStart + other.tagsTimeStart,
             tagsTimeEnd = tagsTimeEnd + other.tagsTimeEnd,
-            tagsRepeat = tagsRepeat + other.tagsRepeat,
+            repeatTag = repeatTag ?: other.repeatTag,
+            repeatOften = repeatOften ?: other.repeatOften,
+            generalTimeTag = generalTimeTag ?: other.generalTimeTag,
+            generalNumber = generalNumber ?: other.generalNumber,
             points = points + other.points
         )
     }

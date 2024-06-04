@@ -7,6 +7,7 @@ import common.mergers.MergerConsecutive
 import common.mergers.MergerGeneralTags
 import en.mergers.ENBegin
 import en.mergers.ENEnd
+import en.mergers.ENRepeat
 import en.parsers.ENBasicDate
 import en.parsers.ENBasicTime
 import en.parsers.ENDayMonthYear
@@ -32,6 +33,7 @@ class ENController(override val config: ENConfig = ENConfig()) : Controller(conf
     override val mergers: List<Merger>
         get() = listOf(
             MergerGeneralTags(config),
+            ENRepeat(config),
             ENBegin(config),
             ENEnd(config),
             MergerConsecutive(config)

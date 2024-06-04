@@ -51,21 +51,32 @@ abstract class Controller(open val config: Config) {
                 println("\n$i")
 
                 // substrings from previous items last index or 0, to the beginning of the current item
-                val prefix = input.substring(
-                    min(
-                        current.getOrNull(i - 1)?.range?.last?.plus(1) ?: 0,
-                        input.length - 1
-                    )..<current[i].range.first
+                val prefixStart = min(
+                    current.getOrNull(i - 1)?.range?.last?.plus(1) ?: 0, input.length - 1
                 )
+                val prefixEnd = current[i].range.first
+                val prefix = if (prefixStart <= prefixEnd) {
+                    input.substring(prefixStart..<prefixEnd)
+                } else {
+                    // adds to back, will only happen if previous is messed up which will be removed due to continue below
+                    if (ret.isEmpty() || !(ret.last().range.first <= current[i].range.first && ret.last().range.last >= current[i].range.last)) {
+                        ret += current[i]
+                    }
+                    continue
+                }
                 val prefixMatch = it.prefixPattern.find(prefix)
 
                 println("prefix \"$prefix\", found ${prefixMatch?.value ?: "NOT FOUND"}")
 
-                val between = input.substring(
-                    min(
-                        current[i].range.last + 1, input.length
-                    )..<(current.getOrNull(i + 1)?.range?.first ?: input.length)
-                )
+                val betweenStart = min(current[i].range.last + 1, input.length)
+                val betweenEnd = current.getOrNull(i + 1)?.range?.first ?: input.length
+                val between = if (betweenStart <= betweenEnd) {
+                    input.substring(betweenStart..<betweenEnd)
+                } else {
+
+                    // skips the current
+                    continue
+                }
                 val betweenMatch = it.betweenPattern.find(between)
 
                 println("between \"$between\", found ${betweenMatch?.value ?: "NOT FOUND"}")
@@ -112,7 +123,9 @@ abstract class Controller(open val config: Config) {
                 println("DATE: $date")
 
 
-                ret += date.copy(text = merged.text, range = merged.range, points = date.points)
+                ret += date.copy(
+                    text = merged.text, range = merged.range, points = date.points + it.reward
+                )
 
             }
             println(ret)
@@ -123,5 +136,6 @@ abstract class Controller(open val config: Config) {
         return ret.cleanGenerics()
     }
 
-    private fun List<DateTime>.cleanGenerics() = filter { it.generalNumber == null && it.generalTimeTag == null }
+    private fun List<DateTime>.cleanGenerics() =
+        filter { it.generalNumber == null && it.generalTimeTag == null }
 }

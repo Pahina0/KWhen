@@ -5,6 +5,9 @@ import common.Config
 
 class MergerGeneralTags(override val config: Config) : MergerConsecutive(config) {
 
+    override val reward: Int
+        get() = 0
+
     override fun onMatch(
         left: DateTime?,
         right: DateTime?,

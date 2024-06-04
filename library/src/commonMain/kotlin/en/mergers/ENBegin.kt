@@ -58,7 +58,6 @@ class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
                         tagsTimeStart = left.tagsTimeEnd + TagTime.HOUR + TagTime.MINUTE,
                         generalTimeTag = null,
                         generalNumber = null,
-                        points = left.points + 1
                     )
                 }
 
@@ -71,7 +70,6 @@ class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
                     tagsTimeStart = left.tagsTimeStart + left.generalTimeTag,
                     generalTimeTag = null,
                     generalNumber = null,
-                    points = left.points + 1
                 )
             } else {
                 return left.copy(
@@ -83,12 +81,11 @@ class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
                     tagsTimeStart = left.tagsTimeStart + (left.generalTimeTag ?: TagTime.HOUR),
                     generalTimeTag = null,
                     generalNumber = null,
-                    points = left.points + 1
                 )
             }
         }
 
 
-        return left.copy(points = left.points + 1)
+        return left.copy()
     }
 }

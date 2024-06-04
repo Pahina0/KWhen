@@ -1,15 +1,11 @@
-import util.copy
-
-
 enum class TagTime{
-    HOUR,
-    MINUTE,
     SECOND,
+    MINUTE,
+    HOUR,
     DAY,
     DAY_OF_WEEK,
     MONTH,
     YEAR,
-
 }
 
 enum class TagDayOfWeek {
@@ -20,13 +16,4 @@ enum class TagDayOfWeek {
     FRIDAY,
     SATURDAY,
     SUNDAY
-}
-
-enum class TagRepeat {
-    MONTH,
-    YEAR,
-    WEEK,
-    DAY,
-    MONTH_NAME,
-    DAY_NAME,
 }

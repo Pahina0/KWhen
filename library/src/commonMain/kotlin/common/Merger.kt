@@ -28,6 +28,11 @@ abstract class Merger(open val config: Config) {
     open val mergeRightWithLeft = false
 
     /**
+     * The amount of points rewarded per successful merge
+     * */
+    open val reward = 1
+
+    /**
      * what is called when there is a match with all the patterns
      *
      * usual parsing will be prefix left between right
