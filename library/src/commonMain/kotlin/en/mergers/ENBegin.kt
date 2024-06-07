@@ -25,7 +25,7 @@ class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
         if (left == null || prefix == null) return null
 
         if (left.generalNumber != null) {
-            if (/*left.endTime == null &&*/ setOf(
+            if (setOf(
                     "from",
                     "on",
                     "at",

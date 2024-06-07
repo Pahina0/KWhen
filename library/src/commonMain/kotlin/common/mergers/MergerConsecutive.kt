@@ -12,6 +12,7 @@ open class MergerConsecutive(override val config: Config) : MergerWhitespaceTrim
 
 
     override fun onMatch(left: DateTime?, right: DateTime?, prefix: MatchResult?, between: MatchResult?): DateTime? {
+        println("trying to merge $left $right $between")
         if (left == null || right == null || between == null) return null
         return left.merge(right)
     }

@@ -32,6 +32,7 @@ abstract class Merger(open val config: Config) {
      * */
     open val reward = 1
 
+
     /**
      * what is called when there is a match with all the patterns
      *
