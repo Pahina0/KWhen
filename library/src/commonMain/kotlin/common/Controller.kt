@@ -133,9 +133,29 @@ abstract class Controller(open val config: Config) {
 
 
 
-        return ret.cleanGenerics()
+        return ret.mergeIntervals().cleanGenerics()
     }
 
     private fun List<DateTime>.cleanGenerics() =
         filter { it.generalNumber == null && it.generalTimeTag == null }
+
+    private fun List<DateTime>.mergeIntervals(): List<DateTime> {
+        val ret = mutableListOf<DateTime>()
+
+        for (date in this) {
+            if (ret.isNotEmpty() && date.range.first <= ret.last().range.last) {
+                val mergeTo = ret.last()
+
+                ret.removeLast()
+                ret += mergeTo.merge(date).copy(
+                    range = mergeTo.range.first..date.range.last,
+                    text = mergeTo.text + date.text.substring(mergeTo.range.last - date.range.first + 1)
+                )
+            } else {
+                ret += date
+            }
+        }
+
+        return ret
+    }
 }

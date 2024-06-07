@@ -38,6 +38,8 @@ data class DateTime(
 
     fun merge(other: DateTime): DateTime {
 
+        println("MERGING $this with $other")
+
         return copy(
             startTime = startTime.mergeTime(other.startTime, other.tagsTimeStart),
             endTime = endTime?.mergeTime(other.endTime, other.tagsTimeEnd) ?: other.endTime,
