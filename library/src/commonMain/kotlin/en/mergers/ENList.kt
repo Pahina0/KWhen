@@ -1,10 +1,9 @@
 package en.mergers
 
-import common.mergers.MergerConsecutive
+import common.mergers.MergerList
 import en.ENConfig
 
-class ENList(config: ENConfig) : MergerConsecutive(config) {
+class ENList(config: ENConfig) : MergerList(config) {
     override val betweenMatchPattern: Regex
-        get() = ",\\s*|and|&|\\s*".toRegex()
-
+        get() = ",\\s*(?:and)?|and|&|\\s*".toRegex()
 }

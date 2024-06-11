@@ -1,7 +1,14 @@
 package common
 
 import DateTime
+import Processed
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import kotlin.math.min
+import kotlin.time.Duration.Companion.hours
 
 abstract class Controller(open val config: Config) {
     protected abstract val parsers: List<Parser>
@@ -40,15 +47,12 @@ abstract class Controller(open val config: Config) {
         var current: List<DateTime>
         var ret = parsed.toMutableList()
 
-        println(parsed)
 
         mergers.forEach {
             current = ret
             ret = mutableListOf()
-            println(it::class.simpleName)
 
             for (i in current.indices) {
-                println("\n$i")
 
                 // substrings from previous items last index or 0, to the beginning of the current item
                 val prefixStart = min(
@@ -66,8 +70,6 @@ abstract class Controller(open val config: Config) {
                 }
                 val prefixMatch = it.prefixPattern.find(prefix)
 
-                println("prefix \"$prefix\", found ${prefixMatch?.value ?: "NOT FOUND"}")
-
                 val betweenStart = min(current[i].range.last + 1, input.length)
                 val betweenEnd = current.getOrNull(i + 1)?.range?.first ?: input.length
                 val between = if (betweenStart <= betweenEnd) {
@@ -78,8 +80,6 @@ abstract class Controller(open val config: Config) {
                     continue
                 }
                 val betweenMatch = it.betweenPattern.find(between)
-
-                println("between \"$between\", found ${betweenMatch?.value ?: "NOT FOUND"}")
 
 
                 val date = it.onMatch(
@@ -97,8 +97,6 @@ abstract class Controller(open val config: Config) {
 
                     continue
                 }
-
-                println("MERGING")
 
                 var merged = DateTime(
                     range = current[i].range
@@ -120,7 +118,13 @@ abstract class Controller(open val config: Config) {
                     )
                 }
 
-                println("DATE: $date")
+                if (it.mergeBetweenWithRight && i + 1 < current.size) {
+                    val range = merged.range.last + 1..current[i + 1].range.last
+                    merged = merged.copy(
+                        range = range, text = input.substring(range)
+                    )
+                    ret += current[i]
+                }
 
 
                 ret += date.copy(
@@ -128,12 +132,71 @@ abstract class Controller(open val config: Config) {
                 )
 
             }
-            println(ret)
         }
 
 
-
         return ret.mergeIntervals().cleanGenerics()
+    }
+
+    /**
+     * The only things that should join are those with the same tags
+     * */
+    fun finalize(times: List<DateTime>): List<Processed> {
+        val ret = mutableListOf<Processed>()
+
+        for (date in times) {
+            if (ret.isNotEmpty() && date.range.first <= ret.last().range.last + 1) {
+                val mergeTo = ret.last()
+
+
+                val st = if (date.tagsDayOfWeek.isNotEmpty()) {
+                    date.tagsDayOfWeek.map {
+                        dayOfWeek(
+                            date.startTime,
+                            DayOfWeek.entries[it.ordinal]
+                        )
+                    }
+                } else listOf(date.startTime)
+
+
+                ret.removeLast()
+                ret += mergeTo.copy(
+                    range = mergeTo.range.first..date.range.last,
+                    text = mergeTo.text + date.text.substring(mergeTo.range.last - date.range.first + 1),
+                    startTime = st + mergeTo.startTime
+                )
+            } else {
+                ret += Processed(
+                    date.text,
+                    date.range,
+                    if (date.tagsDayOfWeek.isNotEmpty()) date.tagsDayOfWeek.map {
+                        dayOfWeek(
+                            date.startTime,
+                            DayOfWeek.entries[it.ordinal]
+                        )
+                    } else listOf(date.startTime),
+                    date.endTime,
+                    date.tagsTimeStart,
+                    date.tagsTimeEnd,
+                    date.repeatTag,
+                    date.repeatOften
+                )
+            }
+        }
+
+        return ret
+    }
+
+    private fun dayOfWeek(start: LocalDateTime, day: DayOfWeek): LocalDateTime {
+        var from = start.toInstant(TimeZone.currentSystemDefault())
+        for (i in 0..7) {
+            val time = from.toLocalDateTime(TimeZone.currentSystemDefault())
+            if (time.dayOfWeek == day) return time
+
+            from += 24.0.hours
+        }
+
+        return from.toLocalDateTime(TimeZone.currentSystemDefault())
     }
 
     private fun List<DateTime>.cleanGenerics() =

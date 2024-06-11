@@ -63,8 +63,8 @@ fun LocalDateTime.mergeTime(other: LocalDateTime?, tags: Set<TagTime>): LocalDat
                 time.copy(dayOfMonth = other.dayOfMonth)
             }
 
-            TagTime.DAY_OF_WEEK -> {
-                time // TODO make day of week copy over
+            TagTime.WEEK -> {
+                time // this shouldn't do much?
             }
 
             TagTime.MONTH -> {
@@ -87,19 +87,19 @@ fun getDateTimeWithGeneral(
     relativeTo: LocalDateTime?
 ): LocalDateTime {
 
+    val now = DateTime.nowZeroed
 
     if (relativeTo == null) {
-        return DateTime().run {
-            when (generalTag) {
-                TagTime.SECOND -> startTime.copy(second = generalNumber)
-                TagTime.MINUTE -> startTime.copy(minute = generalNumber)
-                TagTime.HOUR -> startTime.copy(hour = generalNumber)
-                TagTime.DAY -> startTime.copy(dayOfMonth = generalNumber)
-                TagTime.MONTH -> startTime.copy(monthNumber = generalNumber)
-                TagTime.YEAR -> startTime.copy(year = generalNumber)
-                TagTime.DAY_OF_WEEK -> startTime
-            }
+        return when (generalTag) {
+            TagTime.SECOND -> now.copy(second = generalNumber)
+            TagTime.MINUTE -> now.copy(minute = generalNumber)
+            TagTime.HOUR -> now.copy(hour = generalNumber)
+            TagTime.DAY -> now.copy(dayOfMonth = generalNumber)
+            TagTime.MONTH -> now.copy(monthNumber = generalNumber)
+            TagTime.YEAR -> now.copy(year = generalNumber)
+            TagTime.WEEK -> now
         }
+
     }
 
 
@@ -108,7 +108,7 @@ fun getDateTimeWithGeneral(
         TagTime.MINUTE -> generalNumber.minutes
         TagTime.HOUR -> generalNumber.hours
         TagTime.DAY -> (generalNumber * 24).hours
-        TagTime.DAY_OF_WEEK -> (generalNumber * 24 * 7).hours
+        TagTime.WEEK -> (generalNumber * 24 * 7).hours
         TagTime.MONTH -> return relativeTo.copy(monthNumber = relativeTo.monthNumber + generalNumber)
         TagTime.YEAR -> return relativeTo.copy(year = relativeTo.year + generalNumber)
 
@@ -124,7 +124,7 @@ fun getDateTimeWithGeneral(
 fun Set<TagTime>.getRepeatTime(): TagTime? {
     if (contains(TagTime.YEAR)) return null // every 1989 won't make sense
     if (contains(TagTime.MONTH)) return TagTime.YEAR // every april -> repeat once a year
-    if (contains(TagTime.DAY_OF_WEEK)) return TagTime.DAY_OF_WEEK // every monday -> repeat once a week
+    if (contains(TagTime.WEEK)) return TagTime.WEEK // every monday -> repeat once a week
     if (contains(TagTime.DAY)) return TagTime.MONTH // every 5th -> repeat once a month
     if (contains(TagTime.HOUR)) return TagTime.DAY // every 3am -> repeat once a day
     if (contains(TagTime.MINUTE)) return TagTime.HOUR // every :03 -> repeat once an hour

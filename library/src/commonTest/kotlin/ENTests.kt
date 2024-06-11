@@ -25,7 +25,6 @@ class ENTests {
         }
 
         timeParser.parse("it will be a great day tmrw").let {
-            println(it)
             assertEquals("tmrw", it[0].text)
             assertEquals(setOf(TagTime.DAY), it[0].tagsTimeStart)
             assertEquals(
@@ -52,8 +51,6 @@ class ENTests {
             assertEquals("afternoon", it[0].text)
             assertEquals(setOf(TagTime.HOUR), it[0].tagsTimeStart)
             assertEquals(DateTime().startTime.run { copy(hour = 15) }, it[0].startTime)
-
-            // assertEquals(DateTime().startTime.apply { set(Calendar.HOUR_OF_DAY, 15) }, it[0].startTime)
         }
 
         timeParser.parse("the morning was nice and cool").let {
@@ -72,7 +69,6 @@ class ENTests {
             assertEquals("afternoon", it[0].text)
             assertEquals(setOf(TagTime.HOUR, TagTime.HOUR), it[0].tagsTimeStart)
             assertEquals(DateTime().startTime.run { copy(hour = 14) }, it[0].startTime)
-            println(it)
         }
     }
 
@@ -127,7 +123,6 @@ class ENTests {
     @Test
     fun testMonthDayYear() {
         timeParser.parse(" june  12 07 was an extremely hot day").let {
-            println(it)
             assertEquals("june  12 07", it[0].text)
             assertEquals(setOf(TagTime.DAY, TagTime.MONTH, TagTime.YEAR), it[0].tagsTimeStart)
             assertEquals(
@@ -234,7 +229,7 @@ class ENTests {
             assertEquals("mon", it[0].text)
             assertEquals("tues", it[1].text)
             assertEquals("friday", it[2].text)
-            assertEquals(setOf(TagTime.DAY_OF_WEEK), it[0].tagsTimeStart)
+            assertEquals(setOf(TagTime.WEEK), it[0].tagsTimeStart)
             assertEquals(setOf(TagDayOfWeek.MONDAY), it[0].tagsDayOfWeek)
             assertEquals(setOf(TagDayOfWeek.TUESDAY), it[1].tagsDayOfWeek)
             assertEquals(setOf(TagDayOfWeek.FRIDAY), it[2].tagsDayOfWeek)
@@ -312,18 +307,7 @@ class ENTests {
 
     @Test
     fun testRepeatMerge() {
-        timeParser.parseAndMerge("i swim every mon, tues and fri").let {
-            assertEquals("every mon, tues and fri", it[0].text.trim())
-            assertEquals(
-                setOf(TagDayOfWeek.MONDAY, TagDayOfWeek.TUESDAY, TagDayOfWeek.FRIDAY),
-                it[0].tagsDayOfWeek
-            )
-            assertEquals(
-                setOf(TagTime.DAY_OF_WEEK), it[0].tagsTimeStart
-            )
-            assertEquals(TagTime.DAY_OF_WEEK, it[0].repeatTag)
-            assertEquals(1, it[0].repeatOften)
-        }
+
 
         timeParser.parseAndMerge("i go to school every day").let {
             assertEquals("every day", it[0].text.trim())
@@ -340,7 +324,7 @@ class ENTests {
         timeParser.parseAndMerge("i go to school every other week").let {
             assertEquals("every other week", it[0].text.trim())
             assertEquals(2, it[0].repeatOften)
-            assertEquals(TagTime.DAY_OF_WEEK, it[0].repeatTag)
+            assertEquals(TagTime.WEEK, it[0].repeatTag)
         }
 
         timeParser.parseAndMerge("there is something special every 4 months from july 8th").let {
@@ -362,4 +346,33 @@ class ENTests {
 
 
     }
+
+
+    @Test
+    fun testProcessList() {
+        timeParser.parseMergeProcess("i will go swim on every other 9th  10th, 12th").let {
+            assertEquals("on every other 9th  10th, 12th", it[0].text.trim())
+            assertEquals(3,  it[0].startTime.size)
+            assertEquals(TagTime.MONTH,  it[0].repeatTag)
+            assertEquals(2,  it[0].repeatOften)
+        }
+
+        timeParser.parseMergeProcess("i swim every mon, tues and fri").let {
+            assertEquals("every mon, tues and fri", it[0].text.trim())
+            assertEquals(3,  it[0].startTime.size)
+            assertEquals(setOf(TagTime.WEEK), it[0].tagsTimeStart)
+            assertEquals(TagTime.WEEK, it[0].repeatTag)
+            assertEquals(1, it[0].repeatOften)
+        }
+
+        timeParser.parseMergeProcess("the world is boring every june, jul, and aug").let {
+            println(it)
+            assertEquals("every june, jul, and aug", it[0].text.trim())
+            assertEquals(3,  it[0].startTime.size)
+            assertEquals(setOf(TagTime.MONTH), it[0].tagsTimeStart)
+            assertEquals(TagTime.YEAR, it[0].repeatTag)
+            assertEquals(1, it[0].repeatOften)
+        }
+    }
+
 }
