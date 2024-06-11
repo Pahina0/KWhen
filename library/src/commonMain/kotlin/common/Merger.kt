@@ -26,6 +26,7 @@ abstract class Merger(open val config: Config) {
 
     open val mergePrefixWithLeft = false
     open val mergeRightWithLeft = false
+    open val mergeBetweenWithRight = false
 
     /**
      * The amount of points rewarded per successful merge

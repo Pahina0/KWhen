@@ -13,7 +13,7 @@ class ENDayOfWeek(override val config: Config) : ParserByWord(config) {
 
     override fun onMatch(match: MatchResult): DateTime = DateTime(
         tagsDayOfWeek = setOf(weekdays[match.value]!!),
-        tagsTimeStart = setOf(TagTime.DAY_OF_WEEK)
+        tagsTimeStart = setOf(TagTime.WEEK)
     )
 
 }

@@ -3,7 +3,13 @@ package common.mergers
 import DateTime
 import common.Config
 
-class MergerGeneralTags(override val config: Config) : MergerConsecutive(config) {
+class MergerGeneralTags(override val config: Config) : MergerWhitespaceTrimmed(config) {
+
+    override val betweenMatchPattern: Regex
+        get() = "\\s*".toRegex()
+
+    override val mergeRightWithLeft: Boolean
+        get() = true
 
     override val reward: Int
         get() = 0

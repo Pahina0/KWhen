@@ -20,7 +20,6 @@ class ENRepeat(override val config: ENConfig) : MergerWhitespaceTrimmed(config) 
         if (left == null || prefix == null) return null
 
         val times = if (prefix.groupValues[1].trim() == "") 1 else 2
-        println("TIMES: $times")
 
         // already has an exact time: every 4th of july
         if (left.generalTimeTag == null) {

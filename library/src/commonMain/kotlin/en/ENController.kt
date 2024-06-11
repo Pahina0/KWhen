@@ -3,6 +3,7 @@ package en
 import common.Controller
 import common.Merger
 import common.Parser
+import common.mergers.MergerConsecutive
 import common.mergers.MergerGeneralTags
 import en.mergers.ENBegin
 import en.mergers.ENEnd
@@ -36,6 +37,7 @@ class ENController(override val config: ENConfig = ENConfig()) : Controller(conf
             ENRepeat(config),
             ENBegin(config),
             ENEnd(config),
+            MergerConsecutive(config),
             ENList(config)
         )
 }

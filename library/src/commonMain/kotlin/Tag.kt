@@ -3,7 +3,7 @@ enum class TagTime{
     MINUTE,
     HOUR,
     DAY,
-    DAY_OF_WEEK,
+    WEEK,
     MONTH,
     YEAR,
 }

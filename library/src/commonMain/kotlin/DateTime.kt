@@ -29,6 +29,7 @@ data class DateTime(
     val points: Int = 1
 ) : Comparable<DateTime> {
 
+
     override fun compareTo(other: DateTime): Int = compareValuesBy(this, other,
         { points + tagsTimeStart.size + tagsTimeEnd.size },
         { it.range.first },
@@ -37,8 +38,6 @@ data class DateTime(
 
 
     fun merge(other: DateTime): DateTime {
-
-        println("MERGING $this with $other")
 
         return copy(
             startTime = startTime.mergeTime(other.startTime, other.tagsTimeStart),

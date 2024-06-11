@@ -81,7 +81,7 @@ class ENMonthDayYear(override val config: ENConfig) : ParserByWord(config) {
                 copy(
                     startTime = startTime.copy(
                         monthNumber = months[month] ?: (month.toInt()),
-                        dayOfMonth = ordinal[day] ?: day.replace("th|st|rd".toRegex(), "").toInt(),
+                        dayOfMonth = ordinal[day] ?: day.replace("th|st|rd|nd".toRegex(), "").toInt(),
 
                         ),
                     tagsTimeStart = tagsTimeStart + TagTime.DAY + TagTime.MONTH
