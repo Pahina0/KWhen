@@ -1,8 +1,9 @@
 package common
 
 import DateTime
+import configs.Config
 
-abstract class Parser(open val config: Config) {
+internal abstract class Parser(open val config: Config) {
 
     /**
      * regex that should be applied to every pattern

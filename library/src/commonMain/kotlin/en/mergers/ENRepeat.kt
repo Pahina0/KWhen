@@ -2,10 +2,10 @@ package en.mergers
 
 import DateTime
 import common.mergers.MergerWhitespaceTrimmed
-import en.ENConfig
+import configs.ENConfig
 import util.getRepeatTime
 
-class ENRepeat(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
+internal class ENRepeat(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
     override val prefixMatchPattern: Regex
         get() = "every(\\s+other)?".toRegex()
     override val mergePrefixWithLeft: Boolean

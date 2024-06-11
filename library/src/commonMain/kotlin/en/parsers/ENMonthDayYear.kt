@@ -1,9 +1,9 @@
 package en.parsers
 
 import DateTime
-import TagTime
+import TimeUnit
 import common.parsers.ParserByWord
-import en.ENConfig
+import configs.ENConfig
 import en.months
 import en.ordinal
 import util.between31
@@ -18,7 +18,7 @@ import util.matchAny
  * june 11
  * april
  * */
-class ENMonthDayYear(override val config: ENConfig) : ParserByWord(config) {
+internal class ENMonthDayYear(override val config: ENConfig) : ParserByWord(config) {
     // @formatter:off
     override val matchPattern: Regex
         get() = (
@@ -58,7 +58,7 @@ class ENMonthDayYear(override val config: ENConfig) : ParserByWord(config) {
                     },
 
 
-                    tagsTimeStart = date.tagsTimeStart + TagTime.YEAR
+                    tagsTimeStart = date.tagsTimeStart + TimeUnit.YEAR
 
                 )
             }
@@ -73,7 +73,7 @@ class ENMonthDayYear(override val config: ENConfig) : ParserByWord(config) {
                     startTime = startTime.copy(
                         monthNumber = months[month]!!,
                     ),
-                    tagsTimeStart = tagsTimeStart + TagTime.MONTH
+                    tagsTimeStart = tagsTimeStart + TimeUnit.MONTH
                 )
             }
         } else if (day != ""){
@@ -84,7 +84,7 @@ class ENMonthDayYear(override val config: ENConfig) : ParserByWord(config) {
                         dayOfMonth = ordinal[day] ?: day.replace("th|st|rd|nd".toRegex(), "").toInt(),
 
                         ),
-                    tagsTimeStart = tagsTimeStart + TagTime.DAY + TagTime.MONTH
+                    tagsTimeStart = tagsTimeStart + TimeUnit.DAY + TimeUnit.MONTH
                 )
             }
         } else {

@@ -1,9 +1,9 @@
 package en.parsers
 
 import DateTime
-import TagTime
+import TimeUnit
 import common.parsers.ParserByWord
-import en.ENConfig
+import configs.ENConfig
 import en.ordinal
 import util.between31
 import util.copy
@@ -14,7 +14,7 @@ import util.matchAny
  * 12th
  * 3:05 am
  * */
-class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
+internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
     override val matchPattern: Regex
         get() = "($between31)(?:(th|st|rd|nd)|(?:(?:\\s+|\\s*:\\s*)(\\d{1,2}))?\\s*([ap]\\.?m\\.?)?)|(${ordinal.keys.matchAny()})".toRegex()
 
@@ -38,7 +38,7 @@ class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
                     dayOfMonth = ordinal[timeOrdinal] ?: return null
                 ),
 
-                tagsTimeStart = date.tagsTimeStart + TagTime.DAY
+                tagsTimeStart = date.tagsTimeStart + TimeUnit.DAY
             )
 
 
@@ -50,7 +50,7 @@ class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
 
                 ),
 
-                tagsTimeStart = date.tagsTimeStart + TagTime.DAY
+                tagsTimeStart = date.tagsTimeStart + TimeUnit.DAY
             )
 
         } else {
@@ -94,7 +94,7 @@ class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
                         else minute.toIntOrNull() ?: return null
                     ),
 
-                    tagsTimeStart = tagsTimeStart + TagTime.HOUR + TagTime.MINUTE
+                    tagsTimeStart = tagsTimeStart + TimeUnit.HOUR + TimeUnit.MINUTE
                 )
             }
 

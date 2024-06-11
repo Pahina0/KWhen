@@ -1,4 +1,4 @@
-enum class TagTime{
+enum class TimeUnit{
     SECOND,
     MINUTE,
     HOUR,
@@ -8,7 +8,7 @@ enum class TagTime{
     YEAR,
 }
 
-enum class TagDayOfWeek {
+enum class DayOfWeek {
     MONDAY,
     TUESDAY,
     WEDNESDAY,

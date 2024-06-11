@@ -1,9 +1,9 @@
 package en
 
-import TagDayOfWeek
-import TagTime
+import DayOfWeek
+import TimeUnit
 
-val months = mapOf(
+internal val months = mapOf(
     "january" to 1,
     "jan." to 1,
     "jan" to 1,
@@ -41,7 +41,7 @@ val months = mapOf(
     "dec" to 12,
 )
 
-val ordinal = mapOf(
+internal val ordinal = mapOf(
     "first" to 1,
     "second" to 2,
     "third" to 3,
@@ -85,64 +85,64 @@ val ordinal = mapOf(
     "thirty-first" to 31,
 )
 
-val weekdays = mapOf(
-    "monday" to TagDayOfWeek.MONDAY,
-    "mon." to TagDayOfWeek.MONDAY,
-    "mon" to TagDayOfWeek.MONDAY,
-    "tuesday" to TagDayOfWeek.TUESDAY,
-    "tues." to TagDayOfWeek.TUESDAY,
-    "tues" to TagDayOfWeek.TUESDAY,
-    "tue." to TagDayOfWeek.TUESDAY,
-    "tue" to TagDayOfWeek.TUESDAY,
-    "wednesday" to TagDayOfWeek.WEDNESDAY,
-    "wens." to TagDayOfWeek.WEDNESDAY,
-    "wens" to TagDayOfWeek.WEDNESDAY,
-    "wed." to TagDayOfWeek.WEDNESDAY,
-    "wed" to TagDayOfWeek.WEDNESDAY,
-    "wen." to TagDayOfWeek.WEDNESDAY,
-    "wen" to TagDayOfWeek.WEDNESDAY,
-    "thursday" to TagDayOfWeek.THURSDAY,
-    "thurs." to TagDayOfWeek.THURSDAY,
-    "thurs" to TagDayOfWeek.THURSDAY,
-    "thu." to TagDayOfWeek.THURSDAY,
-    "thu" to TagDayOfWeek.THURSDAY,
-    "friday" to TagDayOfWeek.FRIDAY,
-    "fri." to TagDayOfWeek.FRIDAY,
-    "fri" to TagDayOfWeek.FRIDAY,
-    "saturday" to TagDayOfWeek.SATURDAY,
-    "sat" to TagDayOfWeek.SATURDAY,
-    "sat." to TagDayOfWeek.SATURDAY,
-    "sunday" to TagDayOfWeek.SUNDAY,
-    "sun." to TagDayOfWeek.SUNDAY,
-    "sun" to TagDayOfWeek.SUNDAY,
+internal val weekdays = mapOf(
+    "monday" to DayOfWeek.MONDAY,
+    "mon." to DayOfWeek.MONDAY,
+    "mon" to DayOfWeek.MONDAY,
+    "tuesday" to DayOfWeek.TUESDAY,
+    "tues." to DayOfWeek.TUESDAY,
+    "tues" to DayOfWeek.TUESDAY,
+    "tue." to DayOfWeek.TUESDAY,
+    "tue" to DayOfWeek.TUESDAY,
+    "wednesday" to DayOfWeek.WEDNESDAY,
+    "wens." to DayOfWeek.WEDNESDAY,
+    "wens" to DayOfWeek.WEDNESDAY,
+    "wed." to DayOfWeek.WEDNESDAY,
+    "wed" to DayOfWeek.WEDNESDAY,
+    "wen." to DayOfWeek.WEDNESDAY,
+    "wen" to DayOfWeek.WEDNESDAY,
+    "thursday" to DayOfWeek.THURSDAY,
+    "thurs." to DayOfWeek.THURSDAY,
+    "thurs" to DayOfWeek.THURSDAY,
+    "thu." to DayOfWeek.THURSDAY,
+    "thu" to DayOfWeek.THURSDAY,
+    "friday" to DayOfWeek.FRIDAY,
+    "fri." to DayOfWeek.FRIDAY,
+    "fri" to DayOfWeek.FRIDAY,
+    "saturday" to DayOfWeek.SATURDAY,
+    "sat" to DayOfWeek.SATURDAY,
+    "sat." to DayOfWeek.SATURDAY,
+    "sunday" to DayOfWeek.SUNDAY,
+    "sun." to DayOfWeek.SUNDAY,
+    "sun" to DayOfWeek.SUNDAY,
 )
 
-val generalTimes = mapOf(
-    "days" to TagTime.DAY,
-    "day" to TagTime.DAY,
-    "months" to TagTime.MONTH,
-    "month" to TagTime.MONTH,
-    "week" to TagTime.WEEK,
-    "weeks" to TagTime.WEEK,
-    "years" to TagTime.YEAR,
-    "year" to TagTime.YEAR,
-    "yrs" to TagTime.YEAR,
-    "yr" to TagTime.YEAR,
-    "hrs" to TagTime.HOUR,
-    "hr" to TagTime.HOUR,
-    "hours" to TagTime.HOUR,
-    "hour" to TagTime.HOUR,
-    "secs" to TagTime.SECOND,
-    "sec" to TagTime.SECOND,
-    "seconds" to TagTime.SECOND,
-    "second" to TagTime.SECOND,
-    "mins" to TagTime.MINUTE,
-    "min" to TagTime.MINUTE,
-    "minutes" to TagTime.MINUTE,
-    "minute" to TagTime.MINUTE,
+internal val generalTimes = mapOf(
+    "days" to TimeUnit.DAY,
+    "day" to TimeUnit.DAY,
+    "months" to TimeUnit.MONTH,
+    "month" to TimeUnit.MONTH,
+    "week" to TimeUnit.WEEK,
+    "weeks" to TimeUnit.WEEK,
+    "years" to TimeUnit.YEAR,
+    "year" to TimeUnit.YEAR,
+    "yrs" to TimeUnit.YEAR,
+    "yr" to TimeUnit.YEAR,
+    "hrs" to TimeUnit.HOUR,
+    "hr" to TimeUnit.HOUR,
+    "hours" to TimeUnit.HOUR,
+    "hour" to TimeUnit.HOUR,
+    "secs" to TimeUnit.SECOND,
+    "sec" to TimeUnit.SECOND,
+    "seconds" to TimeUnit.SECOND,
+    "second" to TimeUnit.SECOND,
+    "mins" to TimeUnit.MINUTE,
+    "min" to TimeUnit.MINUTE,
+    "minutes" to TimeUnit.MINUTE,
+    "minute" to TimeUnit.MINUTE,
 )
 
-val amounts = mapOf(
+internal val amounts = mapOf(
     "a" to 1,
     "one" to 1,
     "two" to 2,

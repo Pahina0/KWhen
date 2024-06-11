@@ -1,9 +1,9 @@
 package common.mergers
 
 import DateTime
-import en.ENConfig
+import configs.ENConfig
 
-open class MergerList(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
+internal open class MergerList(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
     override val betweenMatchPattern: Regex
         get() = ",\\s*|&\\s*".toRegex()
 

@@ -1,9 +1,9 @@
 package en.mergers
 
 import common.mergers.MergerList
-import en.ENConfig
+import configs.ENConfig
 
-class ENList(config: ENConfig) : MergerList(config) {
+internal class ENList(config: ENConfig) : MergerList(config) {
     override val betweenMatchPattern: Regex
         get() = ",\\s*(?:and)?|and|&|\\s*".toRegex()
 }

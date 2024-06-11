@@ -1,7 +1,7 @@
 package util
 
 import DateTime
-import TagTime
+import TimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -12,12 +12,12 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
-fun <T> Collection<T>.matchAny(): Regex = joinToString("|").replace(".", "\\.").toRegex()
+internal fun <T> Collection<T>.matchAny(): Regex = joinToString("|").replace(".", "\\.").toRegex()
 
-val between31 = "(?<!\\d)(?:0?[1-9]|[12][0-9]|3[01])(?!\\d)".toRegex()
+internal val between31 = "(?<!\\d)(?:0?[1-9]|[12][0-9]|3[01])(?!\\d)".toRegex()
 
 
-fun LocalDateTime.copy(
+internal fun LocalDateTime.copy(
     year: Int = -1,
     monthNumber: Int = -1,
     dayOfMonth: Int = -1,
@@ -33,7 +33,7 @@ fun LocalDateTime.copy(
     if (second < 0) this.second else second
 )
 
-fun LocalDateTime.copy(
+internal fun LocalDateTime.copy(
     date: LocalDate? = null, time: LocalTime? = null
 ): LocalDateTime = LocalDateTime(
     date ?: this.date,
@@ -41,37 +41,37 @@ fun LocalDateTime.copy(
 )
 
 
-fun LocalDateTime.mergeTime(other: LocalDateTime?, tags: Set<TagTime>): LocalDateTime {
+internal fun LocalDateTime.mergeTime(other: LocalDateTime?, tags: Set<TimeUnit>): LocalDateTime {
     if (other == null) return this
 
     var time = this
     tags.forEach {
         time = when (it) {
-            TagTime.HOUR -> {
+            TimeUnit.HOUR -> {
                 time.copy(hour = other.hour)
             }
 
-            TagTime.MINUTE -> {
+            TimeUnit.MINUTE -> {
                 time.copy(minute = other.minute)
             }
 
-            TagTime.SECOND -> {
+            TimeUnit.SECOND -> {
                 time.copy(second = other.second)
             }
 
-            TagTime.DAY -> {
+            TimeUnit.DAY -> {
                 time.copy(dayOfMonth = other.dayOfMonth)
             }
 
-            TagTime.WEEK -> {
+            TimeUnit.WEEK -> {
                 time // this shouldn't do much?
             }
 
-            TagTime.MONTH -> {
+            TimeUnit.MONTH -> {
                 time.copy(monthNumber = other.monthNumber)
             }
 
-            TagTime.YEAR -> {
+            TimeUnit.YEAR -> {
                 time.copy(year = other.year)
             }
 
@@ -81,9 +81,9 @@ fun LocalDateTime.mergeTime(other: LocalDateTime?, tags: Set<TagTime>): LocalDat
     return time
 }
 
-fun getDateTimeWithGeneral(
+internal fun getDateTimeWithGeneral(
     generalNumber: Int,
-    generalTag: TagTime,
+    generalTag: TimeUnit,
     relativeTo: LocalDateTime?
 ): LocalDateTime {
 
@@ -91,26 +91,26 @@ fun getDateTimeWithGeneral(
 
     if (relativeTo == null) {
         return when (generalTag) {
-            TagTime.SECOND -> now.copy(second = generalNumber)
-            TagTime.MINUTE -> now.copy(minute = generalNumber)
-            TagTime.HOUR -> now.copy(hour = generalNumber)
-            TagTime.DAY -> now.copy(dayOfMonth = generalNumber)
-            TagTime.MONTH -> now.copy(monthNumber = generalNumber)
-            TagTime.YEAR -> now.copy(year = generalNumber)
-            TagTime.WEEK -> now
+            TimeUnit.SECOND -> now.copy(second = generalNumber)
+            TimeUnit.MINUTE -> now.copy(minute = generalNumber)
+            TimeUnit.HOUR -> now.copy(hour = generalNumber)
+            TimeUnit.DAY -> now.copy(dayOfMonth = generalNumber)
+            TimeUnit.MONTH -> now.copy(monthNumber = generalNumber)
+            TimeUnit.YEAR -> now.copy(year = generalNumber)
+            TimeUnit.WEEK -> now
         }
 
     }
 
 
     val duration = when (generalTag) {
-        TagTime.SECOND -> generalNumber.seconds
-        TagTime.MINUTE -> generalNumber.minutes
-        TagTime.HOUR -> generalNumber.hours
-        TagTime.DAY -> (generalNumber * 24).hours
-        TagTime.WEEK -> (generalNumber * 24 * 7).hours
-        TagTime.MONTH -> return relativeTo.copy(monthNumber = relativeTo.monthNumber + generalNumber)
-        TagTime.YEAR -> return relativeTo.copy(year = relativeTo.year + generalNumber)
+        TimeUnit.SECOND -> generalNumber.seconds
+        TimeUnit.MINUTE -> generalNumber.minutes
+        TimeUnit.HOUR -> generalNumber.hours
+        TimeUnit.DAY -> (generalNumber * 24).hours
+        TimeUnit.WEEK -> (generalNumber * 24 * 7).hours
+        TimeUnit.MONTH -> return relativeTo.copy(monthNumber = relativeTo.monthNumber + generalNumber)
+        TimeUnit.YEAR -> return relativeTo.copy(year = relativeTo.year + generalNumber)
 
     }
 
@@ -121,14 +121,14 @@ fun getDateTimeWithGeneral(
 
 }
 
-fun Set<TagTime>.getRepeatTime(): TagTime? {
-    if (contains(TagTime.YEAR)) return null // every 1989 won't make sense
-    if (contains(TagTime.MONTH)) return TagTime.YEAR // every april -> repeat once a year
-    if (contains(TagTime.WEEK)) return TagTime.WEEK // every monday -> repeat once a week
-    if (contains(TagTime.DAY)) return TagTime.MONTH // every 5th -> repeat once a month
-    if (contains(TagTime.HOUR)) return TagTime.DAY // every 3am -> repeat once a day
-    if (contains(TagTime.MINUTE)) return TagTime.HOUR // every :03 -> repeat once an hour
-    if (contains(TagTime.SECOND)) return TagTime.MINUTE // every :--:03 -> repeat once an minute
+internal fun Set<TimeUnit>.getRepeatTime(): TimeUnit? {
+    if (contains(TimeUnit.YEAR)) return null // every 1989 won't make sense
+    if (contains(TimeUnit.MONTH)) return TimeUnit.YEAR // every april -> repeat once a year
+    if (contains(TimeUnit.WEEK)) return TimeUnit.WEEK // every monday -> repeat once a week
+    if (contains(TimeUnit.DAY)) return TimeUnit.MONTH // every 5th -> repeat once a month
+    if (contains(TimeUnit.HOUR)) return TimeUnit.DAY // every 3am -> repeat once a day
+    if (contains(TimeUnit.MINUTE)) return TimeUnit.HOUR // every :03 -> repeat once an hour
+    if (contains(TimeUnit.SECOND)) return TimeUnit.MINUTE // every :--:03 -> repeat once an minute
 
     return null
 }

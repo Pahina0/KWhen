@@ -1,9 +1,9 @@
 package en.mergers
 
 import DateTime
-import TagTime
+import TimeUnit
 import common.mergers.MergerWhitespaceTrimmed
-import en.ENConfig
+import configs.ENConfig
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -13,7 +13,7 @@ import util.getDateTimeWithGeneral
  * merges phrases such as
  * from 4am to 7pm
  * */
-class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
+internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
     override val prefixMatchPattern: Regex
         get() = "to|till|ends|ending|-|until".toRegex()
 
@@ -30,7 +30,7 @@ class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
 
 
         if (left.generalNumber != null) {
-            if (left.generalTimeTag == TagTime.HOUR || left.generalTimeTag == null) {
+            if (left.generalTimeTag == TimeUnit.HOUR || left.generalTimeTag == null) {
                 val currentHour =
                     Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
                 val hour = if (config.use24) {
@@ -49,10 +49,10 @@ class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
                 return left.copy(
                     endTime = getDateTimeWithGeneral(
                         hour,
-                        TagTime.HOUR,
+                        TimeUnit.HOUR,
                         null
                     ),
-                    tagsTimeEnd = left.tagsTimeEnd + TagTime.HOUR + TagTime.MINUTE,
+                    tagsTimeEnd = left.tagsTimeEnd + TimeUnit.HOUR + TimeUnit.MINUTE,
                     generalTimeTag = null,
                     generalNumber = null,
                 )

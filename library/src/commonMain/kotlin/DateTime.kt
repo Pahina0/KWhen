@@ -8,7 +8,7 @@ import util.mergeTime
 /**
  * The result of the parsed string
  * */
-data class DateTime(
+internal data class DateTime(
     val text: String = "",
     val range: IntRange = 0..0,
 
@@ -16,14 +16,14 @@ data class DateTime(
 
     val endTime: LocalDateTime? = null,
 
-    val tagsDayOfWeek: Set<TagDayOfWeek> = mutableSetOf(),
-    val tagsTimeStart: Set<TagTime> = mutableSetOf(),
-    val tagsTimeEnd: Set<TagTime> = mutableSetOf(),
+    val tagsDayOfWeek: Set<DayOfWeek> = mutableSetOf(),
+    val tagsTimeStart: Set<TimeUnit> = mutableSetOf(),
+    val tagsTimeEnd: Set<TimeUnit> = mutableSetOf(),
 
-    val repeatTag: TagTime? = null,
+    val repeatTag: TimeUnit? = null,
     val repeatOften: Int? = null,
 
-    val generalTimeTag: TagTime? = null,
+    val generalTimeTag: TimeUnit? = null,
     val generalNumber: Int? = null,
 
     val points: Int = 1

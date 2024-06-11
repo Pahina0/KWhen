@@ -5,6 +5,7 @@ import common.Merger
 import common.Parser
 import common.mergers.MergerConsecutive
 import common.mergers.MergerGeneralTags
+import configs.ENConfig
 import en.mergers.ENBegin
 import en.mergers.ENEnd
 import en.mergers.ENList
@@ -18,7 +19,9 @@ import en.parsers.ENGeneralTime
 import en.parsers.ENMonthDayYear
 import en.parsers.ENNumericOrdinal
 
-class ENController(override val config: ENConfig = ENConfig()) : Controller(config) {
+internal class ENController  (override val config: ENConfig = ENConfig()) :
+    Controller(config) {
+
     override val parsers: List<Parser>
         get() = listOf(
             ENGeneralAmount(config),

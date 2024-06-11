@@ -1,7 +1,7 @@
 package en.parsers
 
 import DateTime
-import common.Config
+import configs.Config
 import common.parsers.ParserByWord
 import en.generalTimes
 import util.matchAny
@@ -11,7 +11,7 @@ import util.matchAny
  * min
  * second
  * */
-class ENGeneralTime(override val config: Config) : ParserByWord(config) {
+internal class ENGeneralTime(override val config: Config) : ParserByWord(config) {
     override val matchPattern: Regex
         get() = generalTimes.keys.matchAny()
 

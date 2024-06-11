@@ -1,9 +1,8 @@
 package common.parsers
 
 import DateTime
-import common.Config
-
-open class ParserGenericNumbers(override val config: Config) : ParserByWord(config) {
+import configs.Config
+internal open class ParserGenericNumbers(override val config: Config) : ParserByWord(config) {
     override val matchPattern: Regex
         get() = "\\d+".toRegex()
 

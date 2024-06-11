@@ -1,7 +1,8 @@
 package common
 
 import DateTime
-import Processed
+import Parsed
+import configs.Config
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -10,11 +11,12 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.math.min
 import kotlin.time.Duration.Companion.hours
 
-abstract class Controller(open val config: Config) {
-    protected abstract val parsers: List<Parser>
-    protected abstract val mergers: List<Merger>
+ abstract class Controller(open val config: Config) {
+    internal  abstract val parsers: List<Parser>
+    internal abstract val mergers: List<Merger>
 
-    fun parse(input: String): List<DateTime> {
+
+    internal fun parse(input: String): List<DateTime> {
         val parsed = mutableListOf<DateTime>()
 
         parsers.forEach {
@@ -43,7 +45,7 @@ abstract class Controller(open val config: Config) {
         return ret
     }
 
-    fun merge(input: String, parsed: List<DateTime>): List<DateTime> {
+    internal fun merge(input: String, parsed: List<DateTime>): List<DateTime> {
         var current: List<DateTime>
         var ret = parsed.toMutableList()
 
@@ -141,8 +143,8 @@ abstract class Controller(open val config: Config) {
     /**
      * The only things that should join are those with the same tags
      * */
-    fun finalize(times: List<DateTime>): List<Processed> {
-        val ret = mutableListOf<Processed>()
+    internal fun finalize(times: List<DateTime>): List<Parsed> {
+        val ret = mutableListOf<Parsed>()
 
         for (date in times) {
             if (ret.isNotEmpty() && date.range.first <= ret.last().range.last + 1) {
@@ -166,7 +168,7 @@ abstract class Controller(open val config: Config) {
                     startTime = st + mergeTo.startTime
                 )
             } else {
-                ret += Processed(
+                ret += Parsed(
                     date.text,
                     date.range,
                     if (date.tagsDayOfWeek.isNotEmpty()) date.tagsDayOfWeek.map {

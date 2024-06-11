@@ -1,17 +1,12 @@
-import en.ENConfig
-import en.ENController
+import configs.Config
+import configs.ENConfig
 
+class TimeParser(val config: Config = ENConfig()) {
+    fun parse(input: String): List<Parsed> {
+        val controller = config.instance()
 
-class TimeParser(val config: ENConfig = ENConfig()) {
-    fun parse(input: String): List<DateTime> {
-        return ENController(config).parse(input).filter { it.generalTimeTag == null && it.generalNumber == null }
-    }
-
-    fun parseAndMerge(input: String): List<DateTime> {
-        return ENController(config).let { it.merge(input, it.parse(input)) }
-    }
-
-    fun parseMergeProcess(input: String): List<Processed> {
-        return ENController(config).let { it.finalize(it.merge(input, it.parse(input))) }
+        val parsed = controller.parse(input)
+        val merged = controller.merge(input, parsed)
+        return controller.finalize(merged)
     }
 }

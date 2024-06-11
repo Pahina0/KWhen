@@ -1,15 +1,15 @@
 package en.mergers
 
 import DateTime
-import TagTime
+import TimeUnit
 import common.mergers.MergerWhitespaceTrimmed
-import en.ENConfig
+import configs.ENConfig
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import util.getDateTimeWithGeneral
 
-class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
+internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
     override val prefixMatchPattern: Regex
         get() = "(?:starting\\s+)?(from|on|at|during|in)(?:\\s+the)?|the".toRegex()
 
@@ -34,7 +34,7 @@ class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
             ) {
                 if (left.text == "a") return null // on a boat isn't a time
 
-                if (left.generalTimeTag == TagTime.HOUR || left.generalTimeTag == null) {
+                if (left.generalTimeTag == TimeUnit.HOUR || left.generalTimeTag == null) {
                     val currentHour =
                         Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
                     val hour = if (config.use24) {
@@ -52,10 +52,10 @@ class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
                     return left.copy(
                         startTime = getDateTimeWithGeneral(
                             hour,
-                            TagTime.HOUR,
+                            TimeUnit.HOUR,
                             null
                         ),
-                        tagsTimeStart = left.tagsTimeEnd + TagTime.HOUR + TagTime.MINUTE,
+                        tagsTimeStart = left.tagsTimeEnd + TimeUnit.HOUR + TimeUnit.MINUTE,
                         generalTimeTag = null,
                         generalNumber = null,
                     )
@@ -75,10 +75,10 @@ class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
                 return left.copy(
                     startTime = getDateTimeWithGeneral(
                         left.generalNumber,
-                        left.generalTimeTag ?: TagTime.HOUR,
+                        left.generalTimeTag ?: TimeUnit.HOUR,
                         left.endTime ?: left.startTime
                     ),
-                    tagsTimeStart = left.tagsTimeStart + (left.generalTimeTag ?: TagTime.HOUR),
+                    tagsTimeStart = left.tagsTimeStart + (left.generalTimeTag ?: TimeUnit.HOUR),
                     generalTimeTag = null,
                     generalNumber = null,
                 )
