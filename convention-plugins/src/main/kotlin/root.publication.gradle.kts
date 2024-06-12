@@ -3,7 +3,7 @@ plugins {
 }
 
 allprojects {
-    group = "ap.panini.kwhen"
+    group = "io.github.pahinaa.kwhen"
     version = "0.0.1"
 }
 
