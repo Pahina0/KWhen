@@ -45,7 +45,7 @@ kotlin {
 }
 
 android {
-    namespace = "io.github.pahinaa.kwhen"
+    namespace = "io.github.pahinaa"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()

@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "KWhen"
-include(":library")
+include(":kwhen")

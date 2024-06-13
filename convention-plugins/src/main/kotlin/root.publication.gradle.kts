@@ -3,7 +3,7 @@ plugins {
 }
 
 allprojects {
-    group = "io.github.pahinaa.kwhen"
+    group = "io.github.pahinaa"
     version = "0.0.1"
 }
 
