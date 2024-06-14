@@ -40,6 +40,9 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
 
       - name: Publish
         run: ./gradlew publishToMavenCentral --no-configuration-cache
