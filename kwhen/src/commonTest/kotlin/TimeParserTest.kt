@@ -1,4 +1,6 @@
-import configs.ENConfig
+import ap.panini.kwhen.DateTime
+import ap.panini.kwhen.Parsed
+import ap.panini.kwhen.configs.ENConfig
 
 
 internal class TimeParserTest(val config: ENConfig = ENConfig()) {
