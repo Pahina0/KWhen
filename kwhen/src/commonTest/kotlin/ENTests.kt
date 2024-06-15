@@ -1,5 +1,6 @@
 import ap.panini.kwhen.DateTime
 import ap.panini.kwhen.DayOfWeek
+import ap.panini.kwhen.TimeParser
 import ap.panini.kwhen.TimeUnit
 import ap.panini.kwhen.configs.ENConfig
 import ap.panini.kwhen.util.copy
@@ -13,10 +14,13 @@ import kotlin.test.assertEquals
 
 class ENTests {
     private lateinit var timeParser: TimeParserTest
+    private lateinit var parserFinal: TimeParser
 
     @BeforeTest
     fun setup() {
         timeParser = TimeParserTest()
+        parserFinal = TimeParser()
+
     }
 
 
@@ -362,13 +366,44 @@ class ENTests {
         }
 
         timeParser.parseMergeProcess("the world is boring every june, jul, and aug").let {
-            println(it)
             assertEquals("every june, jul, and aug", it[0].text.trim())
             assertEquals(3, it[0].startTime.size)
             assertEquals(setOf(TimeUnit.MONTH), it[0].tagsTimeStart)
             assertEquals(TimeUnit.YEAR, it[0].repeatTag)
             assertEquals(1, it[0].repeatOften)
         }
+    }
+
+    @Test
+    fun testProcessSentence() {
+        parserFinal.parse("Jul 9 is going to be crazy").let {
+            assertEquals(1, it.size)
+            assertEquals("Jul 9", it[0].text.trim())
+            assertEquals(1, it[0].startTime.size)
+            assertEquals(
+                DateTime().startTime.run { copy(monthNumber = 7, dayOfMonth = 9) },
+                it[0].startTime.first()
+            )
+            assertEquals(setOf(TimeUnit.MONTH, TimeUnit.DAY), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("Today I will go swim").let {
+            assertEquals("Today", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("At 9 there is special food").let {
+            assertEquals("At 9", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeStart)
+        }
+
+
+        parserFinal.parse("There is an event in 24 hrs").let {
+            assertEquals("in 24 hrs", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.HOUR), it[0].tagsTimeStart)
+        }
+
+        assertEquals(emptyList(), parserFinal.parse("on feb 31st"))
     }
 
 }

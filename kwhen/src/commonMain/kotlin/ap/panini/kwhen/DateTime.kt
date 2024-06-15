@@ -58,7 +58,7 @@ internal data class DateTime(
         val nowZeroed = with(
             Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         ) {
-            LocalDateTime(year, month, dayOfMonth, hour, 0, 0, 0)
+            LocalDateTime(year, month, dayOfMonth, hour, minute, 0, 0)
         }
     }
 

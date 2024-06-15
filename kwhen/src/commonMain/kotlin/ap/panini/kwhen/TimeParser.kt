@@ -9,6 +9,8 @@ class TimeParser(val config: Config = ENConfig()) {
 
         val parsed = controller.parse(input)
         val merged = controller.merge(input, parsed)
-        return controller.finalize(merged)
+        return controller
+            .finalize(merged)
+            .map { it.copy(text = input.substring(it.range)) }
     }
 }

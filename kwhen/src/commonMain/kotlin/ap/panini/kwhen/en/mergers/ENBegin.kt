@@ -32,7 +32,7 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
                     "during"
                 ).contains(prefix.value.trim())
             ) {
-                if (left.text == "a") return null // on a boat isn't a time
+                if (left.text == "a") return null // "on a boat" isn't a time
 
                 if (left.generalTimeTag == TimeUnit.HOUR || left.generalTimeTag == null) {
                     val currentHour =
