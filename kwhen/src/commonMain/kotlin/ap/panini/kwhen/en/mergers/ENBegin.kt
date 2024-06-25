@@ -4,6 +4,7 @@ import ap.panini.kwhen.DateTime
 import ap.panini.kwhen.TimeUnit
 import ap.panini.kwhen.common.mergers.MergerWhitespaceTrimmed
 import ap.panini.kwhen.configs.ENConfig
+import ap.panini.kwhen.util.copy
 import ap.panini.kwhen.util.getDateTimeWithGeneral
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -54,6 +55,8 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
                             hour,
                             TimeUnit.HOUR,
                             null
+                        ).copy(
+                            minute = 0
                         ),
                         tagsTimeStart = left.tagsTimeEnd + TimeUnit.HOUR + TimeUnit.MINUTE,
                         generalTimeTag = null,

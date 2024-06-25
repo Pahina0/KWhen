@@ -281,8 +281,8 @@ class ENTests {
     fun testGenericAndMerge() {
         TimeParserTest(config = ENConfig(use24 = true)).parseAndMerge("im busy from 4 to 6").let {
             assertEquals("from 4 to 6", it[0].text.trim())
-            assertEquals(DateTime().startTime.run { copy(hour = 4) }, it[0].startTime)
-            assertEquals(DateTime().startTime.run { copy(hour = 6) }, it[0].endTime)
+            assertEquals(DateTime().startTime.run { copy(hour = 4, minute = 0) }, it[0].startTime)
+            assertEquals(DateTime().startTime.run { copy(hour = 6, minute = 0) }, it[0].endTime)
             assertEquals(setOf(TimeUnit.MINUTE, TimeUnit.HOUR), it[0].tagsTimeStart)
             assertEquals(setOf(TimeUnit.MINUTE, TimeUnit.HOUR), it[0].tagsTimeEnd)
         }
@@ -404,6 +404,16 @@ class ENTests {
         }
 
         assertEquals(emptyList(), parserFinal.parse("on feb 31st"))
+
+        parserFinal.parse("Im going to swim at 9:18").let {
+            println(it)
+            assertEquals("at 9:18", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeStart)
+            assertEquals(18, it[0].startTime.first().minute)
+        }
+        //    TODO add this week, next week ect
+
+        //     TODO add at 30 min after 5
     }
 
 }
