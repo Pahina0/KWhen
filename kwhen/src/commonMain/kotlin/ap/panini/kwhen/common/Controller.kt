@@ -150,7 +150,6 @@ abstract class Controller(open val config: Config) {
                 ret += date.copy(
                     text = merged.text, range = merged.range, points = date.points + it.reward
                 )
-
             }
 
             ret = ret.mergeIntervals().toMutableList()

@@ -1,4 +1,6 @@
 package ap.panini.kwhen
+
+import ap.panini.kwhen.util.getDateTimeWithGeneral
 import ap.panini.kwhen.util.mergeTime
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
@@ -38,7 +40,22 @@ internal data class DateTime(
     )
 
 
-    fun merge(other: DateTime): DateTime {
+    fun merge(other: DateTime, pureMerge: Boolean = false): DateTime {
+        if (generalNumber != null && generalTimeTag != null && !pureMerge) {
+            return merge(other, true).let {
+                it.copy(
+                    startTime = getDateTimeWithGeneral(
+                        generalNumber,
+                        generalTimeTag,
+                        it.startTime
+                    ),
+                    tagsTimeStart = it.tagsTimeStart + generalTimeTag,
+                    generalNumber = null,
+                    generalTimeTag = null
+                )
+            }
+
+        }
 
         return copy(
             startTime = startTime.mergeTime(other.startTime, other.tagsTimeStart),
