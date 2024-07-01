@@ -99,7 +99,6 @@ internal fun getDateTimeWithGeneral(
             TimeUnit.YEAR -> now.copy(year = generalNumber)
             TimeUnit.WEEK -> now
         }
-
     }
 
 

@@ -406,7 +406,6 @@ class ENTests {
         assertEquals(emptyList(), parserFinal.parse("on feb 31st"))
 
         parserFinal.parse("Im going to swim at 9:18").let {
-            println(it)
             assertEquals("at 9:18", it[0].text.trim())
             assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeStart)
             assertEquals(18, it[0].startTime.first().minute)
@@ -414,6 +413,18 @@ class ENTests {
         //    TODO add this week, next week ect
 
         //     TODO add at 30 min after 5
+    }
+
+    @Test
+    fun testTimeFullWithRepeat() {
+        parserFinal.parse("he has school from 4am to 8pm every day").let {
+            assertEquals("from 4am to 8pm every day", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeStart)
+            assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeEnd)
+            assertEquals(1, it[0].repeatOften)
+            assertEquals(TimeUnit.DAY, it[0].repeatTag)
+        }
+
     }
 
 }

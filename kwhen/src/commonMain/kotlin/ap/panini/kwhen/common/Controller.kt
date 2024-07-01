@@ -60,6 +60,10 @@ abstract class Controller(open val config: Config) {
             current = ret
             ret = mutableListOf()
 
+            println(it::class.simpleName)
+            println(current)
+            println()
+
             for (i in current.indices) {
 
                 // substrings from previous items last index or 0, to the beginning of the current item
@@ -148,10 +152,12 @@ abstract class Controller(open val config: Config) {
                 )
 
             }
+
+            ret = ret.mergeIntervals().toMutableList()
         }
 
 
-        return ret.mergeIntervals().cleanGenerics()
+        return ret.cleanGenerics()
     }
 
     /**

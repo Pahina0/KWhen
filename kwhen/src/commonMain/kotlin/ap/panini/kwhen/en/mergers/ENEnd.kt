@@ -29,57 +29,57 @@ internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(co
     ): DateTime? {
         if (left == null || prefix == null) return null
 
+        // has an unknown number
+        if (left.generalNumber == null) {
+            return left.copy(
+                startTime = DateTime().startTime,
+                endTime = left.startTime,
+                tagsTimeStart = setOf(),
+                tagsTimeEnd = left.tagsTimeStart,
+            )
+        }
 
-        if (left.generalNumber != null) {
-            if (left.generalTimeTag == TimeUnit.HOUR || left.generalTimeTag == null) {
-                val currentHour =
-                    Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
-                val hour = if (config.use24) {
+
+        if (left.generalTimeTag == TimeUnit.HOUR || left.generalTimeTag == null) {
+            val currentHour =
+                Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
+            val hour = if (config.use24) {
+                left.generalNumber
+            } else {
+                if (currentHour < left.generalNumber) {
                     left.generalNumber
+                } else if (currentHour < left.generalNumber + 12) {
+                    (left.generalNumber + 12) % 24
                 } else {
-                    if (currentHour < left.generalNumber) {
-                        left.generalNumber
-                    } else if (currentHour < left.generalNumber + 12) {
-                        (left.generalNumber + 12) % 24
-                    } else {
-                        left.generalNumber
-                    }
+                    left.generalNumber
                 }
-
-
-                return left.copy(
-                    endTime = getDateTimeWithGeneral(
-                        hour,
-                        TimeUnit.HOUR,
-                        null
-                    ).copy(minute = 0),
-                    tagsTimeEnd = left.tagsTimeEnd + TimeUnit.HOUR + TimeUnit.MINUTE,
-                    generalTimeTag = null,
-                    generalNumber = null,
-                )
             }
 
 
             return left.copy(
                 endTime = getDateTimeWithGeneral(
-                    left.generalNumber,
-                    left.generalTimeTag,
+                    hour,
+                    TimeUnit.HOUR,
                     null
-                ),
-                tagsTimeEnd = left.tagsTimeEnd + left.generalTimeTag,
+                ).copy(minute = 0),
+                tagsTimeStart = setOf(),
+                tagsTimeEnd = left.tagsTimeEnd + TimeUnit.HOUR + TimeUnit.MINUTE,
                 generalTimeTag = null,
                 generalNumber = null,
             )
         }
 
 
-
-
         return left.copy(
-            startTime = DateTime().startTime,
-            endTime = left.startTime,
+            endTime = getDateTimeWithGeneral(
+                left.generalNumber,
+                left.generalTimeTag,
+                null
+            ),
             tagsTimeStart = setOf(),
-            tagsTimeEnd = left.tagsTimeStart,
+            tagsTimeEnd = left.tagsTimeEnd + left.generalTimeTag,
+            generalTimeTag = null,
+            generalNumber = null,
         )
     }
 }
