@@ -12,7 +12,7 @@ import kotlinx.datetime.toLocalDateTime
 
 internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
     override val prefixMatchPattern: Regex
-        get() = "(?:starting\\s+)?(from|on|at|during|in)(?:\\s+the)?|the".toRegex()
+        get() = "(?:starting\\s+)?(from|on|at|during|in|after)(?:\\s+the)?|the".toRegex()
 
     override val mergePrefixWithLeft: Boolean
         get() = true

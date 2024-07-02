@@ -430,16 +430,13 @@ class ENTests {
             assertEquals("30 min from 9am", it.first().text)
             assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeStart)
             assertEquals(9, it[0].startTime.first().hour)
-
             assertEquals(30, it[0].startTime.first().minute)
         }
-
 
         parserFinal.parse("there is a big party 2 days from jul 31st").let {
             assertEquals("2 days from jul 31st", it.first().text)
             assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH), it[0].tagsTimeStart)
             assertEquals(2, it[0].startTime.first().dayOfMonth)
-
             assertEquals(8, it[0].startTime.first().monthNumber)
         }
     }

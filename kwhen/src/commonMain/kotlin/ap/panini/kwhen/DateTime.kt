@@ -43,16 +43,30 @@ internal data class DateTime(
     fun merge(other: DateTime, pureMerge: Boolean = false): DateTime {
         if (generalNumber != null && generalTimeTag != null && !pureMerge) {
             return merge(other, true).let {
-                it.copy(
-                    startTime = getDateTimeWithGeneral(
-                        generalNumber,
-                        generalTimeTag,
-                        it.startTime
-                    ),
-                    tagsTimeStart = it.tagsTimeStart + generalTimeTag,
-                    generalNumber = null,
-                    generalTimeTag = null
-                )
+                // will set to end time if the general number is an end time
+                if (endTime != null) {
+                    it.copy(
+                        endTime = getDateTimeWithGeneral(
+                            generalNumber,
+                            generalTimeTag,
+                            it.endTime
+                        ),
+                        tagsTimeEnd = it.tagsTimeEnd + generalTimeTag,
+                        generalNumber = null,
+                        generalTimeTag = null
+                    )
+                } else {
+                    it.copy(
+                        startTime = getDateTimeWithGeneral(
+                            generalNumber,
+                            generalTimeTag,
+                            it.startTime
+                        ),
+                        tagsTimeStart = it.tagsTimeStart + generalTimeTag,
+                        generalNumber = null,
+                        generalTimeTag = null
+                    )
+                }
             }
 
         }

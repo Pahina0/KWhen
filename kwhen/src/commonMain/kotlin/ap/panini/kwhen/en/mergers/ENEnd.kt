@@ -16,7 +16,7 @@ import kotlinx.datetime.toLocalDateTime
  * */
 internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
     override val prefixMatchPattern: Regex
-        get() = "to|till|ends|ending|-|until|from|after".toRegex()
+        get() = "to|till|ends|ending|-|until".toRegex()
 
     override val mergePrefixWithLeft: Boolean
         get() = true
