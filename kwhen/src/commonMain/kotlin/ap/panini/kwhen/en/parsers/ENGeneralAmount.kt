@@ -11,6 +11,6 @@ internal class ENGeneralAmount(override val config: ENConfig) : ParserGenericNum
         get() = "${super.matchPattern}|${amounts.keys.matchAny()}".toRegex()
 
     override fun onMatch(match: MatchResult): DateTime {
-        return DateTime(generalNumber = amounts[match.value] ?: match.value.toInt())
+        return DateTime(generalNumber = amounts[match.value]?.toDouble() ?: match.value.toDouble())
     }
 }

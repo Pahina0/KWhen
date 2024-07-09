@@ -25,13 +25,13 @@ internal class ENRepeat(override val config: ENConfig) : MergerWhitespaceTrimmed
         if (left.generalTimeTag == null) {
             return left.copy(
                 repeatTag = left.tagsTimeStart.getRepeatTime() ?: return null,
-                repeatOften = times
+                repeatOften = times.toDouble()
             )
         }
 
         return left.copy(
             repeatTag = left.generalTimeTag,
-            repeatOften = (left.generalNumber ?: 1) * times,
+            repeatOften = (left.generalNumber ?: 1.0) * times,
             generalTimeTag = null,
             generalNumber = null
         )

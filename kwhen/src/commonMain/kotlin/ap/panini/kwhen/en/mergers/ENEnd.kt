@@ -58,7 +58,7 @@ internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(co
 
             return left.copy(
                 endTime = getDateTimeWithGeneral(
-                    hour,
+                    hour.toInt(),
                     TimeUnit.HOUR,
                     null
                 ).copy(minute = 0),
@@ -72,7 +72,7 @@ internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(co
 
         return left.copy(
             endTime = getDateTimeWithGeneral(
-                left.generalNumber,
+                left.generalNumber.toInt(),
                 left.generalTimeTag,
                 null
             ),

@@ -318,25 +318,25 @@ class ENTests {
 
         timeParser.parseAndMerge("i go to school every day").let {
             assertEquals("every day", it[0].text.trim())
-            assertEquals(1, it[0].repeatOften)
+            assertEquals(1.0, it[0].repeatOften)
             assertEquals(TimeUnit.DAY, it[0].repeatTag)
         }
 
         timeParser.parseAndMerge("i go to school every 4 days").let {
             assertEquals("every 4 days", it[0].text.trim())
-            assertEquals(4, it[0].repeatOften)
+            assertEquals(4.0, it[0].repeatOften)
             assertEquals(TimeUnit.DAY, it[0].repeatTag)
         }
 
         timeParser.parseAndMerge("i go to school every other week").let {
             assertEquals("every other week", it[0].text.trim())
-            assertEquals(2, it[0].repeatOften)
+            assertEquals(2.0, it[0].repeatOften)
             assertEquals(TimeUnit.WEEK, it[0].repeatTag)
         }
 
         timeParser.parseAndMerge("there is something special every 4 months from july 8th").let {
             assertEquals("every 4 months from july 8th", it[0].text.trim())
-            assertEquals(4, it[0].repeatOften)
+            assertEquals(4.0, it[0].repeatOften)
             assertEquals(TimeUnit.MONTH, it[0].repeatTag)
             assertEquals(
                 DateTime().startTime.run { copy(monthNumber = 7, dayOfMonth = 8) },
@@ -354,7 +354,7 @@ class ENTests {
             assertEquals("on every other 9th  10th, 12th", it[0].text.trim())
             assertEquals(3, it[0].startTime.size)
             assertEquals(TimeUnit.MONTH, it[0].repeatTag)
-            assertEquals(2, it[0].repeatOften)
+            assertEquals(2.0, it[0].repeatOften)
         }
 
         timeParser.parseMergeProcess("i swim every mon, tues and fri").let {
@@ -362,7 +362,7 @@ class ENTests {
             assertEquals(3, it[0].startTime.size)
             assertEquals(setOf(TimeUnit.WEEK), it[0].tagsTimeStart)
             assertEquals(TimeUnit.WEEK, it[0].repeatTag)
-            assertEquals(1, it[0].repeatOften)
+            assertEquals(1.0, it[0].repeatOften)
         }
 
         timeParser.parseMergeProcess("the world is boring every june, jul, and aug").let {
@@ -370,7 +370,7 @@ class ENTests {
             assertEquals(3, it[0].startTime.size)
             assertEquals(setOf(TimeUnit.MONTH), it[0].tagsTimeStart)
             assertEquals(TimeUnit.YEAR, it[0].repeatTag)
-            assertEquals(1, it[0].repeatOften)
+            assertEquals(1.0, it[0].repeatOften)
         }
     }
 
@@ -419,7 +419,7 @@ class ENTests {
             assertEquals("from 4am to 8pm every day", it[0].text.trim())
             assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeStart)
             assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeEnd)
-            assertEquals(1, it[0].repeatOften)
+            assertEquals(1.0, it[0].repeatOften)
             assertEquals(TimeUnit.DAY, it[0].repeatTag)
         }
     }

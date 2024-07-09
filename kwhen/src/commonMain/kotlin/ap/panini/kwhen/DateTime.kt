@@ -24,10 +24,10 @@ internal data class DateTime(
     val tagsTimeEnd: Set<TimeUnit> = mutableSetOf(),
 
     val repeatTag: TimeUnit? = null,
-    val repeatOften: Int? = null,
+    val repeatOften: Double? = null,
 
     val generalTimeTag: TimeUnit? = null,
-    val generalNumber: Int? = null,
+    val generalNumber: Double? = null,
 
     val points: Int = 1
 ) : Comparable<DateTime> {
@@ -47,7 +47,7 @@ internal data class DateTime(
                 if (endTime != null) {
                     it.copy(
                         endTime = getDateTimeWithGeneral(
-                            generalNumber,
+                            generalNumber.toInt(),
                             generalTimeTag,
                             it.endTime
                         ),
@@ -58,7 +58,7 @@ internal data class DateTime(
                 } else {
                     it.copy(
                         startTime = getDateTimeWithGeneral(
-                            generalNumber,
+                            generalNumber.toInt(),
                             generalTimeTag,
                             it.startTime
                         ),
