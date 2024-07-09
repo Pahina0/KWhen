@@ -47,7 +47,7 @@ internal data class DateTime(
                 if (endTime != null) {
                     it.copy(
                         endTime = getDateTimeWithGeneral(
-                            generalNumber.toInt(),
+                            generalNumber,
                             generalTimeTag,
                             it.endTime
                         ),
@@ -58,7 +58,7 @@ internal data class DateTime(
                 } else {
                     it.copy(
                         startTime = getDateTimeWithGeneral(
-                            generalNumber.toInt(),
+                            generalNumber,
                             generalTimeTag,
                             it.startTime
                         ),

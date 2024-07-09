@@ -60,9 +60,9 @@ abstract class Controller(open val config: Config) {
             current = ret
             ret = mutableListOf()
 
-            println(it::class.simpleName)
-            println(current)
-            println()
+            //println(it::class.simpleName)
+            //println(current)
+            //println()
 
             for (i in current.indices) {
 
@@ -155,7 +155,6 @@ abstract class Controller(open val config: Config) {
             ret = ret.mergeIntervals().toMutableList()
         }
 
-
         return ret.cleanGenerics()
     }
 
@@ -220,8 +219,13 @@ abstract class Controller(open val config: Config) {
         return from.toLocalDateTime(TimeZone.currentSystemDefault())
     }
 
+    /**
+     * keep if no generic number and time tag
+     * if there are, if start/end time changed, then keep
+     */
     private fun List<DateTime>.cleanGenerics() =
-        filter { it.generalNumber == null && it.generalTimeTag == null }
+        filter { (it.generalNumber == null && it.generalTimeTag == null) ||
+                (it.startTime != DateTime.nowZeroed || it.endTime != null) }
 
     private fun List<DateTime>.mergeIntervals(): List<DateTime> {
         val ret = mutableListOf<DateTime>()

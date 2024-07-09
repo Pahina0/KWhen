@@ -441,4 +441,17 @@ class ENTests {
         }
     }
 
+    @Test
+    fun testPartialTime() {
+        parserFinal.parse("I gotta leave in half an hour!").also {
+            assertEquals("in half an hour", it.first().text.trim())
+            assertEquals(setOf(TimeUnit.HOUR), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("There is a huge party every quarter year").also {
+            assertEquals("every quarter year", it.first().text.trim())
+            assertEquals(TimeUnit.YEAR, it[0].repeatTag)
+            assertEquals(0.25, it[0].repeatOften)
+        }
+    }
 }

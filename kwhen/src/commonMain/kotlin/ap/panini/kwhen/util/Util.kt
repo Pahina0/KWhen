@@ -82,6 +82,19 @@ internal fun LocalDateTime.mergeTime(other: LocalDateTime?, tags: Set<TimeUnit>)
 }
 
 internal fun getDateTimeWithGeneral(
+    generalNumber: Double,
+    generalTag: TimeUnit,
+    relativeTo: LocalDateTime?
+): LocalDateTime {
+    if  (generalNumber.rem(1).equals(0.0)) {
+        return getDateTimeWithGeneral(generalNumber.toInt(), generalTag, relativeTo)
+    }
+    val (tag, num) = generalTag.partial(generalNumber)
+
+    return getDateTimeWithGeneral(num, tag, relativeTo)
+}
+
+private fun getDateTimeWithGeneral(
     generalNumber: Int,
     generalTag: TimeUnit,
     relativeTo: LocalDateTime?

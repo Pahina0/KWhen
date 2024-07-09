@@ -52,7 +52,7 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
 
                     return left.copy(
                         startTime = getDateTimeWithGeneral(
-                            hour.toInt(),
+                            hour,
                             TimeUnit.HOUR,
                             null
                         ).copy(
@@ -66,7 +66,7 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
 
                 return left.copy(
                     startTime = getDateTimeWithGeneral(
-                        left.generalNumber.toInt(),
+                        left.generalNumber,
                         left.generalTimeTag,
                         null
                     ),
@@ -77,7 +77,7 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
             } else {
                 return left.copy(
                     startTime = getDateTimeWithGeneral(
-                        left.generalNumber.toInt(),
+                        left.generalNumber,
                         left.generalTimeTag ?: TimeUnit.HOUR,
                         left.endTime ?: left.startTime
                     ),

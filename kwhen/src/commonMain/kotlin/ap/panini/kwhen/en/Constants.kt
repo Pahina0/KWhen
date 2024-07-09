@@ -143,15 +143,17 @@ internal val generalTimes = mapOf(
 )
 
 internal val amounts = mapOf(
-    "a" to 1,
-    "one" to 1,
-    "two" to 2,
-    "three" to 3,
-    "four" to 4,
-    "five" to 5,
-    "six" to 6,
-    "seven" to 7,
-    "eight" to 8,
-    "nine" to 9,
-    "ten" to 10
+    "a" to 1.0,
+    "one" to 1.0,
+    "two" to 2.0,
+    "three" to 3.0,
+    "four" to 4.0,
+    "five" to 5.0,
+    "six" to 6.0,
+    "seven" to 7.0,
+    "eight" to 8.0,
+    "nine" to 9.0,
+    "ten" to 10.0,
+    "half" to 0.5,
+    "quarter" to 0.25
 )
