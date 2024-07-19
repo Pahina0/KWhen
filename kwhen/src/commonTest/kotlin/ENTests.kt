@@ -5,6 +5,7 @@ import ap.panini.kwhen.TimeUnit
 import ap.panini.kwhen.configs.ENConfig
 import ap.panini.kwhen.util.copy
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlin.test.BeforeTest
@@ -403,7 +404,13 @@ class ENTests {
             assertEquals(setOf(TimeUnit.HOUR), it[0].tagsTimeStart)
         }
 
-        //assertEquals(emptyList(), parserFinal.parse("on feb 31st"))
+        parserFinal.parse("on feb 31st 2025").let {
+            assertEquals("on feb 31st 2025", it[0].text)
+            assertEquals(setOf(TimeUnit.MONTH, TimeUnit.DAY, TimeUnit.YEAR), it[0].tagsTimeStart)
+            assertEquals(3, it[0].startTime.first().dayOfMonth)
+            assertEquals(3, it[0].startTime.first().monthNumber)
+            assertEquals(2025, it[0].startTime.first().year)
+        }
 
         parserFinal.parse("Im going to swim at 9:18").let {
             assertEquals("at 9:18", it[0].text.trim())
@@ -453,5 +460,10 @@ class ENTests {
             assertEquals(TimeUnit.YEAR, it[0].repeatTag)
             assertEquals(0.25, it[0].repeatOften)
         }
+
+        // TODO: make saving partial times have the original tag time
     }
+
+
+
 }

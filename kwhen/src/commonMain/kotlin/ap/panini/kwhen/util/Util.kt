@@ -8,6 +8,7 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -16,7 +17,18 @@ internal fun <T> Collection<T>.matchAny(): Regex = joinToString("|").replace("."
 
 internal val between31 = "(?<!\\d)(?:0?[1-9]|[12][0-9]|3[01])(?!\\d)".toRegex()
 
-
+/**
+ * Copies a local date time with modified values
+ * values can flow over to the next
+ *
+ * @param year
+ * @param monthNumber
+ * @param dayOfMonth
+ * @param hour
+ * @param minute
+ * @param second
+ * @return The copied date time with the given modifications
+ */
 internal fun LocalDateTime.copy(
     year: Int = -1,
     monthNumber: Int = -1,
@@ -24,15 +36,47 @@ internal fun LocalDateTime.copy(
     hour: Int = -1,
     minute: Int = -1,
     second: Int = -1
-): LocalDateTime = LocalDateTime(
-    (if (year < 0) this.year else year) + (monthNumber - 1) / 12,
-    if (monthNumber < 0) this.monthNumber else ((monthNumber - 1) % 12 + 1),
-    if (dayOfMonth < 0) this.dayOfMonth else dayOfMonth,
-    if (hour < 0) this.hour else hour,
-    if (minute < 0) this.minute else minute,
-    if (second < 0) this.second else second
-)
+): LocalDateTime {
 
+    val mSec = if (second < 0) this.second else second
+
+    val mMinute = if (minute < 0) this.minute else minute
+
+    val mHour = if (hour < 0) this.hour else hour
+
+    val mDayOfMonth = (if (dayOfMonth < 0) this.dayOfMonth else dayOfMonth) - 1
+
+
+    val tz = TimeZone.currentSystemDefault()
+
+    // gets the month and year info
+    var inst = LocalDateTime(
+        (if (year < 0) this.year else year) + (monthNumber - 1) / 12,
+        if (monthNumber < 0) this.monthNumber else ((monthNumber - 1) % 12 + 1),
+        1, // month can't be 0
+        0,
+        0,
+        0,
+    ).toInstant(tz)
+
+
+    // adds month days years ect.
+    inst = inst.plus(mDayOfMonth.days)
+    inst = inst.plus(mHour.hours)
+    inst = inst.plus(mMinute.minutes)
+    inst = inst.plus(mSec.seconds)
+
+    return inst.toLocalDateTime(tz)
+
+}
+
+/**
+ * Copies a date time with only a local date and local time
+ *
+ * @param date
+ * @param time
+ * @return The copied date time with given modifications
+ */
 internal fun LocalDateTime.copy(
     date: LocalDate? = null, time: LocalTime? = null
 ): LocalDateTime = LocalDateTime(
@@ -86,7 +130,7 @@ internal fun getDateTimeWithGeneral(
     generalTag: TimeUnit,
     relativeTo: LocalDateTime?
 ): LocalDateTime {
-    if  (generalNumber.rem(1).equals(0.0)) {
+    if (generalNumber.rem(1).equals(0.0)) {
         return getDateTimeWithGeneral(generalNumber.toInt(), generalTag, relativeTo)
     }
     val (tag, num) = generalTag.partial(generalNumber)

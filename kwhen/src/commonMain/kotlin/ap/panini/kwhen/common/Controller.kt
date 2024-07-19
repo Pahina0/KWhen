@@ -100,12 +100,11 @@ abstract class Controller(open val config: Config) {
                         prefixMatch,
                         betweenMatch,
                     )
-                } catch (_: Exception) {
+                } catch (e: Exception) {
                     // only adds current if it's range is not in the last in ret range
                     if (ret.isEmpty() || !(ret.last().range.first <= current[i].range.first && ret.last().range.last >= current[i].range.last)) {
                         ret += current[i]
                     }
-
                     continue
                 }
 
@@ -224,8 +223,10 @@ abstract class Controller(open val config: Config) {
      * if there are, if start/end time changed, then keep
      */
     private fun List<DateTime>.cleanGenerics() =
-        filter { (it.generalNumber == null && it.generalTimeTag == null) ||
-                (it.startTime != DateTime.nowZeroed || it.endTime != null) }
+        filter {
+            (it.generalNumber == null && it.generalTimeTag == null) ||
+                    (it.startTime != DateTime.nowZeroed || it.endTime != null)
+        }
 
     private fun List<DateTime>.mergeIntervals(): List<DateTime> {
         val ret = mutableListOf<DateTime>()
