@@ -1,6 +1,7 @@
 package ap.panini.kwhen.en
 
 import ap.panini.kwhen.DayOfWeek
+import ap.panini.kwhen.Partials
 import ap.panini.kwhen.TimeUnit
 
 internal val months = mapOf(
@@ -154,6 +155,6 @@ internal val amounts = mapOf(
     "eight" to 8.0,
     "nine" to 9.0,
     "ten" to 10.0,
-    "half" to 0.5,
-    "quarter" to 0.25
+    "half" to Partials.HALF,
+    "quarter" to Partials.QUARTER
 )

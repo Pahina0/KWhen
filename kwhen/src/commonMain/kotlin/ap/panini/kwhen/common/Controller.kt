@@ -185,6 +185,7 @@ abstract class Controller(open val config: Config) {
                     startTime = st + mergeTo.startTime
                 )
             } else {
+                val whole = date.repeatTag?.unPartial(date.repeatOften ?: 0.0)
                 ret += Parsed(
                     date.text,
                     date.range,
@@ -197,8 +198,8 @@ abstract class Controller(open val config: Config) {
                     date.endTime,
                     date.tagsTimeStart,
                     date.tagsTimeEnd,
-                    date.repeatTag,
-                    date.repeatOften
+                    whole?.first,
+                    whole?.second
                 )
             }
         }

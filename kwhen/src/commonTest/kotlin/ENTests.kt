@@ -5,7 +5,6 @@ import ap.panini.kwhen.TimeUnit
 import ap.panini.kwhen.configs.ENConfig
 import ap.panini.kwhen.util.copy
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlin.test.BeforeTest
@@ -355,7 +354,7 @@ class ENTests {
             assertEquals("on every other 9th  10th, 12th", it[0].text.trim())
             assertEquals(3, it[0].startTime.size)
             assertEquals(TimeUnit.MONTH, it[0].repeatTag)
-            assertEquals(2.0, it[0].repeatOften)
+            assertEquals(2, it[0].repeatOften)
         }
 
         timeParser.parseMergeProcess("i swim every mon, tues and fri").let {
@@ -363,7 +362,7 @@ class ENTests {
             assertEquals(3, it[0].startTime.size)
             assertEquals(setOf(TimeUnit.WEEK), it[0].tagsTimeStart)
             assertEquals(TimeUnit.WEEK, it[0].repeatTag)
-            assertEquals(1.0, it[0].repeatOften)
+            assertEquals(1, it[0].repeatOften)
         }
 
         timeParser.parseMergeProcess("the world is boring every june, jul, and aug").let {
@@ -371,7 +370,7 @@ class ENTests {
             assertEquals(3, it[0].startTime.size)
             assertEquals(setOf(TimeUnit.MONTH), it[0].tagsTimeStart)
             assertEquals(TimeUnit.YEAR, it[0].repeatTag)
-            assertEquals(1.0, it[0].repeatOften)
+            assertEquals(1, it[0].repeatOften)
         }
     }
 
@@ -426,7 +425,7 @@ class ENTests {
             assertEquals("from 4am to 8pm every day", it[0].text.trim())
             assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeStart)
             assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeEnd)
-            assertEquals(1.0, it[0].repeatOften)
+            assertEquals(1, it[0].repeatOften)
             assertEquals(TimeUnit.DAY, it[0].repeatTag)
         }
     }
@@ -457,11 +456,16 @@ class ENTests {
 
         parserFinal.parse("There is a huge party every quarter year").also {
             assertEquals("every quarter year", it.first().text.trim())
-            assertEquals(TimeUnit.YEAR, it[0].repeatTag)
-            assertEquals(0.25, it[0].repeatOften)
+            assertEquals(TimeUnit.MONTH, it[0].repeatTag)
+            assertEquals(3, it[0].repeatOften)
         }
 
-        // TODO: make saving partial times have the original tag time
+
+        parserFinal.parse("a bit of time passes every half minute.").also {
+            assertEquals("every half minute", it.first().text.trim())
+            assertEquals(TimeUnit.SECOND, it[0].repeatTag)
+            assertEquals(30, it[0].repeatOften)
+        }
     }
 
 

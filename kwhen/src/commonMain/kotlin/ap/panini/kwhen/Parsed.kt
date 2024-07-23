@@ -14,5 +14,5 @@ data class Parsed(
    val tagsTimeEnd: Set<TimeUnit> = mutableSetOf(),
 
    val repeatTag: TimeUnit? = null,
-   val repeatOften: Double? = null
+   val repeatOften: Int? = null
 )
