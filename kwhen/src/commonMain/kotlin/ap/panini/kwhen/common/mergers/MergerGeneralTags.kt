@@ -3,6 +3,12 @@ package ap.panini.kwhen.common.mergers
 import ap.panini.kwhen.DateTime
 import ap.panini.kwhen.configs.Config
 
+/**
+ * Merger general tags merges any general times together
+ *
+ * @property config
+ * @constructor Create empty Merger general tags
+ */
 internal class MergerGeneralTags(override val config: Config) : MergerWhitespaceTrimmed(config) {
 
     override val betweenMatchPattern: Regex

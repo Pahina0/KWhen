@@ -6,6 +6,12 @@ import ap.panini.kwhen.common.parsers.ParserByWord
 import ap.panini.kwhen.configs.ENConfig
 import ap.panini.kwhen.util.copy
 
+/**
+ * En basic time finds words that usually indicate a time of day
+ *
+ * @property config
+ * @constructor Create empty En basic time
+ */
 internal class ENBasicTime(override val config: ENConfig) : ParserByWord(config) {
     override val matchPattern: Regex
         get() = "(evening|morning|afternoon|night|midnight|midday|noon|tonight)".toRegex()

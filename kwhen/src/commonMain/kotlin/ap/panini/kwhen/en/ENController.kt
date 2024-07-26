@@ -18,6 +18,13 @@ import ap.panini.kwhen.en.parsers.ENGeneralTime
 import ap.panini.kwhen.en.parsers.ENMonthDayYear
 import ap.panini.kwhen.en.parsers.ENNumericOrdinal
 
+/**
+ * En controller is a controller for the english language.
+ * This determines which parses and mergers should be used
+ *
+ * @property config
+ * @constructor Create empty En controller
+ */
 internal class ENController  (override val config: ENConfig = ENConfig()) :
     ap.panini.kwhen.common.Controller(config) {
 

@@ -6,6 +6,13 @@ import ap.panini.kwhen.configs.ENConfig
 import ap.panini.kwhen.en.amounts
 import ap.panini.kwhen.util.matchAny
 
+/**
+ * En general amount finds generic numbers such as
+ * 1, 2, three, four
+ *
+ * @property config
+ * @constructor Create empty En general amount
+ */
 internal class ENGeneralAmount(override val config: ENConfig) : ParserGenericNumbers(config) {
     override val matchPattern: Regex
         get() = "${super.matchPattern}|${amounts.keys.matchAny()}(?:(?:\\s+an|a)?(?:\\s+-)?)?".toRegex()

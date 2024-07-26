@@ -3,6 +3,12 @@ package ap.panini.kwhen.common.mergers
 import ap.panini.kwhen.DateTime
 import ap.panini.kwhen.configs.Config
 
+/**
+ * Merger consecutive merges any 2 times in a row
+ *
+ * @property config the type of config you want
+ * @constructor Create empty Merger consecutive
+ */
 internal class MergerConsecutive(override val config: Config) : MergerWhitespaceTrimmed(config) {
     override val betweenMatchPattern: Regex
         get() = "\\s*".toRegex()

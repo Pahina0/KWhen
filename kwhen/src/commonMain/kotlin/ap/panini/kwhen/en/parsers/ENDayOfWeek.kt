@@ -7,6 +7,12 @@ import ap.panini.kwhen.configs.Config
 import ap.panini.kwhen.en.weekdays
 import ap.panini.kwhen.util.matchAny
 
+/**
+ * En day of week finds a day of week such as monday, tues, wens
+ *
+ * @property config
+ * @constructor Create empty En day of week
+ */
 internal class ENDayOfWeek(override val config: Config) : ParserByWord(config) {
     override val matchPattern: Regex
         get() = weekdays.keys.matchAny()

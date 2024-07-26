@@ -3,6 +3,12 @@ package ap.panini.kwhen.common.mergers
 import ap.panini.kwhen.DateTime
 import ap.panini.kwhen.configs.ENConfig
 
+/**
+ * Merger list merges lists such as [apple, pineapple, and juice] into a single time
+ *
+ * @property config
+ * @constructor Create empty Merger list
+ */
 internal open class MergerList(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
     override val betweenMatchPattern: Regex
         get() = ",\\s*|&\\s*".toRegex()

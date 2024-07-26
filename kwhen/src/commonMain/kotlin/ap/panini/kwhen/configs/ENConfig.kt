@@ -2,6 +2,16 @@ package ap.panini.kwhen.configs
 
 import ap.panini.kwhen.en.ENController
 
+/**
+ * En config is a configuration file for english parsing
+ *
+ * @property evening what time evening is
+ * @property morning what time morning is
+ * @property afternoon what time afternoon is
+ * @property night what time night is
+ * @property use24 if 24 hour time should be used or not
+ * @constructor Create empty En config
+ */
 data class ENConfig(
     val evening: Int = 18,
     val morning: Int = 9,

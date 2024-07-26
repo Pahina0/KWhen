@@ -11,13 +11,17 @@ import ap.panini.kwhen.util.copy
 import ap.panini.kwhen.util.matchAny
 
 /**
+ * En month day year finds the month, day, year time pattern
  * 05/08/24 -> may 8th, 2024
  * june 12th, 2058
  * 06/27
  * 6/28
  * june 11
  * april
- * */
+ *
+ * @property config
+ * @constructor Create empty En month day year
+ */
 internal class ENMonthDayYear(override val config: ENConfig) : ParserByWord(config) {
     // @formatter:off
     override val matchPattern: Regex

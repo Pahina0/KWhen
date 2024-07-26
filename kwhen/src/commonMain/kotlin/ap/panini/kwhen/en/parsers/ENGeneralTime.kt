@@ -8,10 +8,14 @@ import ap.panini.kwhen.util.matchAny
 
 
 /**
+ * En general time finds general time units
  * in 20 `hours`
  * min
  * second
- * */
+ *
+ * @property config
+ * @constructor Create empty En general time
+ */
 internal class ENGeneralTime(override val config: Config) : ParserByWord(config) {
     override val matchPattern: Regex
         get() = generalTimes.keys.matchAny()

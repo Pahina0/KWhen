@@ -10,10 +10,14 @@ import ap.panini.kwhen.util.copy
 import ap.panini.kwhen.util.matchAny
 
 /**
+ * En numeric ordinal finds time units that only have numbers in them
  * ex:
  * 12th
  * 3:05 am
- * */
+ *
+ * @property config
+ * @constructor Create empty E n numeric ordinal
+ */
 internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
     override val matchPattern: Regex
         get() = "($between31)(?:(th|st|rd|nd)|(?:(?:\\s+|\\s*(:)\\s*)(\\d{1,2}))?\\s*([ap]\\.?m\\.?)?)|(${ordinal.keys.matchAny()})".toRegex()

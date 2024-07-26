@@ -11,6 +11,12 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.math.min
 import kotlin.time.Duration.Companion.hours
 
+/**
+ * Controller parses, merges, and finalizes times based on parsers and mergers given.
+ *
+ * @property config
+ * @constructor Create empty Controller
+ */
 abstract class Controller(open val config: Config) {
     internal abstract val parsers: List<Parser>
     internal abstract val mergers: List<Merger>

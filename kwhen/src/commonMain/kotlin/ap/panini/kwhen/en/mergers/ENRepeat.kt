@@ -5,6 +5,14 @@ import ap.panini.kwhen.common.mergers.MergerWhitespaceTrimmed
 import ap.panini.kwhen.configs.ENConfig
 import ap.panini.kwhen.util.getRepeatTime
 
+
+/**
+ * En repeat merges times what would indicate a repeating time
+ * such as every friday... it makes it repeat once a week on friday
+ *
+ * @property config
+ * @constructor Create empty En repeat
+ */
 internal class ENRepeat(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
     override val prefixMatchPattern: Regex
         get() = "every(\\s+other)?".toRegex()

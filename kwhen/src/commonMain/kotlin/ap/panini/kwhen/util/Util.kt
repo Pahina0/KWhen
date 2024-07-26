@@ -13,6 +13,12 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * Match any takes a list and turns it into a regex that matches any item in that list
+ *
+ * @param T the tpe of list
+ * @return a regex string that matches any value in the list
+ */
 internal fun <T> Collection<T>.matchAny(): Regex = joinToString("|").replace(".", "\\.").toRegex()
 
 internal val between31 = "(?<!\\d)(?:0?[1-9]|[12][0-9]|3[01])(?!\\d)".toRegex()
@@ -85,6 +91,13 @@ internal fun LocalDateTime.copy(
 )
 
 
+/**
+ * Merge time merges two times together by time units
+ *
+ * @param other the other time to merge into
+ * @param tags any types of tags you want one to merge into the other for
+ * @return a merged date time with merged tags
+ */
 internal fun LocalDateTime.mergeTime(other: LocalDateTime?, tags: Set<TimeUnit>): LocalDateTime {
     if (other == null) return this
 
@@ -125,19 +138,39 @@ internal fun LocalDateTime.mergeTime(other: LocalDateTime?, tags: Set<TimeUnit>)
     return time
 }
 
+/**
+ * Get date time with general finds a date that would represent a number and a time unit
+ * ex: 3 and hour increases the time relative to by 3 hours
+ *
+ * @param generalNumber the general number you want to use
+ * @param generalTag what time unit you want your general number to change
+ * @param relativeTo what time your general number and tag should be based off of
+ * @return a time that got changed number and tags off from relative time
+ */
 internal fun getDateTimeWithGeneral(
     generalNumber: Double,
     generalTag: TimeUnit,
     relativeTo: LocalDateTime?
 ): LocalDateTime {
+    // decimal is a whole number
     if (generalNumber.rem(1).equals(0.0)) {
         return getDateTimeWithGeneral(generalNumber.toInt(), generalTag, relativeTo)
     }
+
+    // finds a whole number time using a partial time
     val (tag, num) = generalTag.partial(generalNumber)
 
     return getDateTimeWithGeneral(num, tag, relativeTo)
 }
 
+/**
+ * Get date time with general finds the date time based off a general number but only takes in an int
+ *
+ * @param generalNumber
+ * @param generalTag
+ * @param relativeTo
+ * @return
+ */
 private fun getDateTimeWithGeneral(
     generalNumber: Int,
     generalTag: TimeUnit,

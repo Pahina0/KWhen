@@ -10,6 +10,12 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
+/**
+ * En begin finds words that come before times that can be merged with times
+ *
+ * @property config
+ * @constructor Create empty En begin
+ */
 internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
     override val prefixMatchPattern: Regex
         get() = "(?:starting\\s+)?(from|on|at|during|in|after)(?:\\s+the)?|the".toRegex()

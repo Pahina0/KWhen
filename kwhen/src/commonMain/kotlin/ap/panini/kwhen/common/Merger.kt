@@ -3,6 +3,12 @@ package ap.panini.kwhen.common
 import ap.panini.kwhen.DateTime
 import ap.panini.kwhen.configs.Config
 
+/**
+ * Merger merges two found times together
+ *
+ * @property config any various configuration that may come from localization
+ * @constructor Create empty Merger
+ */
 internal abstract class Merger(open val config: Config) {
     /**
      * regex that should be applied to every pattern for matching prefix (text before first time)

@@ -3,7 +3,12 @@ package ap.panini.kwhen
 import ap.panini.kwhen.Partials.HALF
 import ap.panini.kwhen.Partials.QUARTER
 
-
+/**
+ * Time unit is the various time units a time can be
+ * goes from second to years
+ *
+ * @constructor Create empty Time unit
+ */
 enum class TimeUnit {
     SECOND {
         override fun partial(part: Double): Pair<TimeUnit, Int> {
@@ -125,6 +130,11 @@ enum class TimeUnit {
     abstract fun unPartial(part: Double): Pair<TimeUnit, Int>
 }
 
+/**
+ * Day of week
+ *
+ * @constructor Create empty Day of week
+ */
 enum class DayOfWeek {
     MONDAY,
     TUESDAY,
@@ -135,6 +145,11 @@ enum class DayOfWeek {
     SUNDAY
 }
 
+/**
+ * Partials are the various valid partial times that are allowed
+ *
+ * @constructor Create empty Partials
+ */
 object Partials {
     internal const val QUARTER = 0.25
     internal const val HALF = 0.5

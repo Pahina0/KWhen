@@ -11,8 +11,12 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 /**
+ * En End finds words that usually indicate the end time of a phrase
  * merges phrases such as
  * from 4am to 7pm
+ *
+ * @property config
+ * @constructor Create empty E n end
  * */
 internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
     override val prefixMatchPattern: Regex

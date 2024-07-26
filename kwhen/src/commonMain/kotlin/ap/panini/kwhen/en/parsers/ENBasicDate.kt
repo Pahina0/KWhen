@@ -9,6 +9,12 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 
+/**
+ * En basic date finds basic times such as today and tomorrow
+ *
+ * @property config
+ * @constructor Create empty En basic date
+ */
 internal class ENBasicDate(override val config: ENConfig) : ParserByWord(config) {
     override val matchPattern: Regex
         get() = "(today|tmrw|tmr|tmw|tomorrow|yesterday|now|rn|right now)".toRegex()

@@ -3,6 +3,12 @@ package ap.panini.kwhen.common
 import ap.panini.kwhen.DateTime
 import ap.panini.kwhen.configs.Config
 
+/**
+ * Parser finds specific words and turns them into a timeunit
+ *
+ * @property config
+ * @constructor Create empty Parser
+ */
 internal abstract class Parser(open val config: Config) {
 
     /**

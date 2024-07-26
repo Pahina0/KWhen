@@ -11,11 +11,14 @@ import ap.panini.kwhen.util.copy
 import ap.panini.kwhen.util.matchAny
 
 /**
+ * En day month year finds a day, month, year sequence
  * for the brits
  * 4th of july, 95
  * 6 May 2019
  *
- * */
+ * @property config
+ * @constructor Create empty En day month year
+ */
 internal class ENDayMonthYear(override val config: ENConfig) : ParserByWord(config) {
     // @formatter:off
     override val matchPattern: Regex
