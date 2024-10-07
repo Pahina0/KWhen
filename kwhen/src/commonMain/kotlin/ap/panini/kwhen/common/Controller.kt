@@ -111,6 +111,7 @@ abstract class Controller(open val config: Config) {
                 val prefixMatch = merger.prefixPattern.find(prefix)
                 val betweenMatch = merger.betweenPattern.find(between)
 
+                println("NEXT $next")
                 val mergedIncomplete = merger.onMatch(
                     cur,
                     next,
@@ -155,7 +156,6 @@ abstract class Controller(open val config: Config) {
                     merged = merged.copy(
                         range = range, text = mInput.substring(range)
                     )
-                    //ret.removeAt(index + 1)
                     ret += cur
                 }
 
@@ -170,6 +170,7 @@ abstract class Controller(open val config: Config) {
                 //println("OUT: ${ret[index]}")
                 println("??? $ret")
                 println("index is $index")
+                //++index
 
 
             }
