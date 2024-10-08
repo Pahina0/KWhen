@@ -382,6 +382,14 @@ class ENTests {
 
     @Test
     fun testProcessSentence() {
+        TimeParser(ENConfig(use24 = true)).parse("Go to Vermont 30 minutes after 6").let {
+            println(it)
+            assertEquals("30 minutes after 6", it[0].text.trim())
+            assertEquals(
+                DateTime().startTime.run { copy(minute = 30, hour = 6) },
+                it[0].startTime.first()
+            )
+        }
         parserFinal.parse("Jul 9 is going to be crazy").let {
             assertEquals(1, it.size)
             assertEquals("Jul 9", it[0].text.trim())

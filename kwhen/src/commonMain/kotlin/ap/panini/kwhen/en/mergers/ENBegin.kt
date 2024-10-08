@@ -36,7 +36,8 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
                     "from",
                     "on",
                     "at",
-                    "during"
+                    "during",
+                    "after"
                 ).contains(prefix.value.trim())
             ) {
                 if (left.text == "a") return null // "on a boat" isn't a time
