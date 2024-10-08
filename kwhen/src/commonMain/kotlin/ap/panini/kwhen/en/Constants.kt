@@ -14,6 +14,7 @@ internal val months = mapOf(
     "march" to 3,
     "mar." to 3,
     "mar" to 3,
+    "april" to 4,
     "apr." to 4,
     "apr" to 4,
     "may" to 5,

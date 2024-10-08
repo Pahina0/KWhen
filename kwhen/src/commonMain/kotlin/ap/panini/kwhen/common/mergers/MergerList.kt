@@ -29,6 +29,6 @@ internal open class MergerList(override val config: ENConfig) : MergerWhitespace
             left.tagsTimeStart.maxOfOrNull { it.ordinal } != right.tagsTimeStart.maxOfOrNull { it.ordinal }
         ) return null
 
-        return right.copy(repeatTag = left.repeatTag, repeatOften = left.repeatOften)
+        return left.copy()
     }
 }

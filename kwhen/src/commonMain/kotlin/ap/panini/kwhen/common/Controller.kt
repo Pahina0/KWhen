@@ -56,24 +56,16 @@ abstract class Controller(open val config: Config) {
     }
 
     internal fun merge(input: String, parsed: List<DateTime>): List<DateTime> {
-        println(input)
-        println()
-
-
         var processed = parsed.toMutableList()
 
         // tries to use every merger to merge 2 date times together
         for (merger in mergers) {
-            println("\n${merger::class.simpleName}")
             val toProcess = processed
             processed = mutableListOf()
-
 
             // merges using current and next node
             var i = 0
             while (i < toProcess.size) {
-                println(i)
-                println(toProcess.joinToString("\n") + "\n\n")
                 val left = toProcess[i]
                 val right = toProcess.getOrNull(i + 1)
                 val prevIndex = toProcess.getOrNull(i - 1)?.range?.last ?: -1
@@ -92,11 +84,7 @@ abstract class Controller(open val config: Config) {
                 // increment to the next merge
                 ++i
 
-                println("LEFT: $left")
-                println("RIGHT: $right")
-                println("PREFIX: ${prefix?.groups}")
-                println("BETWEEN: ${between?.groups}")
-
+                // sees if is possible to merge given data
                 var merged = merger.onMatch(left, right, prefix, between)?.copy(range = left.range)
 
                 if (merged == null) {
@@ -116,7 +104,6 @@ abstract class Controller(open val config: Config) {
                     merged = merged.copy(
                         range = range, text = input.substring(range)
                     )
-
                 }
 
                 if (merger.mergeRightWithLeft == Merger.BetweenMergeOption.FULL_MERGE && between != null && right != null) {
@@ -131,12 +118,9 @@ abstract class Controller(open val config: Config) {
                 }
 
             }
-            println("FINAL: $processed")
         }
 
-        return processed.also {
-            println("FINAL: $it")
-        }
+        return processed
     }
 
     /**
@@ -145,7 +129,6 @@ abstract class Controller(open val config: Config) {
     internal fun finalize(times: List<DateTime>): List<Parsed> {
         val ret = mutableListOf<Parsed>()
 
-        println("\n\n$times")
         for (date in times.filter { it.points != 0 }) {
             if (ret.isNotEmpty() && date.range.first <= ret.last().range.last + 1) {
                 val mergeTo = ret.last()
@@ -183,7 +166,7 @@ abstract class Controller(open val config: Config) {
             }
         }
 
-        return ret.also { println(it) }
+        return ret
     }
 
     private fun dayOfWeek(start: LocalDateTime, day: DayOfWeek): LocalDateTime {
@@ -198,31 +181,4 @@ abstract class Controller(open val config: Config) {
         return from.toLocalDateTime(TimeZone.currentSystemDefault())
     }
 
-    /**
-     * keep if no generic number and time tag
-     * if there are, if start/end time changed, then keep
-     */
-    private fun List<DateTime>.cleanGenerics() = filter {
-        (it.generalNumber == null && it.generalTimeTag == null) || (it.startTime != DateTime.nowZeroed || it.endTime != null)
-    }
-
-    private fun List<DateTime>.mergeIntervals(): List<DateTime> {
-        val ret = mutableListOf<DateTime>()
-        val sorted = this.sortedBy { it.range.first }
-
-        for (date in sorted) {
-            if (ret.isNotEmpty() && date.range.first <= ret.last().range.last && date.range.last != ret.last().range.last) {
-                val mergeTo = ret.last()
-
-                ret[ret.size - 1] = mergeTo.merge(date).copy(
-                    range = mergeTo.range.first..date.range.last,
-                    text = mergeTo.text + date.text.substring(mergeTo.range.last - date.range.first + 1)
-                )
-            } else {
-                ret += date
-            }
-        }
-
-        return ret
-    }
 }

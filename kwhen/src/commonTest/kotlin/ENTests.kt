@@ -372,6 +372,12 @@ class ENTests {
             assertEquals(TimeUnit.YEAR, it[0].repeatTag)
             assertEquals(1, it[0].repeatOften)
         }
+
+        timeParser.parseMergeProcess("the 4th, 5th 6th, 19th, and 20th and may").let {
+            assertEquals(2, it.size)
+            assertEquals(5, it[0].startTime.size)
+            assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
+        }
     }
 
     @Test
