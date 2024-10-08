@@ -3,7 +3,6 @@ package ap.panini.kwhen.en.parsers
 import ap.panini.kwhen.DateTime
 import ap.panini.kwhen.common.parsers.ParserByWord
 import ap.panini.kwhen.configs.Config
-import ap.panini.kwhen.en.generalTimes
 import ap.panini.kwhen.en.generalTimesRepeatable
 import ap.panini.kwhen.util.matchAny
 

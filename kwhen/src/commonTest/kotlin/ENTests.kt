@@ -441,6 +441,18 @@ class ENTests {
             assertEquals(1, it[0].repeatOften)
             assertEquals(TimeUnit.DAY, it[0].repeatTag)
         }
+
+        parserFinal.parse("I have a meeting that recurs every other day").let {
+            assertEquals("that recurs every other day", it[0].text.trim())
+            assertEquals(2, it[0].repeatOften)
+            assertEquals(TimeUnit.DAY, it[0].repeatTag)
+        }
+
+        parserFinal.parse("there is a big party recurring every month").let {
+            assertEquals("recurring every month", it[0].text.trim())
+            assertEquals(1, it[0].repeatOften)
+            assertEquals(TimeUnit.MONTH, it[0].repeatTag)
+        }
     }
 
     @Test
@@ -506,7 +518,7 @@ class ENTests {
             assertEquals(2, it[0].repeatOften)
             assertEquals(TimeUnit.MONTH, it[0].repeatTag)
         }
-        parserFinal.parse("bieveryday").let { println(it) }
+
     }
     // TODO: at 8pm for 3 days
     // TODO: recur
