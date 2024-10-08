@@ -13,9 +13,7 @@ internal open class MergerList(override val config: ENConfig) : MergerWhitespace
     override val betweenMatchPattern: Regex
         get() = ",\\s*|&\\s*".toRegex()
 
-    override val mergeBetweenWithRight: Boolean
-        get() = true
-
+    override val mergeRightWithLeft = BetweenMergeOption.PREFIX_MERGE
 
     override fun onMatch(
         left: DateTime?,
@@ -31,6 +29,6 @@ internal open class MergerList(override val config: ENConfig) : MergerWhitespace
             left.tagsTimeStart.maxOfOrNull { it.ordinal } != right.tagsTimeStart.maxOfOrNull { it.ordinal }
         ) return null
 
-        return right.copy()
+        return left.copy()
     }
 }

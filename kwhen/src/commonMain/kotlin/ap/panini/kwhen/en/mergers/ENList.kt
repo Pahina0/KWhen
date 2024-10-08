@@ -12,4 +12,5 @@ import ap.panini.kwhen.configs.ENConfig
 internal class ENList(override val config: ENConfig) : MergerList(config) {
     override val betweenMatchPattern: Regex
         get() = ",\\s*(?:and)?|and|&|\\s*".toRegex()
+
 }

@@ -14,8 +14,7 @@ internal class MergerGeneralTags(override val config: Config) : MergerWhitespace
     override val betweenMatchPattern: Regex
         get() = "\\s*".toRegex()
 
-    override val mergeRightWithLeft: Boolean
-        get() = true
+    override val mergeRightWithLeft = BetweenMergeOption.FULL_MERGE
 
     override val reward: Int
         get() = 0
@@ -26,7 +25,7 @@ internal class MergerGeneralTags(override val config: Config) : MergerWhitespace
         prefix: MatchResult?,
         between: MatchResult?
     ): DateTime? {
-        if (left == null || right == null) return null
+        if (left == null || right == null || between == null) return null
 
         val generalTag = left.generalTimeTag ?: right.generalTimeTag ?: return null
         val generalNumber = right.generalNumber ?: left.generalNumber ?: return null

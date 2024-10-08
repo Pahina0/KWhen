@@ -8,7 +8,6 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
-import kotlin.math.min
 import kotlin.time.Duration.Companion.hours
 
 /**
@@ -57,110 +56,71 @@ abstract class Controller(open val config: Config) {
     }
 
     internal fun merge(input: String, parsed: List<DateTime>): List<DateTime> {
-        val inputLc = input.lowercase()
-        var current: List<DateTime>
-        var ret = parsed.toMutableList()
+        var processed = parsed.toMutableList()
 
+        // tries to use every merger to merge 2 date times together
+        for (merger in mergers) {
+            val toProcess = processed
+            processed = mutableListOf()
 
-        mergers.forEach {
-            current = ret
-            ret = mutableListOf()
+            // merges using current and next node
+            var i = 0
+            while (i < toProcess.size) {
+                val left = toProcess[i]
+                val right = toProcess.getOrNull(i + 1)
+                val prevIndex = toProcess.getOrNull(i - 1)?.range?.last ?: -1
 
-            //println(it::class.simpleName)
-            //println(current)
-            //println()
-
-            for (i in current.indices) {
-
-                // substrings from previous items last index or 0, to the beginning of the current item
-                val prefixStart = min(
-                    current.getOrNull(i - 1)?.range?.last?.plus(1) ?: 0, inputLc.length - 1
+                val prefix = merger.prefixPattern.find(
+                    input.substring(prevIndex + 1 until left.range.first).lowercase()
                 )
-                val prefixEnd = current[i].range.first
-                val prefix = if (prefixStart <= prefixEnd) {
-                    inputLc.substring(prefixStart..<prefixEnd)
+
+                val between = merger.betweenPattern.find(
+                    input.substring(
+                        left.range.last + 1 until (right?.range?.first ?: input.length)
+                    ).lowercase()
+                )
+
+
+                // increment to the next merge
+                ++i
+
+                // sees if is possible to merge given data
+                var merged = merger.onMatch(left, right, prefix, between)?.copy(range = left.range)
+
+                if (merged == null) {
+                    processed += left
+                    continue
+                }
+
+                if (merger.mergePrefixWithLeft && prefix != null) {
+                    val range = merged.range.first - prefix.value.length..merged.range.last
+                    merged = merged.copy(
+                        range = range, text = input.substring(range)
+                    )
+                }
+
+                if (merger.mergeRightWithLeft == Merger.BetweenMergeOption.PREFIX_MERGE && between != null && right != null) {
+                    val range = merged.range.first until right.range.first
+                    merged = merged.copy(
+                        range = range, text = input.substring(range)
+                    )
+                }
+
+                if (merger.mergeRightWithLeft == Merger.BetweenMergeOption.FULL_MERGE && between != null && right != null) {
+                    val range = merged.range.first..right.range.last
+                    merged = merged.copy(
+                        range = range, text = input.substring(range)
+                    )
+                    toProcess.removeAt(i--)
+                    toProcess[i] = merged
                 } else {
-                    // adds to back, will only happen if previous is messed up which will be removed due to continue below
-                    if (ret.isEmpty() || !(ret.last().range.first <= current[i].range.first && ret.last().range.last >= current[i].range.last)) {
-                        ret += current[i]
-                    }
-                    continue
-                }
-                val prefixMatch = it.prefixPattern.find(prefix)
-
-                val betweenStart = min(current[i].range.last + 1, inputLc.length)
-                val betweenEnd = current.getOrNull(i + 1)?.range?.first ?: inputLc.length
-                val between = if (betweenStart <= betweenEnd) {
-                    inputLc.substring(betweenStart..<betweenEnd)
-                } else {
-
-                    // skips the current
-                    continue
-                }
-                val betweenMatch = it.betweenPattern.find(between)
-
-                val date = try {
-                    it.onMatch(
-                        current[i],
-                        current.getOrNull(i + 1),
-                        prefixMatch,
-                        betweenMatch,
-                    )
-                } catch (e: Exception) {
-                    // only adds current if it's range is not in the last in ret range
-                    if (ret.isEmpty() || !(ret.last().range.first <= current[i].range.first && ret.last().range.last >= current[i].range.last)) {
-                        ret += current[i]
-                    }
-                    continue
+                    processed += merged
                 }
 
-                if (date == null) {
-                    // only adds current if it's range is not in the last in ret range
-                    if (ret.isEmpty() || !(ret.last().range.first <= current[i].range.first && ret.last().range.last >= current[i].range.last)) {
-                        ret += current[i]
-                    }
-
-                    continue
-                }
-
-                var merged = DateTime(
-                    range = current[i].range
-                )
-
-                if (it.mergePrefixWithLeft && prefixMatch != null) {
-                    val range = merged.range.first - prefixMatch.value.length..merged.range.last
-                    merged = merged.copy(
-                        range = range, text = inputLc.substring(range)
-                    )
-                }
-
-
-                if (it.mergeRightWithLeft && i + 1 < current.size) {
-                    val range = merged.range.first..current[i + 1].range.last
-
-                    merged = merged.copy(
-                        range = range, text = inputLc.substring(range)
-                    )
-                }
-
-                if (it.mergeBetweenWithRight && i + 1 < current.size) {
-                    val range = merged.range.last + 1..current[i + 1].range.last
-                    merged = merged.copy(
-                        range = range, text = inputLc.substring(range)
-                    )
-                    ret += current[i]
-                }
-
-
-                ret += date.copy(
-                    text = merged.text, range = merged.range, points = date.points + it.reward
-                )
             }
-
-            ret = ret.mergeIntervals().toMutableList()
         }
 
-        return ret.cleanGenerics()
+        return processed
     }
 
     /**
@@ -169,7 +129,7 @@ abstract class Controller(open val config: Config) {
     internal fun finalize(times: List<DateTime>): List<Parsed> {
         val ret = mutableListOf<Parsed>()
 
-        for (date in times) {
+        for (date in times.filter { it.points != 0 }) {
             if (ret.isNotEmpty() && date.range.first <= ret.last().range.last + 1) {
                 val mergeTo = ret.last()
 
@@ -177,8 +137,7 @@ abstract class Controller(open val config: Config) {
                 val st = if (date.tagsDayOfWeek.isNotEmpty()) {
                     date.tagsDayOfWeek.map {
                         dayOfWeek(
-                            date.startTime,
-                            DayOfWeek.entries[it.ordinal]
+                            date.startTime, DayOfWeek.entries[it.ordinal]
                         )
                     }
                 } else listOf(date.startTime)
@@ -192,21 +151,18 @@ abstract class Controller(open val config: Config) {
                 )
             } else {
                 val whole = date.repeatTag?.unPartial(date.repeatOften ?: 0.0)
-                ret += Parsed(
-                    date.text,
+                ret += Parsed(date.text,
                     date.range,
                     if (date.tagsDayOfWeek.isNotEmpty()) date.tagsDayOfWeek.map {
                         dayOfWeek(
-                            date.startTime,
-                            DayOfWeek.entries[it.ordinal]
+                            date.startTime, DayOfWeek.entries[it.ordinal]
                         )
                     } else listOf(date.startTime),
                     date.endTime,
                     date.tagsTimeStart,
                     date.tagsTimeEnd,
                     whole?.first,
-                    whole?.second
-                )
+                    whole?.second)
             }
         }
 
@@ -225,33 +181,4 @@ abstract class Controller(open val config: Config) {
         return from.toLocalDateTime(TimeZone.currentSystemDefault())
     }
 
-    /**
-     * keep if no generic number and time tag
-     * if there are, if start/end time changed, then keep
-     */
-    private fun List<DateTime>.cleanGenerics() =
-        filter {
-            (it.generalNumber == null && it.generalTimeTag == null) ||
-                    (it.startTime != DateTime.nowZeroed || it.endTime != null)
-        }
-
-    private fun List<DateTime>.mergeIntervals(): List<DateTime> {
-        val ret = mutableListOf<DateTime>()
-
-        for (date in this) {
-            if (ret.isNotEmpty() && date.range.first <= ret.last().range.last) {
-                val mergeTo = ret.last()
-
-                ret.removeLast()
-                ret += mergeTo.merge(date).copy(
-                    range = mergeTo.range.first..date.range.last,
-                    text = mergeTo.text + date.text.substring(mergeTo.range.last - date.range.first + 1)
-                )
-            } else {
-                ret += date
-            }
-        }
-
-        return ret
-    }
 }

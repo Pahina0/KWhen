@@ -32,8 +32,7 @@ internal abstract class Merger(open val config: Config) {
     protected open val betweenMatchPattern: Regex = "[\\s\\S]*".toRegex()
 
     open val mergePrefixWithLeft = false
-    open val mergeRightWithLeft = false
-    open val mergeBetweenWithRight = false
+    open val mergeRightWithLeft: BetweenMergeOption = BetweenMergeOption.NO_MERGE
 
     /**
      * The amount of points rewarded per successful merge
@@ -54,4 +53,31 @@ internal abstract class Merger(open val config: Config) {
         prefix: MatchResult?,
         between: MatchResult?,
     ): DateTime?
+
+
+    enum class BetweenMergeOption {
+        /**
+         * No Merge, do not merge with anything
+         *
+         * @constructor Create empty No Merge
+         */
+        NO_MERGE,
+
+        /**
+         * Full Merge, merges the left and right side together
+         * this is checked recursively but **doesn't** get added to the new list of found times
+         *
+         * @constructor Create empty Full Merge
+         */
+        FULL_MERGE,
+
+        /**
+         * Prefix Merge, merges the left and between text together
+         * this is checked recursively while being added to the new list of found times
+         *
+         * @constructor Create empty Prefix Merge
+         */
+        PREFIX_MERGE
+    }
+
 }

@@ -18,11 +18,11 @@ import ap.panini.kwhen.util.matchAny
  */
 internal class ENGeneralTime(override val config: Config) : ParserByWord(config) {
     override val matchPattern: Regex
-        get() = generalTimes.keys.matchAny()
+        get() = "(?:of\\s+)?(?:a|an\\s+)?(${generalTimes.keys.matchAny()})".toRegex()
 
     override fun onMatch(match: MatchResult): DateTime {
         return DateTime(
-            generalTimeTag = generalTimes[match.value]!!
+            generalTimeTag = generalTimes[match.groupValues[1]]!!
         )
     }
 }

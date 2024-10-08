@@ -18,6 +18,9 @@ internal class ENGeneralAmount(override val config: ENConfig) : ParserGenericNum
         get() = "${super.matchPattern}|${amounts.keys.matchAny()}(?:(?:\\s+an|a)?(?:\\s+-)?)?".toRegex()
 
     override fun onMatch(match: MatchResult): DateTime {
-        return DateTime(generalNumber = amounts[match.value] ?: match.value.toDouble())
+        return DateTime(
+            generalNumber = amounts[match.value] ?: match.value.toDouble(),
+            points = if (match.value == "a" || match.value == "an") 0 else 1
+        )
     }
 }
