@@ -9,7 +9,7 @@ import ap.panini.kwhen.util.matchAny
 /**
  * En general amount finds generic numbers such as
  * 1, 2, three, four
- *^(?:\d+|a|one|two|three|four|five|six|seven|eight|nine|ten|half|quarter(?:(?:\s+an|a)?(?:\s+-)?)?)$
+ *
  * @property config
  * @constructor Create empty En general amount
  */
