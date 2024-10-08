@@ -144,6 +144,16 @@ internal val generalTimes = mapOf(
     "minute" to TimeUnit.MINUTE,
 )
 
+internal val generalTimesRepeatable = mapOf(
+    "hourly" to TimeUnit.HOUR,
+    "everyday" to TimeUnit.DAY,
+    "daily" to TimeUnit.DAY,
+    "weekly" to TimeUnit.WEEK,
+    "hourly" to TimeUnit.HOUR,
+    "monthly" to TimeUnit.MONTH,
+    "yearly" to TimeUnit.YEAR,
+)
+
 internal val amounts = mapOf(
     "a" to 1.0,
     "one" to 1.0,

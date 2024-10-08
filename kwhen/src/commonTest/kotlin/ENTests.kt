@@ -430,7 +430,6 @@ class ENTests {
             assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeStart)
             assertEquals(18, it[0].startTime.first().minute)
         }
-        //    TODO add this week, next week ect
     }
 
     @Test
@@ -482,5 +481,35 @@ class ENTests {
         }
     }
 
+    @Test
+    fun testRepeatingGeneral() {
+        timeParser.parse("Have a meeting daily.").let{
+            assertEquals("daily", it[0].text)
+            assertEquals(1.0, it[0].repeatOften)
+            assertEquals(TimeUnit.DAY, it[0].repeatTag)
+        }
+
+        timeParser.parse("Have a meeting everyday").let{
+            assertEquals("everyday", it[0].text)
+            assertEquals(1.0, it[0].repeatOften)
+            assertEquals(TimeUnit.DAY, it[0].repeatTag)
+        }
+
+        timeParser.parse("Have a meeting biweekly").let{
+            assertEquals("biweekly", it[0].text)
+            assertEquals(2.0, it[0].repeatOften)
+            assertEquals(TimeUnit.WEEK, it[0].repeatTag)
+        }
+
+        parserFinal.parse("Have a meeting bi-monthly").let{
+            assertEquals("bi-monthly", it[0].text)
+            assertEquals(2, it[0].repeatOften)
+            assertEquals(TimeUnit.MONTH, it[0].repeatTag)
+        }
+        parserFinal.parse("bieveryday").let { println(it) }
+    }
+    // TODO: at 8pm for 3 days
+    // TODO: recur
+    // TODO: this week, next week ect
 
 }

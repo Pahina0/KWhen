@@ -66,7 +66,7 @@ android {
  * */
 
 mavenPublishing {
-    coordinates("io.github.pahinaa.kwhen", "kwhen", "0.0.4")
+    coordinates("io.github.pahinaa.kwhen", "kwhen", "0.0.5-beta")
 
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
