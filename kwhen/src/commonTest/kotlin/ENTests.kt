@@ -495,33 +495,57 @@ class ENTests {
 
     @Test
     fun testRepeatingGeneral() {
-        timeParser.parse("Have a meeting daily.").let{
+        timeParser.parse("Have a meeting daily.").let {
             assertEquals("daily", it[0].text)
             assertEquals(1.0, it[0].repeatOften)
             assertEquals(TimeUnit.DAY, it[0].repeatTag)
         }
 
-        timeParser.parse("Have a meeting everyday").let{
+        timeParser.parse("Have a meeting everyday").let {
             assertEquals("everyday", it[0].text)
             assertEquals(1.0, it[0].repeatOften)
             assertEquals(TimeUnit.DAY, it[0].repeatTag)
         }
 
-        timeParser.parse("Have a meeting biweekly").let{
+        timeParser.parse("Have a meeting biweekly").let {
             assertEquals("biweekly", it[0].text)
             assertEquals(2.0, it[0].repeatOften)
             assertEquals(TimeUnit.WEEK, it[0].repeatTag)
         }
 
-        parserFinal.parse("Have a meeting bi-monthly").let{
+        parserFinal.parse("Have a meeting bi-monthly").let {
             assertEquals("bi-monthly", it[0].text)
             assertEquals(2, it[0].repeatOften)
             assertEquals(TimeUnit.MONTH, it[0].repeatTag)
         }
 
     }
+
+    @Test
+    fun testRangeDuration() {
+        parserFinal.parse("go swim every 8pm for 3 days from the third of jun").let {
+            assertEquals("every 8pm for 3 days from the third of jun", it[0].text.trim())
+            assertEquals(1, it[0].repeatOften)
+            assertEquals(TimeUnit.DAY, it[0].repeatTag)
+            it[0].startTime[0].let { time ->
+                assertEquals(20, time.hour)
+                assertEquals(6, time.monthNumber)
+                assertEquals(3, time.dayOfMonth)
+            }
+
+            it[0].endTime!!.let { time ->
+                assertEquals(6, time.monthNumber)
+                assertEquals(6, time.dayOfMonth)
+            }
+        }
+
+        parserFinal.parse("I will go party for a month starting from 04/3").let {
+            assertEquals(5, it[0].endTime!!.monthNumber)
+            assertEquals(4, it[0].startTime[0].monthNumber)
+        }
+
+    }
     // TODO: at 8pm for 3 days
-    // TODO: recur
     // TODO: this week, next week ect
 
 }
