@@ -70,9 +70,20 @@ abstract class Controller(open val config: Config) {
                 val right = toProcess.getOrNull(i + 1)
                 val prevIndex = toProcess.getOrNull(i - 1)?.range?.last ?: -1
 
-                val prefix = merger.prefixPattern.find(
-                    input.substring(prevIndex + 1 until left.range.first).lowercase()
-                )
+                // prevent out of bounds
+                if (
+                    prevIndex + 1 > left.range.first ||
+                    left.range.last + 1 > (right?.range?.first ?: input.length)
+                ) {
+                    ++i
+                    processed += left
+                    continue
+                }
+
+                val prefix =
+                    merger.prefixPattern.find(
+                        input.substring(prevIndex + 1 until left.range.first).lowercase()
+                    )
 
                 val between = merger.betweenPattern.find(
                     input.substring(

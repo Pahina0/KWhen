@@ -102,7 +102,10 @@ internal fun LocalDateTime.mergeTime(other: LocalDateTime?, tags: Set<TimeUnit>)
     if (other == null) return this
 
     var time = this
-    tags.forEach {
+
+    // has to be sorted or else you may try to set day before month which may cause
+    // out of bounds like feb 31st
+    tags.sortedDescending().forEach {
         time = when (it) {
             TimeUnit.HOUR -> {
                 time.copy(hour = other.hour)

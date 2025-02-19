@@ -40,6 +40,13 @@ internal data class DateTime(
     )
 
 
+    /**
+     * Merge
+     *
+     * @param other
+     * @param pureMerge takes the other time and combines all values blindly if true
+     * @return
+     */
     fun merge(other: DateTime, pureMerge: Boolean = false): DateTime {
         if (generalNumber != null && generalTimeTag != null && !pureMerge) {
             return merge(other, true).let {
