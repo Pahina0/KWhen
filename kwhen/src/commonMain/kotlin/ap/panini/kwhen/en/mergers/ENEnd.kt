@@ -88,6 +88,7 @@ internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(co
             )
 
         }
+
         return left.copy(
             endTime = getDateTimeWithGeneral(
                 left.generalNumber,

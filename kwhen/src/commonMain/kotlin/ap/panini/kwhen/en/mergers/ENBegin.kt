@@ -18,7 +18,7 @@ import kotlinx.datetime.toLocalDateTime
  */
 internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
     override val prefixMatchPattern: Regex
-        get() = "(?:starting\\s+)?(from|on|at|during|in|after)(?:\\s+the)?|the".toRegex()
+        get() = "(?:starting\\s+)?(from|on|at|during|in|after)(?:\\s+the)?|the|next".toRegex()
 
     override val mergePrefixWithLeft: Boolean
         get() = true
@@ -31,71 +31,86 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
     ): DateTime? {
         if (left == null || prefix == null) return null
 
-        if (left.generalNumber != null) {
-            if (setOf(
-                    "from",
-                    "on",
-                    "at",
-                    "during",
-                    "after"
-                ).contains(prefix.value.trim())
-            ) {
-                if (left.text == "a") return null // "on a boat" isn't a time
+        if (prefix.value.trim() == "next" && left.generalTimeTag != null) {
 
-                if (left.generalTimeTag == TimeUnit.HOUR || left.generalTimeTag == null) {
-                    val currentHour =
-                        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
-                    val hour = if (config.use24) {
+            return left.copy(
+                startTime = getDateTimeWithGeneral(
+                    left.generalNumber ?: 1.0,
+                    left.generalTimeTag,
+                    left.startTime
+                ),
+                tagsTimeStart = left.tagsTimeStart + left.generalTimeTag,
+                generalTimeTag = null,
+                generalNumber = null,
+            )
+        }
+
+        if (left.generalNumber == null) {
+            return left.copy()
+        }
+
+        if (setOf(
+                "from",
+                "on",
+                "at",
+                "during",
+                "after"
+            ).contains(prefix.value.trim())
+        ) {
+            if (left.text == "a") return null // "on a boat" isn't a time
+
+            if (left.generalTimeTag == TimeUnit.HOUR || left.generalTimeTag == null) {
+                val currentHour =
+                    Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
+                val hour = if (config.use24) {
+                    left.generalNumber
+                } else {
+                    if (currentHour < left.generalNumber) {
                         left.generalNumber
+                    } else if (currentHour < left.generalNumber + 12) {
+                        (left.generalNumber + 12) % 24
                     } else {
-                        if (currentHour < left.generalNumber) {
-                            left.generalNumber
-                        } else if (currentHour < left.generalNumber + 12) {
-                            (left.generalNumber + 12) % 24
-                        } else {
-                            left.generalNumber
-                        }
+                        left.generalNumber
                     }
-
-                    return left.copy(
-                        startTime = getDateTimeWithGeneral(
-                            hour,
-                            TimeUnit.HOUR,
-                            null
-                        ).copy(
-                            minute = 0
-                        ),
-                        tagsTimeStart = left.tagsTimeEnd + TimeUnit.HOUR + TimeUnit.MINUTE,
-                        generalTimeTag = null,
-                        generalNumber = null,
-                    )
                 }
 
                 return left.copy(
                     startTime = getDateTimeWithGeneral(
-                        left.generalNumber,
-                        left.generalTimeTag,
+                        hour,
+                        TimeUnit.HOUR,
                         null
+                    ).copy(
+                        minute = 0
                     ),
-                    tagsTimeStart = left.tagsTimeStart + left.generalTimeTag,
-                    generalTimeTag = null,
-                    generalNumber = null,
-                )
-            } else {
-                return left.copy(
-                    startTime = getDateTimeWithGeneral(
-                        left.generalNumber,
-                        left.generalTimeTag ?: TimeUnit.HOUR,
-                        left.endTime ?: left.startTime
-                    ),
-                    tagsTimeStart = left.tagsTimeStart + (left.generalTimeTag ?: TimeUnit.HOUR),
+                    tagsTimeStart = left.tagsTimeEnd + TimeUnit.HOUR + TimeUnit.MINUTE,
                     generalTimeTag = null,
                     generalNumber = null,
                 )
             }
+
+            return left.copy(
+                startTime = getDateTimeWithGeneral(
+                    left.generalNumber,
+                    left.generalTimeTag,
+                    null
+                ),
+                tagsTimeStart = left.tagsTimeStart + left.generalTimeTag,
+                generalTimeTag = null,
+                generalNumber = null,
+            )
         }
 
+        return left.copy(
+            startTime = getDateTimeWithGeneral(
+                left.generalNumber,
+                left.generalTimeTag ?: TimeUnit.HOUR,
+                left.endTime ?: left.startTime
+            ),
+            tagsTimeStart = left.tagsTimeStart + (left.generalTimeTag ?: TimeUnit.HOUR),
+            generalTimeTag = null,
+            generalNumber = null,
+        )
 
-        return left.copy()
+
     }
 }

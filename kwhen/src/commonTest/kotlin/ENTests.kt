@@ -545,6 +545,36 @@ class ENTests {
                 }
             }
     }
-    // TODO: this week, next week ect
+
+    @Test
+    fun testNext() {
+        parserFinal.parse("I have to go do something next week").let {
+            assertEquals("next week", it.first().text.trim())
+            assertEquals(setOf(TimeUnit.WEEK), it[0].tagsTimeStart)
+            assertEquals(
+                listOf(DateTime().startTime.run { copy(date.plus(7, DateTimeUnit.DAY)) }),
+                it[0].startTime
+            )
+        }
+
+        parserFinal.parse("Next month there is a big party i have to go to!").let {
+            assertEquals("Next month", it.first().text.trim())
+            assertEquals(setOf(TimeUnit.MONTH), it[0].tagsTimeStart)
+            assertEquals(
+                listOf(DateTime().startTime.run { copy(date.plus(1, DateTimeUnit.MONTH)) }),
+                it[0].startTime
+            )
+        }
+
+
+        parserFinal.parse("the movie coming out next year will be the best").let {
+            assertEquals("next year", it.first().text.trim())
+            assertEquals(setOf(TimeUnit.YEAR), it[0].tagsTimeStart)
+            assertEquals(
+                listOf(DateTime().startTime.run { copy(date.plus(1, DateTimeUnit.YEAR)) }),
+                it[0].startTime
+            )
+        }
+    }
 
 }
