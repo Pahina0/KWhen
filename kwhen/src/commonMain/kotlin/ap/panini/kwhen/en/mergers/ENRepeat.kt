@@ -15,7 +15,7 @@ import ap.panini.kwhen.util.getRepeatTime
  */
 internal class ENRepeat(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
     override val prefixMatchPattern: Regex
-        get() = "every(\\s+other)?".toRegex()
+        get() = "(?:(?:that\\s+)?recur(?:ring|s)?\\s+)?every(\\s+other)?".toRegex()
     override val mergePrefixWithLeft: Boolean
         get() = true
 

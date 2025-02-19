@@ -20,7 +20,7 @@ import kotlinx.datetime.toLocalDateTime
  * */
 internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
     override val prefixMatchPattern: Regex
-        get() = "to|till|ends|ending|-|until".toRegex()
+        get() = "(for|to|till|ends|ending|-|until)".toRegex()
 
     override val mergePrefixWithLeft: Boolean
         get() = true
@@ -73,6 +73,21 @@ internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(co
             )
         }
 
+        // relative time duration (go on a trip for 3 days [this ends in 3 days])
+        if (prefix.groupValues[1] == "for") {
+            return left.copy(
+                endTime = getDateTimeWithGeneral(
+                    left.generalNumber,
+                    left.generalTimeTag,
+                    right?.startTime ?: left.startTime
+                ),
+                tagsTimeStart = setOf(),
+                tagsTimeEnd = left.tagsTimeEnd + left.generalTimeTag,
+                generalTimeTag = null,
+                generalNumber = null,
+            )
+
+        }
 
         return left.copy(
             endTime = getDateTimeWithGeneral(

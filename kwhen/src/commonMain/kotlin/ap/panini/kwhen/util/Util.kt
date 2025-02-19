@@ -2,10 +2,12 @@ package ap.panini.kwhen.util
 
 import ap.panini.kwhen.DateTime
 import ap.panini.kwhen.TimeUnit
+import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.days
@@ -102,7 +104,10 @@ internal fun LocalDateTime.mergeTime(other: LocalDateTime?, tags: Set<TimeUnit>)
     if (other == null) return this
 
     var time = this
-    tags.forEach {
+
+    // has to be sorted or else you may try to set day before month which may cause
+    // out of bounds like feb 31st
+    tags.sortedDescending().forEach {
         time = when (it) {
             TimeUnit.HOUR -> {
                 time.copy(hour = other.hour)
@@ -192,20 +197,20 @@ private fun getDateTimeWithGeneral(
     }
 
 
-    val duration = when (generalTag) {
-        TimeUnit.SECOND -> generalNumber.seconds
-        TimeUnit.MINUTE -> generalNumber.minutes
-        TimeUnit.HOUR -> generalNumber.hours
-        TimeUnit.DAY -> (generalNumber * 24).hours
-        TimeUnit.WEEK -> (generalNumber * 24 * 7).hours
-        TimeUnit.MONTH -> return relativeTo.copy(monthNumber = relativeTo.monthNumber + generalNumber)
-        TimeUnit.YEAR -> return relativeTo.copy(year = relativeTo.year + generalNumber)
-
-    }
 
     return relativeTo
         .toInstant(TimeZone.currentSystemDefault())
-        .plus(duration)
+        .plus(
+            DateTimePeriod(
+                seconds = if (generalTag == TimeUnit.SECOND) generalNumber else 0,
+                minutes = if (generalTag == TimeUnit.MINUTE) generalNumber else 0,
+                hours = if (generalTag == TimeUnit.HOUR) generalNumber else 0,
+                days = if (generalTag == TimeUnit.DAY) generalNumber else if (generalTag == TimeUnit.WEEK) 7 * generalNumber else 0,
+                months = if (generalTag == TimeUnit.MONTH) generalNumber else 0,
+                years = if (generalTag == TimeUnit.YEAR) generalNumber else 0,
+            ),
+            TimeZone.currentSystemDefault()
+        )
         .toLocalDateTime(TimeZone.currentSystemDefault())
 
 }

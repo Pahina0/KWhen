@@ -1,10 +1,10 @@
 package ap.panini.kwhen.en
 
 import ap.panini.kwhen.common.Merger
-import ap.panini.kwhen.configs.ENConfig
 import ap.panini.kwhen.common.Parser
 import ap.panini.kwhen.common.mergers.MergerConsecutive
 import ap.panini.kwhen.common.mergers.MergerGeneralTags
+import ap.panini.kwhen.configs.ENConfig
 import ap.panini.kwhen.en.mergers.ENBegin
 import ap.panini.kwhen.en.mergers.ENEnd
 import ap.panini.kwhen.en.mergers.ENList
@@ -15,6 +15,7 @@ import ap.panini.kwhen.en.parsers.ENDayMonthYear
 import ap.panini.kwhen.en.parsers.ENDayOfWeek
 import ap.panini.kwhen.en.parsers.ENGeneralAmount
 import ap.panini.kwhen.en.parsers.ENGeneralTime
+import ap.panini.kwhen.en.parsers.ENGeneralTimeRepeatable
 import ap.panini.kwhen.en.parsers.ENMonthDayYear
 import ap.panini.kwhen.en.parsers.ENNumericOrdinal
 
@@ -25,7 +26,7 @@ import ap.panini.kwhen.en.parsers.ENNumericOrdinal
  * @property config
  * @constructor Create empty En controller
  */
-internal class ENController  (override val config: ENConfig = ENConfig()) :
+internal class ENController(override val config: ENConfig = ENConfig()) :
     ap.panini.kwhen.common.Controller(config) {
 
     override val parsers: List<Parser>
@@ -37,7 +38,8 @@ internal class ENController  (override val config: ENConfig = ENConfig()) :
             ENMonthDayYear(config),
             ENNumericOrdinal(config),
             ENDayOfWeek(config),
-            ENGeneralTime(config)
+            ENGeneralTime(config),
+            ENGeneralTimeRepeatable(config)
         )
 
     override val mergers: List<Merger>

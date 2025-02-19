@@ -7,8 +7,8 @@ import com.vanniktech.maven.publish.JavadocJar
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
-    id("org.jetbrains.dokka")
-    id("com.vanniktech.maven.publish") version "0.29.0"
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.maven.publish)
     id("signing")
 }
 
@@ -66,7 +66,7 @@ android {
  * */
 
 mavenPublishing {
-    coordinates("io.github.pahinaa.kwhen", "kwhen", "0.0.4")
+    coordinates("io.github.pahinaa.kwhen", "kwhen", "0.0.5-beta")
 
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()

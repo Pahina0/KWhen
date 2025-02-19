@@ -35,8 +35,7 @@ class ENTests {
             assertEquals("tmrw", it[0].text)
             assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
             assertEquals(
-                DateTime().startTime.run { copy(date.plus(1, DateTimeUnit.DAY)) },
-                it[0].startTime
+                DateTime().startTime.run { copy(date.plus(1, DateTimeUnit.DAY)) }, it[0].startTime
             )
         }
 
@@ -46,8 +45,7 @@ class ENTests {
             assertEquals("yesterday", it[0].text)
             assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
             assertEquals(
-                DateTime().startTime.run { copy(date.minus(1, DateTimeUnit.DAY)) },
-                it[0].startTime
+                DateTime().startTime.run { copy(date.minus(1, DateTimeUnit.DAY)) }, it[0].startTime
             )
         }
     }
@@ -94,8 +92,7 @@ class ENTests {
             assertEquals("4th of july", it[0].text)
             assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH), it[0].tagsTimeStart)
             assertEquals(
-                DateTime().startTime.run { copy(monthNumber = 7, dayOfMonth = 4) },
-                it[0].startTime
+                DateTime().startTime.run { copy(monthNumber = 7, dayOfMonth = 4) }, it[0].startTime
             )
         }
 
@@ -121,8 +118,7 @@ class ENTests {
             assertEquals("1st of    feb", it[0].text)
             assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH), it[0].tagsTimeStart)
             assertEquals(
-                DateTime().startTime.run { copy(monthNumber = 2, dayOfMonth = 1) },
-                it[0].startTime
+                DateTime().startTime.run { copy(monthNumber = 2, dayOfMonth = 1) }, it[0].startTime
             )
         }
     }
@@ -142,8 +138,7 @@ class ENTests {
             assertEquals("jul 4th", it[0].text)
             assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH), it[0].tagsTimeStart)
             assertEquals(
-                DateTime().startTime.run { copy(monthNumber = 7, dayOfMonth = 4) },
-                it[0].startTime
+                DateTime().startTime.run { copy(monthNumber = 7, dayOfMonth = 4) }, it[0].startTime
             )
         }
 
@@ -169,8 +164,7 @@ class ENTests {
             assertEquals("feb/1", it[0].text)
             assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH), it[0].tagsTimeStart)
             assertEquals(
-                DateTime().startTime.run { copy(monthNumber = 2, dayOfMonth = 1) },
-                it[0].startTime
+                DateTime().startTime.run { copy(monthNumber = 2, dayOfMonth = 1) }, it[0].startTime
             )
         }
 
@@ -179,9 +173,7 @@ class ENTests {
             assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH, TimeUnit.YEAR), it[0].tagsTimeStart)
             assertEquals(DateTime().startTime.run {
                 copy(
-                    year = 2005,
-                    monthNumber = 4,
-                    dayOfMonth = 13
+                    year = 2005, monthNumber = 4, dayOfMonth = 13
                 )
             }, it[0].startTime)
         }
@@ -191,9 +183,7 @@ class ENTests {
             assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH, TimeUnit.YEAR), it[0].tagsTimeStart)
             assertEquals(DateTime().startTime.run {
                 copy(
-                    year = 2005,
-                    monthNumber = 4,
-                    dayOfMonth = 13
+                    year = 2005, monthNumber = 4, dayOfMonth = 13
                 )
             }, it[0].startTime)
         }
@@ -259,8 +249,7 @@ class ENTests {
             assertEquals("today till tmrw", it[0].text.trim())
             assertEquals(DateTime().startTime, it[0].startTime)
             assertEquals(
-                DateTime().startTime.run { copy(date.plus(1, DateTimeUnit.DAY)) },
-                it[0].endTime
+                DateTime().startTime.run { copy(date.plus(1, DateTimeUnit.DAY)) }, it[0].endTime
             )
             assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
             assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeEnd)
@@ -290,8 +279,7 @@ class ENTests {
         timeParser.parseAndMerge("the diving team will go on a field trip in 18 months").let {
             assertEquals("in 18 months", it[0].text.trim())
             assertEquals(
-                DateTime().startTime.run { copy(monthNumber = monthNumber + 18) },
-                it[0].startTime
+                DateTime().startTime.run { copy(monthNumber = monthNumber + 18) }, it[0].startTime
             )
             assertEquals(setOf(TimeUnit.MONTH), it[0].tagsTimeStart)
         }
@@ -299,12 +287,10 @@ class ENTests {
         timeParser.parseAndMerge("im going to japan 06/18 - dec 2025").let {
             assertEquals("06/18 - dec 2025", it[0].text.trim())
             assertEquals(
-                DateTime().startTime.run { copy(monthNumber = 6, dayOfMonth = 18) },
-                it[0].startTime
+                DateTime().startTime.run { copy(monthNumber = 6, dayOfMonth = 18) }, it[0].startTime
             )
             assertEquals(
-                DateTime().startTime.run { copy(monthNumber = 12, year = 2025) },
-                it[0].endTime
+                DateTime().startTime.run { copy(monthNumber = 12, year = 2025) }, it[0].endTime
             )
             assertEquals(setOf(TimeUnit.MONTH, TimeUnit.DAY), it[0].tagsTimeStart)
             assertEquals(setOf(TimeUnit.MONTH, TimeUnit.YEAR), it[0].tagsTimeEnd)
@@ -339,8 +325,7 @@ class ENTests {
             assertEquals(4.0, it[0].repeatOften)
             assertEquals(TimeUnit.MONTH, it[0].repeatTag)
             assertEquals(
-                DateTime().startTime.run { copy(monthNumber = 7, dayOfMonth = 8) },
-                it[0].startTime
+                DateTime().startTime.run { copy(monthNumber = 7, dayOfMonth = 8) }, it[0].startTime
             )
             assertEquals(setOf(TimeUnit.MONTH, TimeUnit.DAY), it[0].tagsTimeStart)
 
@@ -382,6 +367,13 @@ class ENTests {
 
     @Test
     fun testProcessSentence() {
+        TimeParser(ENConfig(use24 = true)).parse("Go to Vermont 30 minutes after 6").let {
+            println(it)
+            assertEquals("30 minutes after 6", it[0].text.trim())
+            assertEquals(
+                DateTime().startTime.run { copy(minute = 30, hour = 6) }, it[0].startTime.first()
+            )
+        }
         parserFinal.parse("Jul 9 is going to be crazy").let {
             assertEquals(1, it.size)
             assertEquals("Jul 9", it[0].text.trim())
@@ -422,7 +414,6 @@ class ENTests {
             assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeStart)
             assertEquals(18, it[0].startTime.first().minute)
         }
-        //    TODO add this week, next week ect
     }
 
     @Test
@@ -433,6 +424,18 @@ class ENTests {
             assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeEnd)
             assertEquals(1, it[0].repeatOften)
             assertEquals(TimeUnit.DAY, it[0].repeatTag)
+        }
+
+        parserFinal.parse("I have a meeting that recurs every other day").let {
+            assertEquals("that recurs every other day", it[0].text.trim())
+            assertEquals(2, it[0].repeatOften)
+            assertEquals(TimeUnit.DAY, it[0].repeatTag)
+        }
+
+        parserFinal.parse("there is a big party recurring every month").let {
+            assertEquals("recurring every month", it[0].text.trim())
+            assertEquals(1, it[0].repeatOften)
+            assertEquals(TimeUnit.MONTH, it[0].repeatTag)
         }
     }
 
@@ -474,5 +477,104 @@ class ENTests {
         }
     }
 
+    @Test
+    fun testRepeatingGeneral() {
+        timeParser.parse("Have a meeting daily.").let {
+            assertEquals("daily", it[0].text)
+            assertEquals(1.0, it[0].repeatOften)
+            assertEquals(TimeUnit.DAY, it[0].repeatTag)
+        }
+
+        timeParser.parse("Have a meeting everyday").let {
+            assertEquals("everyday", it[0].text)
+            assertEquals(1.0, it[0].repeatOften)
+            assertEquals(TimeUnit.DAY, it[0].repeatTag)
+        }
+
+        timeParser.parse("Have a meeting biweekly").let {
+            assertEquals("biweekly", it[0].text)
+            assertEquals(2.0, it[0].repeatOften)
+            assertEquals(TimeUnit.WEEK, it[0].repeatTag)
+        }
+
+        parserFinal.parse("Have a meeting bi-monthly").let {
+            assertEquals("bi-monthly", it[0].text)
+            assertEquals(2, it[0].repeatOften)
+            assertEquals(TimeUnit.MONTH, it[0].repeatTag)
+        }
+
+    }
+
+    @Test
+    fun testRangeDuration() {
+        parserFinal.parse("go swim every 8pm for 3 days from the third of jun").let {
+            assertEquals("every 8pm for 3 days from the third of jun", it[0].text.trim())
+            assertEquals(1, it[0].repeatOften)
+            assertEquals(TimeUnit.DAY, it[0].repeatTag)
+            it[0].startTime[0].let { time ->
+                assertEquals(20, time.hour)
+                assertEquals(6, time.monthNumber)
+                assertEquals(3, time.dayOfMonth)
+            }
+
+            it[0].endTime!!.let { time ->
+                assertEquals(6, time.monthNumber)
+                assertEquals(6, time.dayOfMonth)
+            }
+        }
+
+        parserFinal.parse("I will go party for a month starting from 04/3").let {
+            assertEquals(5, it[0].endTime!!.monthNumber)
+            assertEquals(4, it[0].startTime[0].monthNumber)
+        }
+
+        parserFinal.parse("he had to go to the hospital at 3pm every other day for 2 years from june 2023")
+            .let {
+                assertEquals("at 3pm every other day for 2 years from june 2023", it[0].text.trim())
+                assertEquals(2, it[0].repeatOften)
+                assertEquals(TimeUnit.DAY, it[0].repeatTag)
+                it[0].startTime[0].let { time ->
+                    assertEquals(15, time.hour)
+                    assertEquals(6, time.monthNumber)
+                    assertEquals(2023, time.year)
+                }
+
+                it[0].endTime!!.let { time ->
+                    assertEquals(6, time.monthNumber)
+                    assertEquals(2025, time.year)
+                }
+            }
+    }
+
+    @Test
+    fun testNext() {
+        parserFinal.parse("I have to go do something next week").let {
+            assertEquals("next week", it.first().text.trim())
+            assertEquals(setOf(TimeUnit.WEEK), it[0].tagsTimeStart)
+            assertEquals(
+                listOf(DateTime().startTime.run { copy(date.plus(7, DateTimeUnit.DAY)) }),
+                it[0].startTime
+            )
+        }
+
+        parserFinal.parse("Next month there is a big party i have to go to!").let {
+            assertEquals("Next month", it.first().text.trim())
+            assertEquals(setOf(TimeUnit.MONTH), it[0].tagsTimeStart)
+            assertEquals(
+                listOf(DateTime().startTime.run { copy(date.plus(1, DateTimeUnit.MONTH)) }),
+                it[0].startTime
+            )
+        }
+
+
+        parserFinal.parse("the movie coming out next year will be the best").let {
+            assertEquals("next year", it.first().text.trim())
+            assertEquals(setOf(TimeUnit.YEAR), it[0].tagsTimeStart)
+            assertEquals(
+                listOf(DateTime().startTime.run { copy(date.plus(1, DateTimeUnit.YEAR)) }),
+                it[0].startTime
+            )
+        }
+    }
 
 }
