@@ -368,7 +368,6 @@ class ENTests {
     @Test
     fun testProcessSentence() {
         TimeParser(ENConfig(use24 = true)).parse("Go to Vermont 30 minutes after 6").let {
-            println(it)
             assertEquals("30 minutes after 6", it[0].text.trim())
             assertEquals(
                 DateTime().startTime.run { copy(minute = 30, hour = 6) }, it[0].startTime.first()
@@ -578,33 +577,63 @@ class ENTests {
     }
 
     @Test
-    fun testExceptionsTakeLast() {
-        // currently out of bounds are just taking the last time it can find
-        // in the future it may make 2 separate items, unsure yet
-
+    fun testInterweavingRanges() {
+        // these can create multiple possible times
         // caused crash due to out of bounds of items
         parserFinal.parse("I need to go 2 jul 4th").let{
-            println(it)
-            assertEquals("jul 4th", it.first().text.trim())
-            assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH), it[0].tagsTimeStart)
-            it[0].startTime[0].let { time ->
-                assertEquals(7, time.monthNumber)
-                assertEquals(4, time.dayOfMonth)
+            it.first().let { parsed ->
+                assertEquals("2 jul", parsed.text.trim())
+                assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH), parsed.tagsTimeStart)
+                parsed.startTime[0].let { time ->
+                    assertEquals(7, time.monthNumber)
+                    assertEquals(2, time.dayOfMonth)
+                }
+
+            }
+            it[1].let { parsed ->
+                assertEquals("jul 4th", parsed.text.trim())
+                assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH), parsed.tagsTimeStart)
+                parsed.startTime[0].let { time ->
+                    assertEquals(7, time.monthNumber)
+                    assertEquals(4, time.dayOfMonth)
+                }
+
             }
         }
 
         // another out of bounds
         parserFinal.parse("june 9 may was truly a day to remember").let {
-            assertEquals("9 may", it.first().text.trim())
-            assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH), it[0].tagsTimeStart)
-            it[0].startTime[0].let { time ->
-                assertEquals(5, time.monthNumber)
-                assertEquals(9, time.dayOfMonth)
+            it.first().let { parsed ->
+                assertEquals("june 9", parsed.text.trim())
+                assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH), parsed.tagsTimeStart)
+                parsed.startTime[0].let { time ->
+                    assertEquals(6, time.monthNumber)
+                    assertEquals(9, time.dayOfMonth)
+                }
+
+            }
+
+            it[1].let { parsed ->
+                assertEquals("9 may", parsed.text.trim())
+                assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH), parsed.tagsTimeStart)
+                parsed.startTime[0].let { time ->
+                    assertEquals(5, time.monthNumber)
+                    assertEquals(9, time.dayOfMonth)
+                }
+
             }
         }
 
         parserFinal.parse("18:25 9 crashed version 0.0.4").let {
-            println(it)
+            it.first().let { parsed ->
+                assertEquals("18:25", parsed.text.trim())
+                assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), parsed.tagsTimeStart)
+                parsed.startTime[0].let { time ->
+                    assertEquals(18, time.hour)
+                    assertEquals(25, time.minute)
+                }
+
+            }
         }
 
     }

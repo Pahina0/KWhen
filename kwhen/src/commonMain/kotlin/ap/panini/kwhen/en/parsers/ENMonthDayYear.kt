@@ -71,6 +71,7 @@ internal class ENMonthDayYear(override val config: ENConfig) : ParserByWord(conf
         val month = match.groupValues[1].lowercase()
         val day = match.groupValues[2].lowercase()
 
+
         if (month.toIntOrNull() == null && day == "") {
             date = date.run {
                 copy(
@@ -81,6 +82,11 @@ internal class ENMonthDayYear(override val config: ENConfig) : ParserByWord(conf
                 )
             }
         } else if (day != ""){
+//            month.toIntOrNull()?.let { m ->
+//                // month 25 is nonsense
+//                if (m > 12 || m < 1) return null
+//            }
+
             date = date.run {
                 copy(
                     startTime = startTime.copy(

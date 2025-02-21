@@ -84,9 +84,9 @@ abstract class Controller(open val config: Config) {
 
                     val l = toProcess.toMutableList().apply { removeAt(i) }
                     val r = toProcess.toMutableList().apply { removeAt(i + 1) }
-                    return merge(input, l) + merge(
+                    return merge(input, r) + merge(
                         input,
-                        r
+                        l
                     )
                 }
 
@@ -174,6 +174,9 @@ abstract class Controller(open val config: Config) {
                         startTime = st + mergeTo.startTime
                     )
                 } else {
+                    // random numbers with no meaning
+                    if (date.generalTimeTag == null && date.generalNumber != null) continue
+
                     val whole = date.repeatTag?.unPartial(date.repeatOften ?: 0.0)
                     ret += Parsed(date.text,
                         date.range,
@@ -191,7 +194,7 @@ abstract class Controller(open val config: Config) {
             }
             allRet += ret.toSet()
         }
-        return allRet.reduce { l, r -> l union r}.toList()
+        return allRet.reduce { l, r -> l union r }.sortedBy { it.range.first }
     }
 
     private fun dayOfWeek(start: LocalDateTime, day: DayOfWeek): LocalDateTime {
