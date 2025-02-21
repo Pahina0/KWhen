@@ -577,4 +577,36 @@ class ENTests {
         }
     }
 
+    @Test
+    fun testExceptionsTakeLast() {
+        // currently out of bounds are just taking the last time it can find
+        // in the future it may make 2 separate items, unsure yet
+
+        // caused crash due to out of bounds of items
+        parserFinal.parse("I need to go 2 jul 4th").let{
+            println(it)
+            assertEquals("jul 4th", it.first().text.trim())
+            assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH), it[0].tagsTimeStart)
+            it[0].startTime[0].let { time ->
+                assertEquals(7, time.monthNumber)
+                assertEquals(4, time.dayOfMonth)
+            }
+        }
+
+        // another out of bounds
+        parserFinal.parse("june 9 may was truly a day to remember").let {
+            assertEquals("9 may", it.first().text.trim())
+            assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH), it[0].tagsTimeStart)
+            it[0].startTime[0].let { time ->
+                assertEquals(5, time.monthNumber)
+                assertEquals(9, time.dayOfMonth)
+            }
+        }
+
+        parserFinal.parse("18:25 9 crashed version 0.0.4").let {
+            println(it)
+        }
+
+    }
+
 }

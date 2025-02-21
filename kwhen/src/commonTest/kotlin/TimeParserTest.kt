@@ -9,7 +9,7 @@ internal class TimeParserTest(private val config: ENConfig = ENConfig()) {
     }
 
     fun parseAndMerge(input: String): List<DateTime> {
-        return config.instance().let { it.merge(input, it.parse(input)) }.sortedByDescending { it.points }
+        return config.instance().let { it.merge(input, it.parse(input)) }.flatten().sortedByDescending { it.points }
     }
 
     fun parseMergeProcess(input: String): List<Parsed> {

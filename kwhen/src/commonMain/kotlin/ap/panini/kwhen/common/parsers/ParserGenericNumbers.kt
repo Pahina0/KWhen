@@ -14,6 +14,6 @@ internal open class ParserGenericNumbers(override val config: Config) : ParserBy
         get() = "\\d+".toRegex()
 
     override fun onMatch(match: MatchResult): DateTime {
-        return DateTime(generalNumber = match.value.toDouble())
+        return DateTime(generalNumber = match.value.toDouble(), points = 0)
     }
 }

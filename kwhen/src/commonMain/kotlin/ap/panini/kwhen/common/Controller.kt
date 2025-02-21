@@ -55,7 +55,7 @@ abstract class Controller(open val config: Config) {
         return ret
     }
 
-    internal fun merge(input: String, parsed: List<DateTime>): List<DateTime> {
+    internal fun merge(input: String, parsed: List<DateTime>): List<List<DateTime>> {
         var processed = parsed.toMutableList()
 
         // tries to use every merger to merge 2 date times together
@@ -75,9 +75,19 @@ abstract class Controller(open val config: Config) {
                     prevIndex + 1 > left.range.first ||
                     left.range.last + 1 > (right?.range?.first ?: input.length)
                 ) {
-                    ++i
-                    processed += left
-                    continue
+                    if (right == null) {
+                        // this shouldn't happen?
+                        ++i
+                        processed += left
+                        continue
+                    }
+
+                    val l = toProcess.toMutableList().apply { removeAt(i) }
+                    val r = toProcess.toMutableList().apply { removeAt(i + 1) }
+                    return merge(input, l) + merge(
+                        input,
+                        r
+                    )
                 }
 
                 val prefix =
@@ -131,53 +141,57 @@ abstract class Controller(open val config: Config) {
             }
         }
 
-        return processed
+        return listOf(processed)
     }
 
     /**
      * The only things that should join are those with the same tags
      * */
-    internal fun finalize(times: List<DateTime>): List<Parsed> {
-        val ret = mutableListOf<Parsed>()
+    internal fun finalize(times: List<List<DateTime>>): List<Parsed> {
+        val allRet = mutableListOf<Set<Parsed>>()
 
-        for (date in times.filter { it.points != 0 }) {
-            if (ret.isNotEmpty() && date.range.first <= ret.last().range.last + 1) {
-                val mergeTo = ret.last()
+        for (curTimes in times) {
+            val ret = mutableListOf<Parsed>()
 
-
-                val st = if (date.tagsDayOfWeek.isNotEmpty()) {
-                    date.tagsDayOfWeek.map {
-                        dayOfWeek(
-                            date.startTime, DayOfWeek.entries[it.ordinal]
-                        )
-                    }
-                } else listOf(date.startTime)
+            for (date in curTimes.filter { it.points != 0 }) {
+                if (ret.isNotEmpty() && date.range.first <= ret.last().range.last + 1) {
+                    val mergeTo = ret.last()
 
 
-                ret.removeLast()
-                ret += mergeTo.copy(
-                    range = mergeTo.range.first..date.range.last,
-                    text = mergeTo.text + date.text.substring(mergeTo.range.last - date.range.first + 1),
-                    startTime = st + mergeTo.startTime
-                )
-            } else {
-                val whole = date.repeatTag?.unPartial(date.repeatOften ?: 0.0)
-                ret += Parsed(date.text,
-                    date.range,
-                    if (date.tagsDayOfWeek.isNotEmpty()) date.tagsDayOfWeek.map {
-                        dayOfWeek(
-                            date.startTime, DayOfWeek.entries[it.ordinal]
-                        )
-                    } else listOf(date.startTime),
-                    date.endTime,
-                    date.tagsTimeStart,
-                    date.tagsTimeEnd,
-                    whole?.first,
-                    whole?.second)
+                    val st = if (date.tagsDayOfWeek.isNotEmpty()) {
+                        date.tagsDayOfWeek.map {
+                            dayOfWeek(
+                                date.startTime, DayOfWeek.entries[it.ordinal]
+                            )
+                        }
+                    } else listOf(date.startTime)
+
+
+                    ret.removeLast()
+                    ret += mergeTo.copy(
+                        range = mergeTo.range.first..date.range.last,
+                        text = mergeTo.text + date.text.substring(mergeTo.range.last - date.range.first + 1),
+                        startTime = st + mergeTo.startTime
+                    )
+                } else {
+                    val whole = date.repeatTag?.unPartial(date.repeatOften ?: 0.0)
+                    ret += Parsed(date.text,
+                        date.range,
+                        if (date.tagsDayOfWeek.isNotEmpty()) date.tagsDayOfWeek.map {
+                            dayOfWeek(
+                                date.startTime, DayOfWeek.entries[it.ordinal]
+                            )
+                        } else listOf(date.startTime),
+                        date.endTime,
+                        date.tagsTimeStart,
+                        date.tagsTimeEnd,
+                        whole?.first,
+                        whole?.second)
+                }
             }
+            allRet += ret.toSet()
         }
-
-        return ret
+        return allRet.reduce { l, r -> l union r}.toList()
     }
 
     private fun dayOfWeek(start: LocalDateTime, day: DayOfWeek): LocalDateTime {
