@@ -73,33 +73,38 @@ internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(co
             date.run {
                 copy(
                     startTime = startTime.copy(
-                        hour = if (config.use24) {
-                            hour
-                        } else {
-                            val calculatedHour = when (amPm) {
-                                "am" -> hour
-                                "pm" -> hour + 12
-                                else -> { // finds the next available time
-                                    // at 3 (currently 5am) -> 3pm
-                                    // at 5 (currently 4pm) -> 5pm
-                                    // at 3 (currently 5pm) -> 3am
-                                    val min = minute.toIntOrNull() ?: 0
-                                    val curTime = startTime.hour * 60 + startTime.minute
+                        hour = hour.let { hr ->
 
-                                    if (curTime < hour * 60 + min) {
-                                        hour
-                                    } else if (curTime < (hour + 12) * 60 + min) {
-                                        (hour + 12) % 24
-                                    } else {
-                                        hour
-                                    }
-                                }
+                            // using am/pm
+                            if (amPm == "am") {
+                                return@let hr
+                            } else if (amPm == "pm") {
+                                return@let hr + 12
                             }
 
-                            calculatedHour
+                            // next part finds the next days time so its always tmrw
+                            // at 3 (currently 5am) -> 3pm
+                            // at 5 (currently 4pm) -> 5pm
+                            // at 3 (currently 5pm) -> 3am
+
+                            // if they use 24 hr time then you want to check by 24 hrs
+                            val addBy = if (config.use24 || hour > 12) 24 else 12
+                            val min = minute.toIntOrNull() ?: 0
+                            val curTime = startTime.hour * 60 + startTime.minute
+
+                            if (curTime < hour * 60 + min) {
+                                hour
+                            } else if (curTime < (hour + addBy) * 60 + min) {
+                                (hour + addBy) % 24
+                            } else {
+                                hour
+                            }
                         },
-                        minute = if (minute.isBlank()) 0
-                        else minute.toIntOrNull() ?: return null
+                        minute = if (minute.isBlank()) {
+                            0
+                        } else {
+                            minute.toIntOrNull() ?: return null
+                        }
                     ),
 
                     tagsTimeStart = tagsTimeStart + TimeUnit.HOUR + TimeUnit.MINUTE
