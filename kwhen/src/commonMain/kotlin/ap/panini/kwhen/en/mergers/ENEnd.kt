@@ -6,9 +6,6 @@ import ap.panini.kwhen.common.mergers.MergerWhitespaceTrimmed
 import ap.panini.kwhen.configs.ENConfig
 import ap.panini.kwhen.util.copy
 import ap.panini.kwhen.util.getDateTimeWithGeneral
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 /**
  * En End finds words that usually indicate the end time of a phrase
@@ -36,7 +33,7 @@ internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(co
         // has an unknown number
         if (left.generalNumber == null) {
             return left.copy(
-                startTime = DateTime().startTime,
+                startTime = config.getDateTime().startTime,
                 endTime = left.startTime,
                 tagsTimeStart = setOf(),
                 tagsTimeEnd = left.tagsTimeStart,
@@ -46,7 +43,7 @@ internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(co
 
         if (left.generalTimeTag == TimeUnit.HOUR || left.generalTimeTag == null) {
             val currentHour =
-                Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
+                config.now().hour
             val hour = if (config.use24) {
                 left.generalNumber
             } else {
@@ -64,7 +61,8 @@ internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(co
                 endTime = getDateTimeWithGeneral(
                     hour,
                     TimeUnit.HOUR,
-                    null
+                    null,
+                    config
                 ).copy(minute = 0),
                 tagsTimeStart = setOf(),
                 tagsTimeEnd = left.tagsTimeEnd + TimeUnit.HOUR + TimeUnit.MINUTE,
@@ -79,7 +77,8 @@ internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(co
                 endTime = getDateTimeWithGeneral(
                     left.generalNumber,
                     left.generalTimeTag,
-                    right?.startTime ?: left.startTime
+                    right?.startTime ?: left.startTime,
+                    config
                 ),
                 tagsTimeStart = setOf(),
                 tagsTimeEnd = left.tagsTimeEnd + left.generalTimeTag,
@@ -93,7 +92,8 @@ internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(co
             endTime = getDateTimeWithGeneral(
                 left.generalNumber,
                 left.generalTimeTag,
-                null
+                null,
+                config
             ),
             tagsTimeStart = setOf(),
             tagsTimeEnd = left.tagsTimeEnd + left.generalTimeTag,

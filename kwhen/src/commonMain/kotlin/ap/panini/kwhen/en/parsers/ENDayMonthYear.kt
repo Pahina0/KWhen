@@ -36,7 +36,7 @@ internal class ENDayMonthYear(override val config: ENConfig) : ParserByWord(conf
     // @formatter:on
 
     override fun onMatch(match: MatchResult): DateTime? {
-        var date = DateTime()
+        var date = config.getDateTime()
 
         // no year
         val year = match.groupValues[3].lowercase()

@@ -1,6 +1,9 @@
 package ap.panini.kwhen.configs
 
+import ap.panini.kwhen.common.Controller
 import ap.panini.kwhen.en.ENController
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
 
 /**
  * En config is a configuration file for english parsing
@@ -17,9 +20,11 @@ data class ENConfig(
     val morning: Int = 9,
     val afternoon: Int = 15,
     val night: Int = 20,
-    val use24: Boolean = false
-) : Config {
-    override fun instance(): ap.panini.kwhen.common.Controller {
+    val use24: Boolean = false,
+    override val timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    override val relativeTo: Long = Clock.System.now().epochSeconds
+) : Config() {
+    override fun instance(): Controller {
         return ENController(this)
     }
 }

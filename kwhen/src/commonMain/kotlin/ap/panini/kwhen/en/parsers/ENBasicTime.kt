@@ -17,7 +17,7 @@ internal class ENBasicTime(override val config: ENConfig) : ParserByWord(config)
         get() = "(evening|morning|afternoon|night|midnight|midday|noon|tonight)".toRegex()
 
     override fun onMatch(match: MatchResult): DateTime {
-        var date = DateTime()
+        var date = config.getDateTime()
 
         when (match.groupValues.first().lowercase()) {
             "evening" -> date = date.run {

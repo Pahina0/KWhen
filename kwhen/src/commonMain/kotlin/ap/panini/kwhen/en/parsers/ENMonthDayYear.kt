@@ -9,6 +9,7 @@ import ap.panini.kwhen.en.ordinal
 import ap.panini.kwhen.util.between31
 import ap.panini.kwhen.util.copy
 import ap.panini.kwhen.util.matchAny
+import kotlinx.datetime.Clock
 
 /**
  * En month day year finds the month, day, year time pattern
@@ -44,7 +45,7 @@ internal class ENMonthDayYear(override val config: ENConfig) : ParserByWord(conf
     // @formatter:on
 
     override fun onMatch(match: MatchResult): DateTime? {
-        var date = DateTime()
+        var date = config.getDateTime()
 
         // checking year
         val year = match.groupValues[3].lowercase()

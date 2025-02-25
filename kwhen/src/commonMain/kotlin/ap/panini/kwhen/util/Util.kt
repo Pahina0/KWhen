@@ -2,6 +2,7 @@ package ap.panini.kwhen.util
 
 import ap.panini.kwhen.DateTime
 import ap.panini.kwhen.TimeUnit
+import ap.panini.kwhen.configs.Config
 import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -155,17 +156,18 @@ internal fun LocalDateTime.mergeTime(other: LocalDateTime?, tags: Set<TimeUnit>)
 internal fun getDateTimeWithGeneral(
     generalNumber: Double,
     generalTag: TimeUnit,
-    relativeTo: LocalDateTime?
+    relativeTo: LocalDateTime?,
+    config: Config
 ): LocalDateTime {
     // decimal is a whole number
     if (generalNumber.rem(1).equals(0.0)) {
-        return getDateTimeWithGeneral(generalNumber.toInt(), generalTag, relativeTo)
+        return getDateTimeWithGeneral(generalNumber.toInt(), generalTag, relativeTo, config)
     }
 
     // finds a whole number time using a partial time
     val (tag, num) = generalTag.partial(generalNumber)
 
-    return getDateTimeWithGeneral(num, tag, relativeTo)
+    return getDateTimeWithGeneral(num, tag, relativeTo, config)
 }
 
 /**
@@ -179,10 +181,11 @@ internal fun getDateTimeWithGeneral(
 private fun getDateTimeWithGeneral(
     generalNumber: Int,
     generalTag: TimeUnit,
-    relativeTo: LocalDateTime?
+    relativeTo: LocalDateTime?,
+    config: Config
 ): LocalDateTime {
 
-    val now = DateTime.nowZeroed
+    val now = config.nowZeroed()
 
     if (relativeTo == null) {
         return when (generalTag) {

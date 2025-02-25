@@ -25,6 +25,6 @@ internal class MergerConsecutive(override val config: Config) : MergerWhitespace
             left.tagsTimeStart.maxOfOrNull { it.ordinal } == right.tagsTimeStart.maxOfOrNull { it.ordinal }
         ) return null
 
-        return left.merge(right)
+        return left.merge(right, config = config)
     }
 }
