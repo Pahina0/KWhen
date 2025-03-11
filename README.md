@@ -4,6 +4,7 @@ KWhen is a natural language processor that can extract phrases in sentences rela
 
 ## Download
 
+![GitHub Release](https://img.shields.io/github/v/release/pahina0/kwhen)  
 You can include the project using Gradle, replacing the version with the latest version found [here](https://central.sonatype.com/artifact/io.github.pahinaa.kwhen/kwhen/overview):
 
 ```gradle

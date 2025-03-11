@@ -13,7 +13,7 @@ import kotlinx.datetime.toLocalDateTime
 // for things which are uncertain such as evening being somewhere between 6 - 9pm
 sealed class Config(
     internal open val timeZone: TimeZone = TimeZone.currentSystemDefault(),
-    internal open val relativeTo: Long = Clock.System.now().epochSeconds
+    internal open val relativeTo: Long = Clock.System.now().toEpochMilliseconds()
 ) {
     abstract fun instance(): Controller
 
@@ -55,7 +55,7 @@ sealed class Config(
         Instant.fromEpochMilliseconds(relativeTo).toLocalDateTime(timeZone)
 
     internal fun nowZeroed() =
-        with(Instant.fromEpochMilliseconds(relativeTo).toLocalDateTime(timeZone)) {
+        with(now()) {
             LocalDateTime(year, month, dayOfMonth, hour, minute, 0, 0)
         }
 
