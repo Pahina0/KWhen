@@ -31,7 +31,8 @@ internal data class DateTime(
 ) : Comparable<DateTime> {
 
 
-    override fun compareTo(other: DateTime): Int = compareValuesBy(this, other,
+    override fun compareTo(other: DateTime): Int = compareValuesBy(
+        this, other,
         { points + tagsTimeStart.size + tagsTimeEnd.size },
         { it.range.first },
         { it.range.first - it.range.last }
@@ -80,7 +81,8 @@ internal data class DateTime(
 
         return copy(
             startTime = startTime.mergeTime(other.startTime, other.tagsTimeStart),
-            endTime = endTime?.mergeTime(other.endTime, other.tagsTimeEnd) ?: other.endTime,
+            endTime = endTime?.mergeTime(other.endTime, other.tagsTimeEnd)
+                ?: other.endTime,
             tagsDayOfWeek = tagsDayOfWeek + other.tagsDayOfWeek,
             tagsTimeStart = tagsTimeStart + other.tagsTimeStart,
             tagsTimeEnd = tagsTimeEnd + other.tagsTimeEnd,
