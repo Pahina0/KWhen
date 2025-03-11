@@ -21,7 +21,7 @@ internal class ENGeneralTime(override val config: Config) : ParserByWord(config)
         get() = "(?:of\\s+)?(?:a|an\\s+)?(${generalTimes.keys.matchAny()})".toRegex()
 
     override fun onMatch(match: MatchResult): DateTime {
-        return DateTime(
+        return config.getDateTime(
             generalTimeTag = generalTimes[match.groupValues[1]]!!
         )
     }

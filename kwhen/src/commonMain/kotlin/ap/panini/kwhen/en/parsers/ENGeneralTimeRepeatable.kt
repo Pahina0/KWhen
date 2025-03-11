@@ -21,7 +21,7 @@ internal class ENGeneralTimeRepeatable(override val config: Config) : ParserByWo
 
     override fun onMatch(match: MatchResult): DateTime {
         val bi = match.groupValues[1].isNotBlank()
-        return DateTime(
+        return config.getDateTime(
             repeatTag = generalTimesRepeatable[match.groupValues[2]]!!,
             repeatOften = if (bi) 2.0 else 1.0
         )

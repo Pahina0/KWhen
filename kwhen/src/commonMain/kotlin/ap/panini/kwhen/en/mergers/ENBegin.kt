@@ -6,9 +6,6 @@ import ap.panini.kwhen.common.mergers.MergerWhitespaceTrimmed
 import ap.panini.kwhen.configs.ENConfig
 import ap.panini.kwhen.util.copy
 import ap.panini.kwhen.util.getDateTimeWithGeneral
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 /**
  * En begin finds words that come before times that can be merged with times
@@ -37,7 +34,8 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
                 startTime = getDateTimeWithGeneral(
                     left.generalNumber ?: 1.0,
                     left.generalTimeTag,
-                    left.startTime
+                    left.startTime,
+                    config
                 ),
                 tagsTimeStart = left.tagsTimeStart + left.generalTimeTag,
                 generalTimeTag = null,
@@ -61,7 +59,7 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
 
             if (left.generalTimeTag == TimeUnit.HOUR || left.generalTimeTag == null) {
                 val currentHour =
-                    Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
+                    config.now().hour
                 val hour = if (config.use24) {
                     left.generalNumber
                 } else {
@@ -78,7 +76,8 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
                     startTime = getDateTimeWithGeneral(
                         hour,
                         TimeUnit.HOUR,
-                        null
+                        null,
+                        config
                     ).copy(
                         minute = 0
                     ),
@@ -92,7 +91,8 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
                 startTime = getDateTimeWithGeneral(
                     left.generalNumber,
                     left.generalTimeTag,
-                    null
+                    null,
+                    config
                 ),
                 tagsTimeStart = left.tagsTimeStart + left.generalTimeTag,
                 generalTimeTag = null,
@@ -104,7 +104,8 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
             startTime = getDateTimeWithGeneral(
                 left.generalNumber,
                 left.generalTimeTag ?: TimeUnit.HOUR,
-                left.endTime ?: left.startTime
+                left.endTime ?: left.startTime,
+                config
             ),
             tagsTimeStart = left.tagsTimeStart + (left.generalTimeTag ?: TimeUnit.HOUR),
             generalTimeTag = null,

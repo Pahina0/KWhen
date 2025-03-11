@@ -30,7 +30,7 @@ internal class MergerGeneralTags(override val config: Config) : MergerWhitespace
         val generalTag = left.generalTimeTag ?: right.generalTimeTag ?: return null
         val generalNumber = right.generalNumber ?: left.generalNumber ?: return null
 
-        return DateTime(
+        return config.getDateTime(
             generalNumber = generalNumber,
             generalTimeTag = generalTag
         )

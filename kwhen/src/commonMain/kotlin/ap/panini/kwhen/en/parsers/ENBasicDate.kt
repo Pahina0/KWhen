@@ -20,7 +20,7 @@ internal class ENBasicDate(override val config: ENConfig) : ParserByWord(config)
         get() = "(today|tmrw|tmr|tmw|tomorrow|yesterday|now|rn|right now)".toRegex()
 
     override fun onMatch(match: MatchResult): DateTime {
-        var date = DateTime()
+        var date = config.getDateTime()
 
         when (match.groupValues.first().lowercase()) {
             "today" -> date = date.copy(tagsTimeStart = setOf(TimeUnit.DAY))

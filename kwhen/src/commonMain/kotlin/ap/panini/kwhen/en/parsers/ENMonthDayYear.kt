@@ -44,7 +44,7 @@ internal class ENMonthDayYear(override val config: ENConfig) : ParserByWord(conf
     // @formatter:on
 
     override fun onMatch(match: MatchResult): DateTime? {
-        var date = DateTime()
+        var date = config.getDateTime()
 
         // checking year
         val year = match.groupValues[3].lowercase()
@@ -81,7 +81,7 @@ internal class ENMonthDayYear(override val config: ENConfig) : ParserByWord(conf
                     tagsTimeStart = tagsTimeStart + TimeUnit.MONTH
                 )
             }
-        } else if (day != ""){
+        } else if (day != "") {
 //            month.toIntOrNull()?.let { m ->
 //                // month 25 is nonsense
 //                if (m > 12 || m < 1) return null
@@ -91,7 +91,8 @@ internal class ENMonthDayYear(override val config: ENConfig) : ParserByWord(conf
                 copy(
                     startTime = startTime.copy(
                         monthNumber = months[month] ?: (month.toInt()),
-                        dayOfMonth = ordinal[day] ?: day.replace("th|st|rd|nd".toRegex(), "").toInt(),
+                        dayOfMonth = ordinal[day] ?: day.replace("th|st|rd|nd".toRegex(), "")
+                            .toInt(),
 
                         ),
                     tagsTimeStart = tagsTimeStart + TimeUnit.DAY + TimeUnit.MONTH

@@ -23,7 +23,7 @@ internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(co
         get() = "($between31)(?:(th|st|rd|nd)|(?:(?:\\s+|\\s*(:)\\s*)(\\d{1,2}))?\\s*([ap]\\.?m\\.?)?)|(${ordinal.keys.matchAny()})".toRegex()
 
     override fun onMatch(match: MatchResult): DateTime? {
-        var date = DateTime()
+        var date = config.getDateTime()
 
 
         val amPm: String? = match.groupValues[5].let {

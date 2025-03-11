@@ -1,39 +1,38 @@
 package ap.panini.kwhen
 
+import ap.panini.kwhen.configs.Config
 import ap.panini.kwhen.util.getDateTimeWithGeneral
 import ap.panini.kwhen.util.mergeTime
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 
 /**
  * The result of the parsed string
  * */
 internal data class DateTime(
-    val text: String = "",
-    val range: IntRange = 0..0,
+    val text: String,
+    val range: IntRange,
 
-    val startTime: LocalDateTime = nowZeroed,
+    val startTime: LocalDateTime,
 
-    val endTime: LocalDateTime? = null,
+    val endTime: LocalDateTime?,
 
-    val tagsDayOfWeek: Set<DayOfWeek> = mutableSetOf(),
-    val tagsTimeStart: Set<TimeUnit> = mutableSetOf(),
-    val tagsTimeEnd: Set<TimeUnit> = mutableSetOf(),
+    val tagsDayOfWeek: Set<DayOfWeek>,
+    val tagsTimeStart: Set<TimeUnit>,
+    val tagsTimeEnd: Set<TimeUnit>,
 
-    val repeatTag: TimeUnit? = null,
-    val repeatOften: Double? = null,
+    val repeatTag: TimeUnit?,
+    val repeatOften: Double?,
 
-    val generalTimeTag: TimeUnit? = null,
-    val generalNumber: Double? = null,
+    val generalTimeTag: TimeUnit?,
+    val generalNumber: Double?,
 
-    val points: Int = 1
+    val points: Int
 ) : Comparable<DateTime> {
 
 
-    override fun compareTo(other: DateTime): Int = compareValuesBy(this, other,
+    override fun compareTo(other: DateTime): Int = compareValuesBy(
+        this, other,
         { points + tagsTimeStart.size + tagsTimeEnd.size },
         { it.range.first },
         { it.range.first - it.range.last }
@@ -47,16 +46,17 @@ internal data class DateTime(
      * @param pureMerge takes the other time and combines all values blindly if true
      * @return
      */
-    fun merge(other: DateTime, pureMerge: Boolean = false): DateTime {
+    fun merge(other: DateTime, config: Config, pureMerge: Boolean = false): DateTime {
         if (generalNumber != null && generalTimeTag != null && !pureMerge) {
-            return merge(other, true).let {
+            return merge(other, config, true).let {
                 // will set to end time if the general number is an end time
                 if (endTime != null) {
                     it.copy(
                         endTime = getDateTimeWithGeneral(
                             generalNumber,
                             generalTimeTag,
-                            it.endTime
+                            it.endTime,
+                            config
                         ),
                         tagsTimeEnd = it.tagsTimeEnd + generalTimeTag,
                         generalNumber = null,
@@ -67,7 +67,8 @@ internal data class DateTime(
                         startTime = getDateTimeWithGeneral(
                             generalNumber,
                             generalTimeTag,
-                            it.startTime
+                            it.startTime,
+                            config
                         ),
                         tagsTimeStart = it.tagsTimeStart + generalTimeTag,
                         generalNumber = null,
@@ -80,7 +81,8 @@ internal data class DateTime(
 
         return copy(
             startTime = startTime.mergeTime(other.startTime, other.tagsTimeStart),
-            endTime = endTime?.mergeTime(other.endTime, other.tagsTimeEnd) ?: other.endTime,
+            endTime = endTime?.mergeTime(other.endTime, other.tagsTimeEnd)
+                ?: other.endTime,
             tagsDayOfWeek = tagsDayOfWeek + other.tagsDayOfWeek,
             tagsTimeStart = tagsTimeStart + other.tagsTimeStart,
             tagsTimeEnd = tagsTimeEnd + other.tagsTimeEnd,
@@ -90,14 +92,6 @@ internal data class DateTime(
             generalNumber = generalNumber ?: other.generalNumber,
             points = points + other.points
         )
-    }
-
-    companion object {
-        val nowZeroed = with(
-            Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        ) {
-            LocalDateTime(year, month, dayOfMonth, hour, minute, 0, 0)
-        }
     }
 
 }

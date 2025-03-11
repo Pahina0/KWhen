@@ -1,7 +1,7 @@
 package ap.panini.kwhen.util
 
-import ap.panini.kwhen.DateTime
 import ap.panini.kwhen.TimeUnit
+import ap.panini.kwhen.configs.Config
 import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -43,7 +43,7 @@ internal fun LocalDateTime.copy(
     dayOfMonth: Int = -1,
     hour: Int = -1,
     minute: Int = -1,
-    second: Int = -1
+    second: Int = -1,
 ): LocalDateTime {
 
     val mSec = if (second < 0) this.second else second
@@ -54,9 +54,6 @@ internal fun LocalDateTime.copy(
 
     val mDayOfMonth = (if (dayOfMonth < 0) this.dayOfMonth else dayOfMonth) - 1
 
-
-    val tz = TimeZone.currentSystemDefault()
-
     // gets the month and year info
     var inst = LocalDateTime(
         (if (year < 0) this.year else year) + (monthNumber - 1) / 12,
@@ -65,7 +62,7 @@ internal fun LocalDateTime.copy(
         0,
         0,
         0,
-    ).toInstant(tz)
+    ).toInstant(TimeZone.UTC)
 
 
     // adds month days years ect.
@@ -74,7 +71,7 @@ internal fun LocalDateTime.copy(
     inst = inst.plus(mMinute.minutes)
     inst = inst.plus(mSec.seconds)
 
-    return inst.toLocalDateTime(tz)
+    return inst.toLocalDateTime(TimeZone.UTC)
 
 }
 
@@ -100,7 +97,10 @@ internal fun LocalDateTime.copy(
  * @param tags any types of tags you want one to merge into the other for
  * @return a merged date time with merged tags
  */
-internal fun LocalDateTime.mergeTime(other: LocalDateTime?, tags: Set<TimeUnit>): LocalDateTime {
+internal fun LocalDateTime.mergeTime(
+    other: LocalDateTime?,
+    tags: Set<TimeUnit>
+): LocalDateTime {
     if (other == null) return this
 
     var time = this
@@ -155,17 +155,18 @@ internal fun LocalDateTime.mergeTime(other: LocalDateTime?, tags: Set<TimeUnit>)
 internal fun getDateTimeWithGeneral(
     generalNumber: Double,
     generalTag: TimeUnit,
-    relativeTo: LocalDateTime?
+    relativeTo: LocalDateTime?,
+    config: Config
 ): LocalDateTime {
     // decimal is a whole number
     if (generalNumber.rem(1).equals(0.0)) {
-        return getDateTimeWithGeneral(generalNumber.toInt(), generalTag, relativeTo)
+        return getDateTimeWithGeneral(generalNumber.toInt(), generalTag, relativeTo, config)
     }
 
     // finds a whole number time using a partial time
     val (tag, num) = generalTag.partial(generalNumber)
 
-    return getDateTimeWithGeneral(num, tag, relativeTo)
+    return getDateTimeWithGeneral(num, tag, relativeTo, config)
 }
 
 /**
@@ -179,10 +180,11 @@ internal fun getDateTimeWithGeneral(
 private fun getDateTimeWithGeneral(
     generalNumber: Int,
     generalTag: TimeUnit,
-    relativeTo: LocalDateTime?
+    relativeTo: LocalDateTime?,
+    config: Config
 ): LocalDateTime {
 
-    val now = DateTime.nowZeroed
+    val now = config.nowZeroed()
 
     if (relativeTo == null) {
         return when (generalTag) {
