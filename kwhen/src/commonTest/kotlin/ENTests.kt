@@ -729,4 +729,52 @@ class ENTests {
         }
 
     }
+
+    @Test
+    fun testNextDayHours() {
+        // Thu Mar 27 2025 16:46:48.065
+        TimeParser(ENConfig(relativeTo = 1743108408065)).parse("something is happening at 5").let {
+            it.first().let { parsed ->
+                assertEquals("at 5", parsed.text.trim())
+                assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), parsed.tagsTimeStart)
+                assertEquals(17, parsed.startTime[0].hour)
+                assertEquals(27, parsed.startTime[0].dayOfMonth)
+            }
+        }
+
+        // Thu Mar 27 2025 16:46:48.065
+        TimeParser(ENConfig(relativeTo = 1743108408065)).parse("something is happening at 4").let {
+            it.first().let { parsed ->
+                assertEquals("at 4", parsed.text.trim())
+                assertEquals(
+                    setOf(TimeUnit.HOUR, TimeUnit.MINUTE, TimeUnit.DAY),
+                    parsed.tagsTimeStart
+                )
+                assertEquals(4, parsed.startTime[0].hour)
+                assertEquals(28, parsed.startTime[0].dayOfMonth)
+            }
+        }
+
+
+        // Sat Dec 31 2022 23:11:00.000
+        TimeParser(ENConfig(relativeTo = 1672546260000)).parse("december is no more at 1").let {
+            it[1].let { parsed ->
+                assertEquals("at 1", parsed.text.trim())
+                assertEquals(
+                    setOf(
+                        TimeUnit.HOUR,
+                        TimeUnit.MINUTE,
+                        TimeUnit.DAY,
+                        TimeUnit.MONTH,
+                        TimeUnit.YEAR
+                    ), parsed.tagsTimeStart
+                )
+                assertEquals(1, parsed.startTime[0].hour)
+                assertEquals(1, parsed.startTime[0].dayOfMonth)
+                assertEquals(1, parsed.startTime[0].monthNumber)
+                assertEquals(2023, parsed.startTime[0].year)
+            }
+        }
+
+    }
 }
