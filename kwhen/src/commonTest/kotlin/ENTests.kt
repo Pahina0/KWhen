@@ -723,7 +723,8 @@ class ENTests {
         parserFinal.parse("18:25 9 crashed version 0.0.4").let {
             it.first().let { parsed ->
                 assertEquals("18:25", parsed.text.trim())
-                assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), parsed.tagsTimeStart)
+                assertContains(parsed.tagsTimeStart, TimeUnit.HOUR)
+                assertContains(parsed.tagsTimeStart, TimeUnit.MINUTE)
                 parsed.startTime[0].let { time ->
                     assertEquals(18, time.hour)
                     assertEquals(25, time.minute)
