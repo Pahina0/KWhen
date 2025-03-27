@@ -5,7 +5,6 @@ import ap.panini.kwhen.Parsed
 import ap.panini.kwhen.configs.Config
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.hours
@@ -198,15 +197,15 @@ abstract class Controller(open val config: Config) {
     }
 
     private fun dayOfWeek(start: LocalDateTime, day: DayOfWeek): LocalDateTime {
-        var from = start.toInstant(TimeZone.currentSystemDefault())
+        var from = start.toInstant(config.timeZone)
         for (i in 0..7) {
-            val time = from.toLocalDateTime(TimeZone.currentSystemDefault())
+            val time = from.toLocalDateTime(config.timeZone)
             if (time.dayOfWeek == day) return time
 
             from += 24.0.hours
         }
 
-        return from.toLocalDateTime(TimeZone.currentSystemDefault())
+        return from.toLocalDateTime(config.timeZone)
     }
 
 }
