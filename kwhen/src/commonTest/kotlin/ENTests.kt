@@ -4,10 +4,12 @@ import ap.panini.kwhen.TimeUnit
 import ap.panini.kwhen.configs.ENConfig
 import ap.panini.kwhen.util.copy
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 
@@ -483,7 +485,8 @@ class ENTests {
 
         parserFinal.parse("At 9 there is special food").let {
             assertEquals("At 9", it[0].text.trim())
-            assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeStart)
+            assertContains(it[0].tagsTimeStart, TimeUnit.HOUR)
+            assertContains(it[0].tagsTimeStart, TimeUnit.MINUTE)
         }
 
 
@@ -502,7 +505,8 @@ class ENTests {
 
         parserFinal.parse("Im going to swim at 9:18").let {
             assertEquals("at 9:18", it[0].text.trim())
-            assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeStart)
+            assertContains(it[0].tagsTimeStart, TimeUnit.HOUR)
+            assertContains(it[0].tagsTimeStart, TimeUnit.MINUTE)
             assertEquals(18, it[0].startTime.first().minute)
         }
     }
@@ -733,7 +737,12 @@ class ENTests {
     @Test
     fun testNextDayHours() {
         // Thu Mar 27 2025 16:46:48.065
-        TimeParser(ENConfig(relativeTo = 1743108408065)).parse("something is happening at 5").let {
+        TimeParser(
+            ENConfig(
+                relativeTo = 1743108408065,
+                timeZone = TimeZone.of("US/Eastern")
+            )
+        ).parse("something is happening at 5").let {
             it.first().let { parsed ->
                 assertEquals("at 5", parsed.text.trim())
                 assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), parsed.tagsTimeStart)
@@ -743,7 +752,12 @@ class ENTests {
         }
 
         // Thu Mar 27 2025 16:46:48.065
-        TimeParser(ENConfig(relativeTo = 1743108408065)).parse("something is happening at 4").let {
+        TimeParser(
+            ENConfig(
+                relativeTo = 1743108408065,
+                timeZone = TimeZone.of("US/Eastern")
+            )
+        ).parse("something is happening at 4").let {
             it.first().let { parsed ->
                 assertEquals("at 4", parsed.text.trim())
                 assertEquals(
@@ -755,9 +769,32 @@ class ENTests {
             }
         }
 
+        // Thu Mar 27 2025 16:46:48.065
+        TimeParser(
+            ENConfig(
+                relativeTo = 1743108408065,
+                timeZone = TimeZone.of("US/Eastern")
+            )
+        ).parse("something is happening at 4:18").let {
+            it.first().let { parsed ->
+                assertEquals("at 4:18", parsed.text.trim())
+                assertEquals(
+                    setOf(TimeUnit.HOUR, TimeUnit.MINUTE, TimeUnit.DAY),
+                    parsed.tagsTimeStart
+                )
+                assertEquals(4, parsed.startTime[0].hour)
+                assertEquals(18, parsed.startTime[0].minute)
+                assertEquals(28, parsed.startTime[0].dayOfMonth)
+            }
+        }
 
         // Sat Dec 31 2022 23:11:00.000
-        TimeParser(ENConfig(relativeTo = 1672546260000)).parse("december is no more at 1").let {
+        TimeParser(
+            ENConfig(
+                relativeTo = 1672546260000,
+                timeZone = TimeZone.of("US/Eastern")
+            )
+        ).parse("december is no more at 1").let {
             it[1].let { parsed ->
                 assertEquals("at 1", parsed.text.trim())
                 assertEquals(

@@ -8,6 +8,10 @@ import ap.panini.kwhen.en.ordinal
 import ap.panini.kwhen.util.between31
 import ap.panini.kwhen.util.copy
 import ap.panini.kwhen.util.matchAny
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Duration.Companion.days
 
 /**
  * En numeric ordinal finds time units that only have numbers in them
@@ -69,8 +73,8 @@ internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(co
             if (hour > 12 && amPm == "am") return null
 
             if ((minute.toIntOrNull() ?: 0) >= 60) return null
-
-            date.run {
+        var additionalDays = 0
+            val tempDate = date.run {
                 copy(
                     startTime = startTime.copy(
                         hour = hour.let { hr ->
@@ -95,8 +99,10 @@ internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(co
                             if (curTime < hour * 60 + min) {
                                 hour
                             } else if (curTime < (hour + addBy) * 60 + min) {
+                                additionalDays = (hour + addBy) / 24
                                 (hour + addBy) % 24
                             } else {
+                                additionalDays = 1
                                 hour
                             }
                         },
@@ -111,6 +117,32 @@ internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(co
                 )
             }
 
+            // calculates the next day since things like at 4, when its already 5, you would want to go next day
+            return if (additionalDays > 0) {
+                val newTime =
+                    (tempDate.startTime.toInstant(TimeZone.UTC) + additionalDays.days).toLocalDateTime(
+                        TimeZone.UTC
+                    )
+
+                val newTags = tempDate.tagsTimeStart.toMutableSet()
+                newTags += TimeUnit.DAY
+
+                if (tempDate.startTime.monthNumber != newTime.monthNumber) {
+                    newTags += TimeUnit.MONTH
+                }
+
+                if (tempDate.startTime.year != newTime.year) {
+                    newTags += TimeUnit.YEAR
+                }
+
+
+                tempDate.copy(
+                    startTime = newTime,
+                    tagsTimeStart = newTags
+                )
+            } else {
+                tempDate
+            }
         }
 
         return date
