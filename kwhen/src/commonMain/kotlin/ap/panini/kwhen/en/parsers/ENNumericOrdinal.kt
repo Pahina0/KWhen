@@ -8,7 +8,6 @@ import ap.panini.kwhen.en.ordinal
 import ap.panini.kwhen.util.between31
 import ap.panini.kwhen.util.copy
 import ap.panini.kwhen.util.matchAny
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.days
@@ -120,8 +119,8 @@ internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(co
             // calculates the next day since things like at 4, when its already 5, you would want to go next day
             return if (additionalDays > 0) {
                 val newTime =
-                    (tempDate.startTime.toInstant(TimeZone.UTC) + additionalDays.days).toLocalDateTime(
-                        TimeZone.UTC
+                    (tempDate.startTime.toInstant(config.timeZone) + additionalDays.days).toLocalDateTime(
+                        config.timeZone
                     )
 
                 val newTags = tempDate.tagsTimeStart.toMutableSet()

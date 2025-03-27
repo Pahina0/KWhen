@@ -6,7 +6,6 @@ import ap.panini.kwhen.common.mergers.MergerWhitespaceTrimmed
 import ap.panini.kwhen.configs.ENConfig
 import ap.panini.kwhen.util.copy
 import ap.panini.kwhen.util.getDateTimeWithGeneral
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.days
@@ -97,8 +96,8 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
                 // calculates the next day since things like at 4, when its already 5, you would want to go next day
                 return if (additionalDays > 0) {
                     val newTime =
-                        (tempDate.startTime.toInstant(TimeZone.UTC) + additionalDays.days).toLocalDateTime(
-                            TimeZone.UTC
+                        (tempDate.startTime.toInstant(config.timeZone) + additionalDays.days).toLocalDateTime(
+                            config.timeZone
                         )
 
                     val newTags = tempDate.tagsTimeStart.toMutableSet()

@@ -201,7 +201,7 @@ private fun getDateTimeWithGeneral(
 
 
     return relativeTo
-        .toInstant(TimeZone.currentSystemDefault())
+        .toInstant(config.timeZone)
         .plus(
             DateTimePeriod(
                 seconds = if (generalTag == TimeUnit.SECOND) generalNumber else 0,
@@ -211,9 +211,9 @@ private fun getDateTimeWithGeneral(
                 months = if (generalTag == TimeUnit.MONTH) generalNumber else 0,
                 years = if (generalTag == TimeUnit.YEAR) generalNumber else 0,
             ),
-            TimeZone.currentSystemDefault()
+            config.timeZone
         )
-        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .toLocalDateTime(config.timeZone)
 
 }
 
