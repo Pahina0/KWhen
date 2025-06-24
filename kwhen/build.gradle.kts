@@ -1,6 +1,7 @@
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinMultiplatform
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -12,16 +13,17 @@ plugins {
 
 
 kotlin {
-    kotlin.applyDefaultHierarchyTemplate()
+    applyDefaultHierarchyTemplate()
     jvm()
+
     androidTarget {
         publishLibraryVariants("release")
 
-//        tasks.withType<KotlinJvmCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+        tasks.withType<KotlinJvmCompile>().configureEach {
+            compilerOptions {
+                jvmTarget.set(JvmTarget.DEFAULT)
+            }
         }
-//        }
     }
 
     iosX64()
@@ -33,7 +35,6 @@ kotlin {
     mingwX64()
 
     sourceSets {
-
         commonMain {
             dependencies {
                 // dependencies for main
@@ -48,6 +49,7 @@ kotlin {
             }
         }
     }
+
 }
 
 android {
@@ -55,11 +57,6 @@ android {
     compileSdk = 35
     defaultConfig {
         minSdk = 24
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
