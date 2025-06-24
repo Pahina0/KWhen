@@ -156,7 +156,7 @@ abstract class Controller(open val config: Config) {
 
             for (date in curTimes.filter { it.points != 0 }) {
                 if (ret.isNotEmpty() && date.range.first <= ret.last().range.last + 1) {
-                    val mergeTo = ret.removeLast()
+                    val mergeTo = ret.removeAt(ret.size - 1)
 
 
                     val st = if (date.tagsDayOfWeek.isNotEmpty()) {
@@ -220,7 +220,7 @@ abstract class Controller(open val config: Config) {
 
     private fun dayOfWeek(start: LocalDateTime, day: DayOfWeek): LocalDateTime {
         var from = start.toInstant(config.timeZone)
-        for (i in 0..7) {
+        repeat(7) {
             val time = from.toLocalDateTime(config.timeZone)
             if (time.dayOfWeek == day) return time
 

@@ -12,6 +12,7 @@ plugins {
 }
 
 
+
 kotlin {
     applyDefaultHierarchyTemplate()
     jvm()
@@ -50,6 +51,12 @@ kotlin {
         }
     }
 
+}
+
+tasks.withType<Test> {
+    testLogging {
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
 }
 
 android {
