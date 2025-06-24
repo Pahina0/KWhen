@@ -47,5 +47,8 @@ jobs:
       - name: Grant execute permissions to Gradle wrapper
         run: chmod +x ./gradlew
 
+      - name: Clean build
+        run: ./gradlew clean build
+
       - name: Run Gradle Task
         run: ./gradlew ${{ matrix.target }}
