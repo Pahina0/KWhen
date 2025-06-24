@@ -24,7 +24,6 @@ class ENTests {
     fun setup() {
         timeParser = TimeParserTest()
         parserFinal = TimeParser()
-
     }
 
 
