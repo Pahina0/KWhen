@@ -1,4 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import com.vanniktech.maven.publish.KotlinMultiplatform
@@ -52,9 +51,9 @@ kotlin {
 
 android {
     namespace = "io.github.pahinaa"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk = 35
     defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        minSdk = 24
     }
 }
 
@@ -64,11 +63,11 @@ android {
  *
  * maven central user & pw should be auth token from maven central
  * */
-
 mavenPublishing {
     coordinates("io.github.pahinaa.kwhen", "kwhen", "0.1.0")
 
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
+//    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
 
     configure(
