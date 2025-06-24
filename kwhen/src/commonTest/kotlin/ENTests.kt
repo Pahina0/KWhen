@@ -11,7 +11,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
-
+import ap.panini.kwhen.DateTime
+import ap.panini.kwhen.Parsed
 
 class ENTests {
     private lateinit var timeParser: TimeParserTest
@@ -818,18 +819,18 @@ class ENTests {
     @Test
     fun testMultiStart() {
         parserFinal.parse("There is a big event on tues and fri at 6pm")[0].let { parsed ->
-                assertEquals("on tues and fri at 6pm", parsed.text.trim())
-                assertEquals(
-                    setOf(
-                        TimeUnit.HOUR,
-                        TimeUnit.MINUTE,
-                        TimeUnit.WEEK,
-                    ), parsed.tagsTimeStart
-                )
-                assertEquals(18, parsed.startTime[0].hour)
-                assertEquals(18, parsed.startTime[1].hour)
-                assertEquals(kotlinx.datetime.DayOfWeek.TUESDAY, parsed.startTime[1].dayOfWeek)
-                assertEquals(kotlinx.datetime.DayOfWeek.FRIDAY, parsed.startTime[0].dayOfWeek)
+            assertEquals("on tues and fri at 6pm", parsed.text.trim())
+            assertEquals(
+                setOf(
+                    TimeUnit.HOUR,
+                    TimeUnit.MINUTE,
+                    TimeUnit.WEEK,
+                ), parsed.tagsTimeStart
+            )
+            assertEquals(18, parsed.startTime[0].hour)
+            assertEquals(18, parsed.startTime[1].hour)
+            assertEquals(kotlinx.datetime.DayOfWeek.TUESDAY, parsed.startTime[1].dayOfWeek)
+            assertEquals(kotlinx.datetime.DayOfWeek.FRIDAY, parsed.startTime[0].dayOfWeek)
         }
 
         parserFinal.parse("Every monday and thurs at 9:30pm we have a big dinner!")[0].let { parsed ->
@@ -850,5 +851,21 @@ class ENTests {
             assertEquals(kotlinx.datetime.DayOfWeek.THURSDAY, parsed.startTime[0].dayOfWeek)
             assertEquals(kotlinx.datetime.DayOfWeek.MONDAY, parsed.startTime[1].dayOfWeek)
         }
+    }
+}
+
+private class TimeParserTest(private val config: ENConfig = ENConfig()) {
+    fun parse(input: String): List<DateTime> {
+        return config.instance().parse(input)
+            .filter { it.generalTimeTag == null && it.generalNumber == null }
+    }
+
+    fun parseAndMerge(input: String): List<DateTime> {
+        return config.instance().let { it.merge(input, it.parse(input)) }.flatten()
+            .sortedByDescending { it.points }
+    }
+
+    fun parseMergeProcess(input: String): List<Parsed> {
+        return config.instance().let { it.finalize(it.merge(input, it.parse(input))) }
     }
 }
