@@ -11,8 +11,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
-import ap.panini.kwhen.DateTime
-import ap.panini.kwhen.Parsed
 
 class ENTests {
     private lateinit var timeParser: TimeParserTest
@@ -851,21 +849,5 @@ class ENTests {
             assertEquals(kotlinx.datetime.DayOfWeek.THURSDAY, parsed.startTime[0].dayOfWeek)
             assertEquals(kotlinx.datetime.DayOfWeek.MONDAY, parsed.startTime[1].dayOfWeek)
         }
-    }
-}
-
-private class TimeParserTest(private val config: ENConfig = ENConfig()) {
-    fun parse(input: String): List<DateTime> {
-        return config.instance().parse(input)
-            .filter { it.generalTimeTag == null && it.generalNumber == null }
-    }
-
-    fun parseAndMerge(input: String): List<DateTime> {
-        return config.instance().let { it.merge(input, it.parse(input)) }.flatten()
-            .sortedByDescending { it.points }
-    }
-
-    fun parseMergeProcess(input: String): List<Parsed> {
-        return config.instance().let { it.finalize(it.merge(input, it.parse(input))) }
     }
 }

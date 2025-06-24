@@ -33,13 +33,15 @@ kotlin {
     mingwX64()
 
     sourceSets {
-        val commonMain by getting {
+
+        commonMain {
             dependencies {
                 // dependencies for main
                 implementation(libs.kotlinx.datetime)
             }
         }
-        val commonTest by getting {
+
+        commonTest {
             dependencies {
                 // dependencies for tests
                 implementation(libs.kotlin.test)
