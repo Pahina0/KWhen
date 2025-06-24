@@ -14,7 +14,6 @@ import kotlinx.datetime.toLocalDateTime
 sealed class Config(
     internal open val timeZone: TimeZone = TimeZone.currentSystemDefault(),
     internal open val relativeTo: Long = Clock.System.now().toEpochMilliseconds(),
-    internal open val lookAhead: Boolean = true
 ) {
     abstract fun instance(): Controller
 
