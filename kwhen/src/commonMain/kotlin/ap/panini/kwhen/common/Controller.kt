@@ -2,7 +2,9 @@ package ap.panini.kwhen.common
 
 import ap.panini.kwhen.DateTime
 import ap.panini.kwhen.Parsed
+import ap.panini.kwhen.TimeUnit
 import ap.panini.kwhen.configs.Config
+import ap.panini.kwhen.util.copy
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toInstant
@@ -154,7 +156,7 @@ abstract class Controller(open val config: Config) {
 
             for (date in curTimes.filter { it.points != 0 }) {
                 if (ret.isNotEmpty() && date.range.first <= ret.last().range.last + 1) {
-                    val mergeTo = ret.last()
+                    val mergeTo = ret.removeLast()
 
 
                     val st = if (date.tagsDayOfWeek.isNotEmpty()) {
@@ -166,18 +168,38 @@ abstract class Controller(open val config: Config) {
                     } else listOf(date.startTime)
 
 
-                    ret.removeLast()
+                    // merges the tags, such as if one has hour/minute and the other doesn't
+                    var mergedStartTime = mergeTo.startTime
+                    for (tag in date.tagsTimeStart) {
+                        if (tag !in mergeTo.tagsTimeStart) {
+                            mergedStartTime = mergedStartTime.map {
+                                when (tag) {
+                                    TimeUnit.SECOND -> it.copy(second = date.startTime.second)
+                                    TimeUnit.MINUTE -> it.copy(minute = date.startTime.minute)
+                                    TimeUnit.HOUR -> it.copy(hour = date.startTime.hour)
+                                    TimeUnit.DAY -> it.copy(dayOfMonth = date.startTime.dayOfMonth)
+                                    TimeUnit.WEEK -> { it }
+                                    TimeUnit.MONTH -> it.copy(monthNumber = date.startTime.monthNumber)
+                                    TimeUnit.YEAR -> it.copy(year = date.startTime.year)
+                                }
+                            }
+                        }
+                    }
+
                     ret += mergeTo.copy(
                         range = mergeTo.range.first..date.range.last,
                         text = mergeTo.text + date.text.substring(mergeTo.range.last - date.range.first + 1),
-                        startTime = st + mergeTo.startTime
+                        startTime = st + mergedStartTime,
+                        tagsTimeStart = date.tagsTimeStart + mergeTo.tagsTimeStart
                     )
+
                 } else {
                     // random numbers with no meaning
                     if (date.generalTimeTag == null && date.generalNumber != null) continue
 
                     val whole = date.repeatTag?.unPartial(date.repeatOften ?: 0.0)
-                    ret += Parsed(date.text,
+                    ret += Parsed(
+                        date.text,
                         date.range,
                         if (date.tagsDayOfWeek.isNotEmpty()) date.tagsDayOfWeek.map {
                             dayOfWeek(

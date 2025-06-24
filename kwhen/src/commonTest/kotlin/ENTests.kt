@@ -815,4 +815,41 @@ class ENTests {
         }
 
     }
+
+    @Test
+    fun testMultiStart() {
+        parserFinal.parse("There is a big event on tues and fri at 6pm")[0].let { parsed ->
+                assertEquals("on tues and fri at 6pm", parsed.text.trim())
+                assertEquals(
+                    setOf(
+                        TimeUnit.HOUR,
+                        TimeUnit.MINUTE,
+                        TimeUnit.WEEK,
+                    ), parsed.tagsTimeStart
+                )
+                assertEquals(18, parsed.startTime[0].hour)
+                assertEquals(18, parsed.startTime[1].hour)
+                assertEquals(kotlinx.datetime.DayOfWeek.TUESDAY, parsed.startTime[1].dayOfWeek)
+                assertEquals(kotlinx.datetime.DayOfWeek.FRIDAY, parsed.startTime[0].dayOfWeek)
+        }
+
+        parserFinal.parse("Every monday and thurs at 9:30pm we have a big dinner!")[0].let { parsed ->
+            assertEquals("Every monday and thurs at 9:30pm", parsed.text.trim())
+            assertEquals(
+                setOf(
+                    TimeUnit.HOUR,
+                    TimeUnit.MINUTE,
+                    TimeUnit.WEEK,
+                ), parsed.tagsTimeStart
+            )
+            assertEquals(21, parsed.startTime[0].hour)
+            assertEquals(21, parsed.startTime[1].hour)
+            assertEquals(30, parsed.startTime[0].minute)
+            assertEquals(30, parsed.startTime[1].minute)
+            assertEquals(1, parsed.repeatOften)
+            assertEquals(TimeUnit.WEEK, parsed.repeatTag)
+            assertEquals(kotlinx.datetime.DayOfWeek.THURSDAY, parsed.startTime[0].dayOfWeek)
+            assertEquals(kotlinx.datetime.DayOfWeek.MONDAY, parsed.startTime[1].dayOfWeek)
+        }
+    }
 }
