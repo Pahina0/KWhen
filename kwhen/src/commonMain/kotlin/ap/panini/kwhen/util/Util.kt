@@ -38,26 +38,30 @@ internal val between31 = "(?<!\\d)(?:0?[1-9]|[12][0-9]|3[01])(?!\\d)".toRegex()
  * @return The copied date time with the given modifications
  */
 internal fun LocalDateTime.copy(
-    year: Int = -1,
-    monthNumber: Int = -1,
-    dayOfMonth: Int = -1,
-    hour: Int = -1,
-    minute: Int = -1,
-    second: Int = -1,
+    year: Int? = null,
+    monthNumber: Int? = null,
+    dayOfMonth: Int? = null,
+    hour: Int? = null,
+    minute: Int? = null,
+    second: Int? = null,
 ): LocalDateTime {
 
-    val mSec = if (second < 0) this.second else second
+    val mSec = second ?: this.second
 
-    val mMinute = if (minute < 0) this.minute else minute
+    val mMinute = minute ?: this.minute
 
-    val mHour = if (hour < 0) this.hour else hour
+    val mHour = hour ?: this.hour
 
-    val mDayOfMonth = (if (dayOfMonth < 0) this.dayOfMonth else dayOfMonth) - 1
+    val mDayOfMonth = (dayOfMonth ?: this.dayOfMonth) - 1
+
+    val mYear = year ?: this.year
+
+    val mMonthNumber = monthNumber ?: this.monthNumber
 
     // gets the month and year info
     var inst = LocalDateTime(
-        (if (year < 0) this.year else year) + (monthNumber - 1) / 12,
-        if (monthNumber < 0) this.monthNumber else ((monthNumber - 1) % 12 + 1),
+        mYear + (mMonthNumber - 1) / 12,
+        if (monthNumber == null) this.monthNumber else ((monthNumber - 1) % 12 + 1),
         1, // month can't be 0
         0,
         0,

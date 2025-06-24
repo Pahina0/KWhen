@@ -22,7 +22,8 @@ data class ENConfig(
     val night: Int = 20,
     val use24: Boolean = false,
     override val timeZone: TimeZone = TimeZone.currentSystemDefault(),
-    override val relativeTo: Long = Clock.System.now().toEpochMilliseconds()
+    override val relativeTo: Long = Clock.System.now().toEpochMilliseconds(),
+    override val lookAhead: Boolean = true
 ) : Config() {
     override fun instance(): Controller {
         return ENController(this)
