@@ -7,6 +7,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
@@ -14,6 +15,7 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 
 /**
  * Match any takes a list and turns it into a regex that matches any item in that list
@@ -37,6 +39,7 @@ internal val between31 = "(?<!\\d)(?:0?[1-9]|[12][0-9]|3[01])(?!\\d)".toRegex()
  * @param second
  * @return The copied date time with the given modifications
  */
+@OptIn(ExperimentalTime::class)
 internal fun LocalDateTime.copy(
     year: Int? = null,
     monthNumber: Int? = null,
@@ -52,16 +55,16 @@ internal fun LocalDateTime.copy(
 
     val mHour = hour ?: this.hour
 
-    val mDayOfMonth = (dayOfMonth ?: this.dayOfMonth) - 1
+    val mDayOfMonth = (dayOfMonth ?: day) - 1
 
     val mYear = year ?: this.year
 
-    val mMonthNumber = monthNumber ?: this.monthNumber
+    val mMonthNumber = monthNumber ?: month.number
 
     // gets the month and year info
     var inst = LocalDateTime(
         mYear + (mMonthNumber - 1) / 12,
-        if (monthNumber == null) this.monthNumber else ((monthNumber - 1) % 12 + 1),
+        if (monthNumber == null) month.number else ((monthNumber - 1) % 12 + 1),
         1, // month can't be 0
         0,
         0,
@@ -126,7 +129,7 @@ internal fun LocalDateTime.mergeTime(
             }
 
             TimeUnit.DAY -> {
-                time.copy(dayOfMonth = other.dayOfMonth)
+                time.copy(dayOfMonth = other.day)
             }
 
             TimeUnit.WEEK -> {
@@ -134,7 +137,7 @@ internal fun LocalDateTime.mergeTime(
             }
 
             TimeUnit.MONTH -> {
-                time.copy(monthNumber = other.monthNumber)
+                time.copy(monthNumber = other.month.number)
             }
 
             TimeUnit.YEAR -> {
@@ -181,6 +184,7 @@ internal fun getDateTimeWithGeneral(
  * @param relativeTo
  * @return
  */
+@OptIn(ExperimentalTime::class)
 private fun getDateTimeWithGeneral(
     generalNumber: Int,
     generalTag: TimeUnit,

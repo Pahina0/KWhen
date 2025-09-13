@@ -8,9 +8,11 @@ import ap.panini.kwhen.en.ordinal
 import ap.panini.kwhen.util.between31
 import ap.panini.kwhen.util.copy
 import ap.panini.kwhen.util.matchAny
+import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.days
+import kotlin.time.ExperimentalTime
 
 /**
  * En numeric ordinal finds time units that only have numbers in them
@@ -21,6 +23,7 @@ import kotlin.time.Duration.Companion.days
  * @property config
  * @constructor Create empty E n numeric ordinal
  */
+@OptIn(ExperimentalTime::class)
 internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
     override val matchPattern: Regex
         get() = "($between31)(?:(th|st|rd|nd)|(?:(?:\\s+|\\s*(:)\\s*)(\\d{1,2}))?\\s*([ap]\\.?m\\.?)?)|(${ordinal.keys.matchAny()})".toRegex()
@@ -126,7 +129,7 @@ internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(co
                 val newTags = tempDate.tagsTimeStart.toMutableSet()
                 newTags += TimeUnit.DAY
 
-                if (tempDate.startTime.monthNumber != newTime.monthNumber) {
+                if (tempDate.startTime.month.number != newTime.month.number) {
                     newTags += TimeUnit.MONTH
                 }
 

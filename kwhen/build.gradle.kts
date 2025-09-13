@@ -61,7 +61,7 @@ tasks.withType<Test> {
 
 android {
     namespace = "io.github.pahinaa"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         minSdk = 24
     }
@@ -74,7 +74,7 @@ android {
  * maven central user & pw should be auth token from maven central
  * */
 mavenPublishing {
-    coordinates("io.github.pahinaa.kwhen", "kwhen", "0.1.0")
+    coordinates("io.github.pahinaa.kwhen", "kwhen", "0.1.1")
 
     publishToMavenCentral()
     signAllPublications()

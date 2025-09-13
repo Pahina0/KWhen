@@ -7,9 +7,11 @@ import ap.panini.kwhen.configs.Config
 import ap.panini.kwhen.util.copy
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.ExperimentalTime
 
 /**
  * Controller parses, merges, and finalizes times based on parsers and mergers given.
@@ -177,9 +179,9 @@ abstract class Controller(open val config: Config) {
                                     TimeUnit.SECOND -> it.copy(second = date.startTime.second)
                                     TimeUnit.MINUTE -> it.copy(minute = date.startTime.minute)
                                     TimeUnit.HOUR -> it.copy(hour = date.startTime.hour)
-                                    TimeUnit.DAY -> it.copy(dayOfMonth = date.startTime.dayOfMonth)
+                                    TimeUnit.DAY -> it.copy(dayOfMonth = date.startTime.day)
                                     TimeUnit.WEEK -> { it }
-                                    TimeUnit.MONTH -> it.copy(monthNumber = date.startTime.monthNumber)
+                                    TimeUnit.MONTH -> it.copy(monthNumber = date.startTime.month.number)
                                     TimeUnit.YEAR -> it.copy(year = date.startTime.year)
                                 }
                             }
@@ -218,6 +220,7 @@ abstract class Controller(open val config: Config) {
         return allRet.reduce { l, r -> l union r }.sortedBy { it.range.first }
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun dayOfWeek(start: LocalDateTime, day: DayOfWeek): LocalDateTime {
         var from = start.toInstant(config.timeZone)
         repeat(7) {
