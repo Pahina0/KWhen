@@ -426,14 +426,14 @@ class ENTests {
 
     @Test
     fun testProcessList() {
-        timeParser.parseMergeProcess("i will go swim on every other 9th  10th, 12th").let {
+        parserFinal.parse("i will go swim on every other 9th  10th, 12th").let {
             assertEquals("on every other 9th  10th, 12th", it[0].text.trim())
             assertEquals(3, it[0].startTime.size)
             assertEquals(TimeUnit.MONTH, it[0].repeatTag)
             assertEquals(2, it[0].repeatOften)
         }
 
-        timeParser.parseMergeProcess("i swim every mon, tues and fri").let {
+        parserFinal.parse("i swim every mon, tues and fri").let {
             assertEquals("every mon, tues and fri", it[0].text.trim())
             assertEquals(3, it[0].startTime.size)
             assertEquals(setOf(TimeUnit.WEEK), it[0].tagsTimeStart)
@@ -441,7 +441,7 @@ class ENTests {
             assertEquals(1, it[0].repeatOften)
         }
 
-        timeParser.parseMergeProcess("the world is boring every june, jul, and aug").let {
+        parserFinal.parse("the world is boring every june, jul, and aug").let {
             assertEquals("every june, jul, and aug", it[0].text.trim())
             assertEquals(3, it[0].startTime.size)
             assertEquals(setOf(TimeUnit.MONTH), it[0].tagsTimeStart)
@@ -449,7 +449,7 @@ class ENTests {
             assertEquals(1, it[0].repeatOften)
         }
 
-        timeParser.parseMergeProcess("the 4th, 5th 6th, 19th, and 20th and may").let {
+        parserFinal.parse("the 4th, 5th 6th, 19th, and 20th and may").let {
             assertEquals(2, it.size)
             assertEquals(5, it[0].startTime.size)
             assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
@@ -816,7 +816,7 @@ class ENTests {
 
     @Test
     fun testMultiStart() {
-        parserFinal.parse("There is a big event on tues and fri at 6pm")[0].let { parsed ->
+        TimeParser().parse("There is a big event on tues and fri at 6pm")[0].let { parsed ->
             assertEquals("on tues and fri at 6pm", parsed.text.trim())
             assertEquals(
                 setOf(
@@ -831,7 +831,7 @@ class ENTests {
             assertEquals(kotlinx.datetime.DayOfWeek.FRIDAY, parsed.startTime[0].dayOfWeek)
         }
 
-        parserFinal.parse("Every monday and thurs at 9:30pm we have a big dinner!")[0].let { parsed ->
+        TimeParser().parse("Every monday and thurs at 9:30pm we have a big dinner!")[0].let { parsed ->
             assertEquals("Every monday and thurs at 9:30pm", parsed.text.trim())
             assertEquals(
                 setOf(

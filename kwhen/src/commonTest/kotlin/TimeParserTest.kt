@@ -1,5 +1,4 @@
 import ap.panini.kwhen.DateTime
-import ap.panini.kwhen.Parsed
 import ap.panini.kwhen.configs.ENConfig
 
 
@@ -12,7 +11,4 @@ internal class TimeParserTest(private val config: ENConfig = ENConfig()) {
         return config.instance().let { it.merge(input, it.parse(input)) }.flatten().sortedByDescending { it.points }
     }
 
-    fun parseMergeProcess(input: String): List<Parsed> {
-        return config.instance().let { it.finalize(it.merge(input, it.parse(input))) }
-    }
 }
