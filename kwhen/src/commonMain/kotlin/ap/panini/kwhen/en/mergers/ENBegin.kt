@@ -6,9 +6,11 @@ import ap.panini.kwhen.common.mergers.MergerWhitespaceTrimmed
 import ap.panini.kwhen.configs.ENConfig
 import ap.panini.kwhen.util.copy
 import ap.panini.kwhen.util.getDateTimeWithGeneral
+import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.days
+import kotlin.time.ExperimentalTime
 
 /**
  * En begin finds words that come before times that can be merged with times
@@ -23,6 +25,7 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
     override val mergePrefixWithLeft: Boolean
         get() = true
 
+    @OptIn(ExperimentalTime::class)
     override fun onMatch(
         left: DateTime?,
         right: DateTime?,
@@ -103,7 +106,7 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
                     val newTags = tempDate.tagsTimeStart.toMutableSet()
                     newTags += TimeUnit.DAY
 
-                    if (tempDate.startTime.monthNumber != newTime.monthNumber) {
+                    if (tempDate.startTime.month.number != newTime.month.number) {
                         newTags += TimeUnit.MONTH
                     }
 

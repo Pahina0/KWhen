@@ -4,14 +4,15 @@ import ap.panini.kwhen.DateTime
 import ap.panini.kwhen.DayOfWeek
 import ap.panini.kwhen.TimeUnit
 import ap.panini.kwhen.common.Controller
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 // for things which are uncertain such as evening being somewhere between 6 - 9pm
-sealed class Config(
+sealed class Config @OptIn(ExperimentalTime::class) constructor(
     internal open val timeZone: TimeZone = TimeZone.currentSystemDefault(),
     internal open val relativeTo: Long = Clock.System.now().toEpochMilliseconds(),
 ) {
@@ -51,12 +52,13 @@ sealed class Config(
         points
     )
 
+    @OptIn(ExperimentalTime::class)
     internal fun now() =
         Instant.fromEpochMilliseconds(relativeTo).toLocalDateTime(timeZone)
 
     internal fun nowZeroed() =
         with(now()) {
-            LocalDateTime(year, month, dayOfMonth, hour, minute, 0, 0)
+            LocalDateTime(year, month, day, hour, minute, 0, 0)
         }
 
 

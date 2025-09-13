@@ -1,14 +1,15 @@
 import ap.panini.kwhen.TimeParser
-import ap.panini.kwhen.common.Parser
 import ap.panini.kwhen.configs.ENConfig
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.days
+import kotlin.time.ExperimentalTime
 
 class RelativeTimesAndTimeZoneTest {
 
+    @OptIn(ExperimentalTime::class)
     @Test
     fun relativeTimeTest() {
         TimeParser(

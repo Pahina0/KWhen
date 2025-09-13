@@ -2,8 +2,9 @@ package ap.panini.kwhen.configs
 
 import ap.panini.kwhen.common.Controller
 import ap.panini.kwhen.en.ENController
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
+import kotlin.time.ExperimentalTime
 
 /**
  * En config is a configuration file for english parsing
@@ -15,7 +16,7 @@ import kotlinx.datetime.TimeZone
  * @property use24 if 24 hour time should be used or not
  * @constructor Create empty En config
  */
-data class ENConfig(
+data class ENConfig @OptIn(ExperimentalTime::class) constructor(
     val evening: Int = 18,
     val morning: Int = 9,
     val afternoon: Int = 15,
