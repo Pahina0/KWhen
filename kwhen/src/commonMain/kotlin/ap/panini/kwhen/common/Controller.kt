@@ -196,8 +196,8 @@ abstract class Controller(open val config: Config) {
                     )
 
                 } else {
-                    // random numbers with no meaning
-                    if (date.generalTimeTag == null && date.generalNumber != null) continue
+                    // random numbers or unmerged general time words with no tags
+                    if (date.tagsTimeStart.isEmpty() && date.tagsTimeEnd.isEmpty() && date.tagsDayOfWeek.isEmpty() && date.repeatTag == null && (date.generalTimeTag != null || date.generalNumber != null)) continue
 
                     val whole = date.repeatTag?.unPartial(date.repeatOften ?: 0.0)
                     ret += Parsed(

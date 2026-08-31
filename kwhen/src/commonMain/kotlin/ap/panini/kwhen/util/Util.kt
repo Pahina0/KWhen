@@ -55,16 +55,27 @@ internal fun LocalDateTime.copy(
 
     val mHour = hour ?: this.hour
 
-    val mDayOfMonth = (dayOfMonth ?: day) - 1
-
     val mYear = year ?: this.year
 
     val mMonthNumber = monthNumber ?: month.number
 
+    val targetMonth = if (monthNumber == null) month.number else ((monthNumber - 1) % 12 + 1)
+    val targetYear = mYear + (mMonthNumber - 1) / 12
+
+    val maxDays = when (targetMonth) {
+        1, 3, 5, 7, 8, 10, 12 -> 31
+        4, 6, 9, 11 -> 30
+        2 -> if (targetYear % 4 == 0 && (targetYear % 100 != 0 || targetYear % 400 == 0)) 29 else 28
+        else -> 31
+    }
+
+    val targetDay = if (dayOfMonth != null) dayOfMonth else minOf(this.day, maxDays)
+    val mDayOfMonth = targetDay - 1
+
     // gets the month and year info
     var inst = LocalDateTime(
-        mYear + (mMonthNumber - 1) / 12,
-        if (monthNumber == null) month.number else ((monthNumber - 1) % 12 + 1),
+        targetYear,
+        targetMonth,
         1, // month can't be 0
         0,
         0,
@@ -110,44 +121,28 @@ internal fun LocalDateTime.mergeTime(
 ): LocalDateTime {
     if (other == null) return this
 
-    var time = this
+    var y: Int? = null
+    var m: Int? = null
+    var d: Int? = null
+    var hr: Int? = null
+    var min: Int? = null
+    var sec: Int? = null
 
-    // has to be sorted or else you may try to set day before month which may cause
-    // out of bounds like feb 31st
-    tags.sortedDescending().forEach {
-        time = when (it) {
-            TimeUnit.HOUR -> {
-                time.copy(hour = other.hour)
-            }
+    if (TimeUnit.YEAR in tags) y = other.year
+    if (TimeUnit.MONTH in tags) m = other.month.number
+    if (TimeUnit.DAY in tags) d = other.day
+    if (TimeUnit.HOUR in tags) hr = other.hour
+    if (TimeUnit.MINUTE in tags) min = other.minute
+    if (TimeUnit.SECOND in tags) sec = other.second
 
-            TimeUnit.MINUTE -> {
-                time.copy(minute = other.minute)
-            }
-
-            TimeUnit.SECOND -> {
-                time.copy(second = other.second)
-            }
-
-            TimeUnit.DAY -> {
-                time.copy(dayOfMonth = other.day)
-            }
-
-            TimeUnit.WEEK -> {
-                time // this shouldn't do much?
-            }
-
-            TimeUnit.MONTH -> {
-                time.copy(monthNumber = other.month.number)
-            }
-
-            TimeUnit.YEAR -> {
-                time.copy(year = other.year)
-            }
-
-        }
-    }
-
-    return time
+    return copy(
+        year = y,
+        monthNumber = m,
+        dayOfMonth = d,
+        hour = hr,
+        minute = min,
+        second = sec
+    )
 }
 
 /**

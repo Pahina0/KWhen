@@ -17,15 +17,15 @@ import kotlinx.datetime.plus
  */
 internal class ENBasicDate(override val config: ENConfig) : ParserByWord(config) {
     override val matchPattern: Regex
-        get() = "(today|tmrw|tmr|tmw|tomorrow|yesterday|now|rn|right now)".toRegex()
+        get() = "(today|tdy|td|2day|tmrw|tmr|tmw|tom|tomorrow|2morrow|2moro|yesterday|yest|yst|yd|now|rn|right now)".toRegex()
 
     override fun onMatch(match: MatchResult): DateTime {
         var date = config.getDateTime()
 
         when (match.groupValues.first().lowercase()) {
-            "today" -> date = date.copy(tagsTimeStart = setOf(TimeUnit.DAY))
+            "today", "tdy", "td", "2day" -> date = date.copy(tagsTimeStart = setOf(TimeUnit.DAY))
 
-            "tmrw", "tmr", "tmw", "tomorrow" -> date = date.run {
+            "tmrw", "tmr", "tmw", "tom", "tomorrow", "2morrow", "2moro" -> date = date.run {
                 copy(
                     startTime = startTime.copy(startTime.date.plus(1, DateTimeUnit.DAY)),
                     tagsTimeStart = setOf(TimeUnit.DAY)
@@ -33,7 +33,7 @@ internal class ENBasicDate(override val config: ENConfig) : ParserByWord(config)
             }
 
 
-            "yesterday" -> date = date.run {
+            "yesterday", "yest", "yst", "yd" -> date = date.run {
                 copy(
                     startTime = startTime.copy(startTime.date.minus(1, DateTimeUnit.DAY)),
                     tagsTimeStart = setOf(TimeUnit.DAY)

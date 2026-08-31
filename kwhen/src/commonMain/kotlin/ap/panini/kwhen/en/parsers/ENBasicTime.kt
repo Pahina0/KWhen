@@ -14,13 +14,13 @@ import ap.panini.kwhen.util.copy
  */
 internal class ENBasicTime(override val config: ENConfig) : ParserByWord(config) {
     override val matchPattern: Regex
-        get() = "(evening|morning|afternoon|night|midnight|midday|noon|tonight)".toRegex()
+        get() = "(evening|eve|morning|morn|afternoon|aft|arvo|night|midnight|midnite|midday|noon|tonight|tonite|2nite|2night|tn)".toRegex()
 
     override fun onMatch(match: MatchResult): DateTime {
         var date = config.getDateTime()
 
         when (match.groupValues.first().lowercase()) {
-            "evening" -> date = date.run {
+            "evening", "eve" -> date = date.run {
                 copy(
                     startTime = startTime.copy(hour = config.evening),
                     tagsTimeStart = tagsTimeStart + TimeUnit.HOUR
@@ -28,14 +28,14 @@ internal class ENBasicTime(override val config: ENConfig) : ParserByWord(config)
             }
 
 
-            "morning" -> date = date.run {
+            "morning", "morn" -> date = date.run {
                 copy(
                     startTime = startTime.copy(hour = config.morning),
                     tagsTimeStart = tagsTimeStart + TimeUnit.HOUR
                 )
             }
 
-            "afternoon" -> date = date.run {
+            "afternoon", "aft", "arvo" -> date = date.run {
                 copy(
                     startTime = startTime.copy(hour = config.afternoon),
                     tagsTimeStart = tagsTimeStart + TimeUnit.HOUR
@@ -49,14 +49,14 @@ internal class ENBasicTime(override val config: ENConfig) : ParserByWord(config)
                 )
             }
 
-            "tonight" -> date = date.run {
+            "tonight", "tonite", "2nite", "2night", "tn" -> date = date.run {
                 copy(
                     startTime = startTime.copy(hour = config.night),
                     tagsTimeStart = tagsTimeStart + TimeUnit.HOUR + TimeUnit.DAY
                 )
             }
 
-            "midnight" -> date = date.run {
+            "midnight", "midnite" -> date = date.run {
                 copy(
                     startTime = startTime.copy(hour = 24),
                     tagsTimeStart = tagsTimeStart + TimeUnit.HOUR

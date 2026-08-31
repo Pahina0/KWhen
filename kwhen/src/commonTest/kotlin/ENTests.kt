@@ -11,6 +11,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class ENTests {
     private lateinit var timeParser: TimeParserTest
@@ -366,7 +367,7 @@ class ENTests {
         timeParser.parseAndMerge("the diving team will go on a field trip in 18 months").let {
             assertEquals("in 18 months", it[0].text.trim())
             assertEquals(
-                dateTime.startTime.run { copy(monthNumber = monthNumber + 18) },
+                ap.panini.kwhen.util.getDateTimeWithGeneral(18.0, TimeUnit.MONTH, dateTime.startTime, config),
                 it[0].startTime
             )
             assertEquals(setOf(TimeUnit.MONTH), it[0].tagsTimeStart)
@@ -848,6 +849,688 @@ class ENTests {
             assertEquals(TimeUnit.WEEK, parsed.repeatTag)
             assertEquals(kotlinx.datetime.DayOfWeek.THURSDAY, parsed.startTime[0].dayOfWeek)
             assertEquals(kotlinx.datetime.DayOfWeek.MONDAY, parsed.startTime[1].dayOfWeek)
+        }
+    }
+
+    @Test
+    fun testTextShorthands() {
+        // Tonight shorthands
+        parserFinal.parse("see you tn").let {
+            assertEquals(1, it.size, "'tn' should parse as a time expression")
+            assertEquals("tn", it[0].text.trim())
+            assertEquals(config.night, it[0].startTime.first().hour)
+            assertEquals(setOf(TimeUnit.HOUR, TimeUnit.DAY), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("party tonite").let {
+            assertEquals(1, it.size, "'tonite' should parse as a time expression")
+            assertEquals("tonite", it[0].text.trim())
+            assertEquals(config.night, it[0].startTime.first().hour)
+        }
+
+        parserFinal.parse("let's go 2nite").let {
+            assertEquals(1, it.size, "'2nite' should parse as a time expression")
+            assertEquals("2nite", it[0].text.trim())
+            assertEquals(config.night, it[0].startTime.first().hour)
+        }
+
+        parserFinal.parse("meet me 2night").let {
+            assertEquals(1, it.size, "'2night' should parse as a time expression")
+            assertEquals("2night", it[0].text.trim())
+            assertEquals(config.night, it[0].startTime.first().hour)
+        }
+
+        // Today shorthands
+        timeParser.parse("busy tdy").let {
+            assertEquals("tdy", it[0].text)
+            assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
+        }
+
+        timeParser.parse("free td").let {
+            assertEquals("td", it[0].text)
+            assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
+        }
+
+        timeParser.parse("leaving 2day").let {
+            assertEquals("2day", it[0].text)
+            assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
+        }
+
+        // Tomorrow shorthands
+        timeParser.parse("done by 2morrow").let {
+            assertEquals("2morrow", it[0].text)
+            assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
+            assertEquals(
+                dateTime.startTime.run { copy(date.plus(1, DateTimeUnit.DAY)) },
+                it[0].startTime
+            )
+        }
+
+        timeParser.parse("see you 2moro").let {
+            assertEquals("2moro", it[0].text)
+            assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
+            assertEquals(
+                dateTime.startTime.run { copy(date.plus(1, DateTimeUnit.DAY)) },
+                it[0].startTime
+            )
+        }
+
+        timeParser.parse("call me tom").let {
+            assertEquals("tom", it[0].text)
+            assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
+            assertEquals(
+                dateTime.startTime.run { copy(date.plus(1, DateTimeUnit.DAY)) },
+                it[0].startTime
+            )
+        }
+
+        // Yesterday shorthands
+        timeParser.parse("saw him yest").let {
+            assertEquals("yest", it[0].text)
+            assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
+            assertEquals(
+                dateTime.startTime.run { copy(date.minus(1, DateTimeUnit.DAY)) },
+                it[0].startTime
+            )
+        }
+
+        timeParser.parse("was there yst").let {
+            assertEquals("yst", it[0].text)
+            assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
+            assertEquals(
+                dateTime.startTime.run { copy(date.minus(1, DateTimeUnit.DAY)) },
+                it[0].startTime
+            )
+        }
+
+        timeParser.parse("happened yd").let {
+            assertEquals("yd", it[0].text)
+            assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
+            assertEquals(
+                dateTime.startTime.run { copy(date.minus(1, DateTimeUnit.DAY)) },
+                it[0].startTime
+            )
+        }
+
+        // Time of day shorthands
+        timeParser.parse("good morn").let {
+            assertEquals("morn", it[0].text)
+            assertEquals(setOf(TimeUnit.HOUR), it[0].tagsTimeStart)
+            assertEquals(config.morning, it[0].startTime.hour)
+        }
+
+        timeParser.parse("late eve").let {
+            assertEquals("eve", it[0].text)
+            assertEquals(setOf(TimeUnit.HOUR), it[0].tagsTimeStart)
+            assertEquals(config.evening, it[0].startTime.hour)
+        }
+
+        timeParser.parse("meet midnite").let {
+            assertEquals("midnite", it[0].text)
+            assertEquals(setOf(TimeUnit.HOUR), it[0].tagsTimeStart)
+        }
+
+        // Relative time unit abbreviations
+        parserFinal.parse("in 5 mins").let {
+            assertEquals(1, it.size)
+            assertEquals("in 5 mins", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.MINUTE), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("in 2 hrs").let {
+            assertEquals(1, it.size)
+            assertEquals("in 2 hrs", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.HOUR), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("in 3 wks").let {
+            assertEquals(1, it.size)
+            assertEquals("in 3 wks", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.WEEK), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("in 6 mos").let {
+            assertEquals(1, it.size)
+            assertEquals("in 6 mos", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.MONTH), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("in 2 yrs").let {
+            assertEquals(1, it.size)
+            assertEquals("in 2 yrs", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.YEAR), it[0].tagsTimeStart)
+        }
+    }
+
+    @Test
+    fun testNumericTimeEdgeCases() {
+        // Last minute of the day
+        timeParser.parse("deadline is 11:59pm").let {
+            assertEquals("11:59pm", it[0].text)
+            assertEquals(setOf(TimeUnit.HOUR, TimeUnit.MINUTE), it[0].tagsTimeStart)
+            assertEquals(23, it[0].startTime.hour)
+            assertEquals(59, it[0].startTime.minute)
+        }
+
+        // First hour of the morning
+        timeParser.parse("early at 1:00am").let {
+            assertEquals("1:00am", it[0].text)
+            assertEquals(1, it[0].startTime.hour)
+            assertEquals(0, it[0].startTime.minute)
+        }
+
+        // Uppercase PM
+        timeParser.parse("meeting at 3:05 PM").let {
+            assertEquals(15, it[0].startTime.hour)
+            assertEquals(5, it[0].startTime.minute)
+        }
+
+        // Dot notation p.m.
+        timeParser.parse("game starts 3p.m.").let {
+            assertEquals(15, it[0].startTime.hour)
+        }
+
+        // Dot notation a.m.
+        timeParser.parse("wake up at 7a.m.").let {
+            assertEquals(7, it[0].startTime.hour)
+        }
+
+        // Space between number and am
+        timeParser.parse("starts at 9 am").let {
+            assertEquals(9, it[0].startTime.hour)
+            assertEquals(0, it[0].startTime.minute)
+        }
+
+        // Space between number and pm
+        timeParser.parse("dinner at 7 pm").let {
+            assertEquals(19, it[0].startTime.hour)
+            assertEquals(0, it[0].startTime.minute)
+        }
+    }
+
+    @Test
+    fun testDateFormatEdgeCases() {
+        // Start of year MM/DD
+        parserFinal.parse("happy new year on 01/01").let {
+            assertEquals(1, it.size)
+            assertEquals(1, it[0].startTime.first().monthNumber)
+            assertEquals(1, it[0].startTime.first().dayOfMonth)
+        }
+
+        // End of year MM/DD
+        parserFinal.parse("celebration is 12/31").let {
+            assertEquals(1, it.size)
+            assertEquals(12, it[0].startTime.first().monthNumber)
+            assertEquals(31, it[0].startTime.first().dayOfMonth)
+        }
+
+        // Full month name + ordinal suffix
+        parserFinal.parse("the party is July 4th").let {
+            assertEquals(1, it.size)
+            assertEquals(7, it[0].startTime.first().monthNumber)
+            assertEquals(4, it[0].startTime.first().dayOfMonth)
+        }
+
+        // Full month name + 2nd suffix
+        parserFinal.parse("it is february 2nd").let {
+            assertEquals(1, it.size)
+            assertEquals(2, it[0].startTime.first().monthNumber)
+            assertEquals(2, it[0].startTime.first().dayOfMonth)
+        }
+
+        // Day-month format: "1st of january"
+        timeParser.parse("party on the 1st of january").let {
+            assertEquals(1, it[0].startTime.monthNumber)
+            assertEquals(1, it[0].startTime.dayOfMonth)
+        }
+
+        // Day-month format: "31st of december"
+        timeParser.parse("celebrate on the 31st of december").let {
+            assertEquals(12, it[0].startTime.monthNumber)
+            assertEquals(31, it[0].startTime.dayOfMonth)
+        }
+
+        // "sept." with dot abbreviation
+        timeParser.parse("school starts sept. 5").let {
+            assertEquals(9, it[0].startTime.monthNumber)
+            assertEquals(5, it[0].startTime.dayOfMonth)
+        }
+    }
+
+    @Test
+    fun testRelativeTimeEdgeCases() {
+        // "in a week" — "a" maps to 1.0
+        parserFinal.parse("i have plans in a week").let {
+            assertEquals(1, it.size)
+            assertEquals("in a week", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.WEEK), it[0].tagsTimeStart)
+        }
+
+        // "in 1 hour"
+        parserFinal.parse("meeting in 1 hour").let {
+            assertEquals(1, it.size)
+            assertEquals("in 1 hour", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.HOUR), it[0].tagsTimeStart)
+        }
+
+        // "in a month"
+        parserFinal.parse("moving in a month").let {
+            assertEquals(1, it.size)
+            assertEquals("in a month", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.MONTH), it[0].tagsTimeStart)
+        }
+
+        // "in a year"
+        parserFinal.parse("graduating in a year").let {
+            assertEquals(1, it.size)
+            assertEquals("in a year", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.YEAR), it[0].tagsTimeStart)
+        }
+
+        // "in 30 seconds"
+        parserFinal.parse("timer set in 30 seconds").let {
+            assertEquals(1, it.size)
+            assertEquals("in 30 seconds", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.SECOND), it[0].tagsTimeStart)
+        }
+
+        // "in 60 minutes"
+        parserFinal.parse("back in 60 minutes").let {
+            assertEquals(1, it.size)
+            assertEquals("in 60 minutes", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.MINUTE), it[0].tagsTimeStart)
+        }
+    }
+
+    @Test
+    fun testDayOfWeekShorthands() {
+        for ((abbrev, day) in listOf(
+            "mon" to DayOfWeek.MONDAY,
+            "tue" to DayOfWeek.TUESDAY,
+            "wed" to DayOfWeek.WEDNESDAY,
+            "thu" to DayOfWeek.THURSDAY,
+            "fri" to DayOfWeek.FRIDAY,
+            "sat" to DayOfWeek.SATURDAY,
+            "sun" to DayOfWeek.SUNDAY,
+        )) {
+            timeParser.parse("something on $abbrev").let {
+                assertEquals(abbrev, it[0].text, "Failed to parse day shorthand '$abbrev'")
+                assertEquals(setOf(day), it[0].tagsDayOfWeek, "Wrong day for '$abbrev'")
+                assertEquals(setOf(TimeUnit.WEEK), it[0].tagsTimeStart, "Wrong tags for '$abbrev'")
+            }
+        }
+
+        // Alternate variants
+        timeParser.parse("see you tues").let {
+            assertEquals("tues", it[0].text)
+            assertEquals(setOf(DayOfWeek.TUESDAY), it[0].tagsDayOfWeek)
+        }
+
+        timeParser.parse("dinner on thurs").let {
+            assertEquals("thurs", it[0].text)
+            assertEquals(setOf(DayOfWeek.THURSDAY), it[0].tagsDayOfWeek)
+        }
+
+        timeParser.parse("dinner on thur").let {
+            assertEquals("thur", it[0].text)
+            assertEquals(setOf(DayOfWeek.THURSDAY), it[0].tagsDayOfWeek)
+        }
+
+        timeParser.parse("meeting wens").let {
+            assertEquals("wens", it[0].text)
+            assertEquals(setOf(DayOfWeek.WEDNESDAY), it[0].tagsDayOfWeek)
+        }
+
+        timeParser.parse("free on wen").let {
+            assertEquals("wen", it[0].text)
+            assertEquals(setOf(DayOfWeek.WEDNESDAY), it[0].tagsDayOfWeek)
+        }
+    }
+
+    @Test
+    fun testRepeatingAndRangeEdgeCases() {
+        // "every week"
+        timeParser.parseAndMerge("i go swimming every week").let {
+            assertEquals("every week", it[0].text.trim())
+            assertEquals(1.0, it[0].repeatOften)
+            assertEquals(TimeUnit.WEEK, it[0].repeatTag)
+        }
+
+        // "every month"
+        timeParser.parseAndMerge("rent is due every month").let {
+            assertEquals("every month", it[0].text.trim())
+            assertEquals(1.0, it[0].repeatOften)
+            assertEquals(TimeUnit.MONTH, it[0].repeatTag)
+        }
+
+        // "every year"
+        timeParser.parseAndMerge("we celebrate every year").let {
+            assertEquals("every year", it[0].text.trim())
+            assertEquals(1.0, it[0].repeatOften)
+            assertEquals(TimeUnit.YEAR, it[0].repeatTag)
+        }
+
+        // "every other month"
+        timeParser.parseAndMerge("doctor visit every other month").let {
+            assertEquals("every other month", it[0].text.trim())
+            assertEquals(2.0, it[0].repeatOften)
+            assertEquals(TimeUnit.MONTH, it[0].repeatTag)
+        }
+
+        // "every 3 months"
+        timeParser.parseAndMerge("quarterly review every 3 months").let {
+            assertEquals("every 3 months", it[0].text.trim())
+            assertEquals(3.0, it[0].repeatOften)
+            assertEquals(TimeUnit.MONTH, it[0].repeatTag)
+        }
+
+        // "weekly" standalone
+        parserFinal.parse("Have a standup weekly").let {
+            assertEquals("weekly", it[0].text)
+            assertEquals(1, it[0].repeatOften)
+            assertEquals(TimeUnit.WEEK, it[0].repeatTag)
+        }
+
+        // "monthly" standalone
+        parserFinal.parse("There is a review monthly").let {
+            assertEquals("monthly", it[0].text)
+            assertEquals(1, it[0].repeatOften)
+            assertEquals(TimeUnit.MONTH, it[0].repeatTag)
+        }
+
+        // "yearly" standalone
+        parserFinal.parse("the festival is yearly").let {
+            assertEquals("yearly", it[0].text)
+            assertEquals(1, it[0].repeatOften)
+            assertEquals(TimeUnit.YEAR, it[0].repeatTag)
+        }
+
+        // "until midnight"
+        timeParser.parseAndMerge("party goes until midnight").let {
+            assertEquals(1, it.size)
+            assertNotNull(it[0].endTime)
+        }
+    }
+
+    @Test
+    fun testOrdinalEdgeCases() {
+        // "2nd" suffix
+        timeParser.parse("the 2nd will be interesting").let {
+            assertEquals("2nd", it[0].text)
+            assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
+            assertEquals(2, it[0].startTime.dayOfMonth)
+        }
+
+        // "21st"
+        timeParser.parse("the 21st is my birthday").let {
+            assertEquals("21st", it[0].text)
+            assertEquals(21, it[0].startTime.dayOfMonth)
+        }
+
+        // "22nd"
+        timeParser.parse("meeting on the 22nd").let {
+            assertEquals("22nd", it[0].text)
+            assertEquals(22, it[0].startTime.dayOfMonth)
+        }
+
+        // "23rd"
+        timeParser.parse("the 23rd of december").let {
+            assertEquals(23, it[0].startTime.dayOfMonth)
+        }
+
+        // "31st"
+        timeParser.parse("deadline is the 31st").let {
+            assertEquals("31st", it[0].text)
+            assertEquals(31, it[0].startTime.dayOfMonth)
+        }
+
+        // Word ordinal "first"
+        TimeParserTest(ENConfig(use24 = true)).parse("the first is a holiday").let {
+            assertEquals("first", it[0].text)
+            assertEquals(1, it[0].startTime.dayOfMonth)
+        }
+
+        // "twenty-first"
+        TimeParserTest(ENConfig(use24 = true)).parse("the twenty-first is special").let {
+            assertEquals("twenty-first", it[0].text)
+            assertEquals(21, it[0].startTime.dayOfMonth)
+        }
+    }
+
+    @Test
+    fun testKnownBugEdgeCases() {
+        // Bug 1: 12pm should be noon (12:00), not 24:00
+        timeParser.parse("event at 12pm").let {
+            assertEquals(12, it[0].startTime.hour, "12pm should resolve to hour 12")
+            assertEquals(0, it[0].startTime.minute)
+        }
+
+        // Bug 1: 12am should be midnight (0:00), not 12:00
+        timeParser.parse("event at 12am").let {
+            assertEquals(0, it[0].startTime.hour, "12am should resolve to hour 0")
+            assertEquals(0, it[0].startTime.minute)
+        }
+
+        // Bug 1: 12:30pm should be 12:30
+        timeParser.parse("lunch is at 12:30pm").let {
+            assertEquals(12, it[0].startTime.hour, "12:30pm should resolve to hour 12")
+            assertEquals(30, it[0].startTime.minute)
+        }
+
+        // Bug 1: 12:30am should be 00:30
+        timeParser.parse("sleep at 12:30am").let {
+            assertEquals(0, it[0].startTime.hour, "12:30am should resolve to hour 0")
+            assertEquals(30, it[0].startTime.minute)
+        }
+
+        // Bug 2: Midnight should resolve to 0:00
+        timeParser.parse("the show ends at midnight").let {
+            assertEquals(0, it[0].startTime.hour, "midnight hour should be 0")
+        }
+
+        // Bug 3: "second" ambiguity (word "second" as timeunit vs ordinal)
+        parserFinal.parse("wait in 30 seconds").let {
+            assertEquals(1, it.size, "Should parse as a single relative time")
+            assertEquals("in 30 seconds", it[0].text.trim())
+        }
+
+        // Bug 4: Invalid date overflow (April 31st -> May 1st)
+        parserFinal.parse("on april 31st").let {
+            assertEquals(5, it[0].startTime.first().monthNumber, "April 31 should overflow to May")
+            assertEquals(1, it[0].startTime.first().dayOfMonth)
+        }
+
+        // Bug 5: False positive matching on common words ("day" in "independence day", "years" in "new years eve")
+        parserFinal.parse("independence day is July 4th").let {
+            assertEquals(1, it.size, "Should only extract 'July 4th' and not treat 'day' as a separate time")
+        }
+
+        parserFinal.parse("over the years on 12/31").let {
+            assertEquals(1, it.size, "Should only extract '12/31' and not treat 'years' as a separate time")
+        }
+    }
+
+    @Test
+    fun testRealisticConversationalSentences() {
+        // 1. Scheduling call tomorrow afternoon
+        parserFinal.parse("Can we schedule a call tomorrow at 2:30pm?").let {
+            assertEquals(1, it.size)
+            assertEquals("tomorrow at 2:30pm", it[0].text.trim())
+            assertEquals(14, it[0].startTime.first().hour)
+            assertEquals(30, it[0].startTime.first().minute)
+            assertEquals(
+                dateTime.startTime.date.plus(1, DateTimeUnit.DAY),
+                it[0].startTime.first().date
+            )
+            assertContains(it[0].tagsTimeStart, TimeUnit.HOUR)
+            assertContains(it[0].tagsTimeStart, TimeUnit.MINUTE)
+        }
+
+        // 2. Lunch on Friday at noon
+        parserFinal.parse("Let's grab lunch on Friday at noon").let {
+            assertEquals(1, it.size)
+            assertEquals("on Friday at noon", it[0].text.trim())
+            assertEquals(12, it[0].startTime.first().hour)
+            assertEquals(kotlinx.datetime.DayOfWeek.FRIDAY, it[0].startTime.first().dayOfWeek)
+        }
+
+        // 3. Repeating team sync every Monday at 10am
+        parserFinal.parse("Team sync every Monday at 10am in the main room").let {
+            assertEquals(1, it.size)
+            assertEquals("every Monday at 10am", it[0].text.trim())
+            assertEquals(10, it[0].startTime.first().hour)
+            assertEquals(0, it[0].startTime.first().minute)
+            assertEquals(1, it[0].repeatOften)
+            assertEquals(TimeUnit.WEEK, it[0].repeatTag)
+            assertEquals(kotlinx.datetime.DayOfWeek.MONDAY, it[0].startTime.first().dayOfWeek)
+        }
+
+        // 4. Recurring meeting every other Tuesday at 3:15pm
+        parserFinal.parse("Sprint planning is every other Tuesday at 3:15pm").let {
+            assertEquals(1, it.size)
+            assertEquals("every other Tuesday at 3:15pm", it[0].text.trim())
+            assertEquals(15, it[0].startTime.first().hour)
+            assertEquals(15, it[0].startTime.first().minute)
+            assertEquals(2, it[0].repeatOften)
+            assertEquals(TimeUnit.WEEK, it[0].repeatTag)
+            assertEquals(kotlinx.datetime.DayOfWeek.TUESDAY, it[0].startTime.first().dayOfWeek)
+        }
+
+        // 5. Taxes reminder
+        parserFinal.parse("Reminder to submit the taxes by April 15th").let {
+            assertEquals(1, it.size)
+            assertEquals("April 15th", it[0].text.trim())
+            assertEquals(4, it[0].startTime.first().monthNumber)
+            assertEquals(15, it[0].startTime.first().dayOfMonth)
+        }
+
+        // 6. Deadline tomorrow night at 11:59pm
+        parserFinal.parse("Project deadline is tomorrow night at 11:59pm").let {
+            assertEquals(1, it.size)
+            assertEquals(23, it[0].startTime.first().hour)
+            assertEquals(59, it[0].startTime.first().minute)
+        }
+
+        // 7. Text chat shorthand: free tn at 8pm
+        parserFinal.parse("Hey are you free tn at 8pm?").let {
+            assertEquals(1, it.size)
+            assertEquals("tn at 8pm", it[0].text.trim())
+            assertEquals(20, it[0].startTime.first().hour)
+            assertEquals(0, it[0].startTime.first().minute)
+        }
+
+        // 8. Text chat shorthand: 2moro morning at 9am
+        parserFinal.parse("Let's meet up 2moro morning at 9am").let {
+            assertEquals(1, it.size)
+            assertEquals(9, it[0].startTime.first().hour)
+            assertEquals(0, it[0].startTime.first().minute)
+        }
+
+        // 9. Quick relative interval: in 45 mins
+        parserFinal.parse("Heading to the gym in 45 mins").let {
+            assertEquals(1, it.size)
+            assertEquals("in 45 mins", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.MINUTE), it[0].tagsTimeStart)
+        }
+
+        // 10. Flight departure next Friday at 6:45pm
+        parserFinal.parse("Flight departs next Friday at 6:45pm").let {
+            assertEquals(1, it.size)
+            assertEquals(18, it[0].startTime.first().hour)
+            assertEquals(45, it[0].startTime.first().minute)
+            assertEquals(kotlinx.datetime.DayOfWeek.FRIDAY, it[0].startTime.first().dayOfWeek)
+        }
+
+        // 11. Doctor appointment date with time
+        parserFinal.parse("Doctor appointment on 09/25 at 10:30am").let {
+            assertEquals(1, it.size)
+            assertEquals(9, it[0].startTime.first().monthNumber)
+            assertEquals(25, it[0].startTime.first().dayOfMonth)
+            assertEquals(10, it[0].startTime.first().hour)
+            assertEquals(30, it[0].startTime.first().minute)
+        }
+
+        // 12. Party range on Saturday
+        parserFinal.parse("Birthday party this Saturday from 7pm to 11pm").let {
+            assertEquals(1, it.size)
+            assertEquals(19, it[0].startTime.first().hour)
+            assertEquals(23, it[0].endTime!!.hour)
+            assertEquals(kotlinx.datetime.DayOfWeek.SATURDAY, it[0].startTime.first().dayOfWeek)
+        }
+
+        // 13. Daily standup
+        parserFinal.parse("Standup daily at 9:00am").let {
+            assertEquals(1, it.size)
+            assertEquals(9, it[0].startTime.first().hour)
+            assertEquals(0, it[0].startTime.first().minute)
+            assertEquals(1, it[0].repeatOften)
+            assertEquals(TimeUnit.DAY, it[0].repeatTag)
+        }
+
+        // 14. Pay bill every month on the 1st
+        parserFinal.parse("Pay electricity bill every month on the 1st").let {
+            assertEquals(1, it.size)
+            assertEquals(1, it[0].startTime.first().dayOfMonth)
+            assertEquals(1, it[0].repeatOften)
+            assertEquals(TimeUnit.MONTH, it[0].repeatTag)
+        }
+
+        // 15. Hospital follow-up in 2 weeks
+        parserFinal.parse("Hospital follow-up in 2 weeks").let {
+            assertEquals(1, it.size)
+            assertEquals("in 2 weeks", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.WEEK), it[0].tagsTimeStart)
+        }
+
+        // 16. Multi-day date range
+        parserFinal.parse("The conference runs from 10/12 to 10/15").let {
+            assertEquals(1, it.size)
+            assertEquals(10, it[0].startTime.first().monthNumber)
+            assertEquals(12, it[0].startTime.first().dayOfMonth)
+            assertEquals(10, it[0].endTime!!.monthNumber)
+            assertEquals(15, it[0].endTime!!.dayOfMonth)
+        }
+    }
+
+    @Test
+    fun testArbitraryNumbersBeforeTime() {
+        // "in room 401 at 3am" -> 401 is an arbitrary room number and should NOT corrupt or merge with "at 3am"
+        parserFinal.parse("in room 401 at 3am").let {
+            assertEquals(1, it.size, "Should only extract 'at 3am' and ignore room 401")
+            assertEquals("at 3am", it[0].text.trim())
+            assertEquals(3, it[0].startTime.first().hour)
+            assertEquals(0, it[0].startTime.first().minute)
+            assertContains(it[0].tagsTimeStart, TimeUnit.HOUR)
+        }
+
+        // "meet on floor 5 at 3pm" -> 5 is a floor number
+        parserFinal.parse("meet on floor 5 at 3pm").let {
+            assertEquals(1, it.size, "Should only extract 'at 3pm' and ignore floor 5")
+            assertEquals("at 3pm", it[0].text.trim())
+            assertEquals(15, it[0].startTime.first().hour)
+            assertEquals(0, it[0].startTime.first().minute)
+        }
+
+        // "take bus 42 on Monday" -> 42 is a bus number
+        parserFinal.parse("take bus 42 on Monday").let {
+            assertEquals(1, it.size, "Should only extract 'on Monday' and ignore bus 42")
+            assertEquals("on Monday", it[0].text.trim())
+            assertEquals(kotlinx.datetime.DayOfWeek.MONDAY, it[0].startTime.first().dayOfWeek)
+        }
+
+        // "flight 747 on Dec 25 at 6am" -> 747 is a flight number
+        parserFinal.parse("flight 747 on Dec 25 at 6am").let {
+            assertEquals(1, it.size, "Should only extract 'on Dec 25 at 6am' and ignore flight 747")
+            assertEquals(12, it[0].startTime.first().monthNumber)
+            assertEquals(25, it[0].startTime.first().dayOfMonth)
+            assertEquals(6, it[0].startTime.first().hour)
+            assertEquals(0, it[0].startTime.first().minute)
+        }
+
+        // "call 911 tomorrow at noon" -> 911 is an emergency number
+        parserFinal.parse("call 911 tomorrow at noon").let {
+            assertEquals(1, it.size, "Should only extract 'tomorrow at noon' and ignore 911")
+            assertEquals(12, it[0].startTime.first().hour)
         }
     }
 }

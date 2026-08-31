@@ -83,9 +83,9 @@ internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(co
 
                             // using am/pm
                             if (amPm == "am") {
-                                return@let hr
+                                return@let if (hr == 12) 0 else hr
                             } else if (amPm == "pm") {
-                                return@let hr + 12
+                                return@let if (hr == 12) 12 else hr + 12
                             }
 
                             // next part finds the next days time so its always tmrw
