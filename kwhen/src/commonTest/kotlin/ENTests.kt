@@ -1533,4 +1533,140 @@ class ENTests {
             assertEquals(12, it[0].startTime.first().hour)
         }
     }
+
+    @Test
+    fun testComprehensiveRelativeTimes() {
+        // 1. Written number words with relative units
+        parserFinal.parse("we will meet in two hours").let {
+            assertEquals(1, it.size)
+            assertEquals("in two hours", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.HOUR), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("the package arrives in three days").let {
+            assertEquals(1, it.size)
+            assertEquals("in three days", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("leave in five minutes").let {
+            assertEquals(1, it.size)
+            assertEquals("in five minutes", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.MINUTE), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("trip begins in ten weeks").let {
+            assertEquals(1, it.size)
+            assertEquals("in ten weeks", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.WEEK), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("return in six months").let {
+            assertEquals(1, it.size)
+            assertEquals("in six months", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.MONTH), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("graduate in four years").let {
+            assertEquals(1, it.size)
+            assertEquals("in four years", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.YEAR), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("project due in one day").let {
+            assertEquals(1, it.size)
+            assertEquals("in one day", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.DAY), it[0].tagsTimeStart)
+        }
+
+        // 2. Relative time offsets from concrete times
+        parserFinal.parse("the meeting starts 15 minutes after 4pm").let {
+            assertEquals(1, it.size)
+            assertEquals(16, it[0].startTime.first().hour)
+            assertEquals(15, it[0].startTime.first().minute)
+            assertContains(it[0].tagsTimeStart, TimeUnit.HOUR)
+            assertContains(it[0].tagsTimeStart, TimeUnit.MINUTE)
+        }
+
+        parserFinal.parse("alarms sound 45 minutes after 2:00").let {
+            assertEquals(1, it.size)
+            assertEquals(2, it[0].startTime.first().hour)
+            assertEquals(45, it[0].startTime.first().minute)
+        }
+
+        parserFinal.parse("bus arrives 10 mins from 8am").let {
+            assertEquals(1, it.size)
+            assertEquals(8, it[0].startTime.first().hour)
+            assertEquals(10, it[0].startTime.first().minute)
+        }
+
+        parserFinal.parse("lunch is 1 hour after 11am").let {
+            assertEquals(1, it.size)
+            assertEquals(12, it[0].startTime.first().hour)
+            assertEquals(0, it[0].startTime.first().minute)
+        }
+
+        // 3. Relative date offsets from concrete dates
+        parserFinal.parse("the delivery is 3 days from jul 4th").let {
+            assertEquals(1, it.size)
+            assertEquals(7, it[0].startTime.first().monthNumber)
+            assertEquals(7, it[0].startTime.first().dayOfMonth)
+        }
+
+        parserFinal.parse("review is 10 days from 05/10").let {
+            assertEquals(1, it.size)
+            assertEquals(5, it[0].startTime.first().monthNumber)
+            assertEquals(20, it[0].startTime.first().dayOfMonth)
+        }
+
+        parserFinal.parse("the checkup is 2 months from Jan 15").let {
+            assertEquals(1, it.size)
+            assertEquals(3, it[0].startTime.first().monthNumber)
+            assertEquals(15, it[0].startTime.first().dayOfMonth)
+        }
+
+        // 4. Abbreviated unit relative times
+        parserFinal.parse("countdown is in 15 secs").let {
+            assertEquals(1, it.size)
+            assertEquals("in 15 secs", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.SECOND), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("workout in 3 hrs").let {
+            assertEquals(1, it.size)
+            assertEquals("in 3 hrs", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.HOUR), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("vacation in 2 wks").let {
+            assertEquals(1, it.size)
+            assertEquals("in 2 wks", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.WEEK), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("lease expires in 6 mos").let {
+            assertEquals(1, it.size)
+            assertEquals("in 6 mos", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.MONTH), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("warranty valid in 5 yrs").let {
+            assertEquals(1, it.size)
+            assertEquals("in 5 yrs", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.YEAR), it[0].tagsTimeStart)
+        }
+
+        // 5. Prefixes with relative duration
+        parserFinal.parse("show starting in 10 minutes").let {
+            assertEquals(1, it.size)
+            assertEquals("starting in 10 minutes", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.MINUTE), it[0].tagsTimeStart)
+        }
+
+        parserFinal.parse("call back after 3 hours").let {
+            assertEquals(1, it.size)
+            assertEquals("after 3 hours", it[0].text.trim())
+            assertContains(it[0].tagsTimeStart, TimeUnit.HOUR)
+        }
+    }
 }
