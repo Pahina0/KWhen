@@ -15,11 +15,12 @@ import ap.panini.kwhen.util.matchAny
  */
 internal class ENGeneralAmount(override val config: ENConfig) : ParserGenericNumbers(config) {
     override val matchPattern: Regex
-        get() = "${super.matchPattern}|${amounts.keys.matchAny()}(?:(?:\\s+an|a)?(?:\\s+-)?)?".toRegex()
+        get() = "${super.matchPattern}|(?:(?:a|an)\\s+)?(${amounts.keys.matchAny()})".toRegex()
 
     override fun onMatch(match: MatchResult): DateTime {
+        val key = match.groupValues[1].ifBlank { match.value }
         return config.getDateTime(
-            generalNumber = amounts[match.value] ?: match.value.toDouble(),
+            generalNumber = amounts[key] ?: match.value.toDouble(),
             points = if (match.value == "a" || match.value == "an") 0 else 1
         )
     }

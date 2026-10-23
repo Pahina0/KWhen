@@ -57,7 +57,7 @@ enum class TimeUnit {
     },
     DAY {
         override fun partial(part: Double): Pair<TimeUnit, Int> {
-            return HOUR.partial(60 * part)
+            return HOUR.partial(24 * part)
         }
 
         override fun unPartial(part: Double): Pair<TimeUnit, Int> {
