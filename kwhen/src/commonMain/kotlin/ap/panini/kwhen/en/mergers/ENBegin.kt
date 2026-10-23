@@ -63,6 +63,21 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
         ) {
             if (left.text == "a" || left.text == "an") return null // "on a boat" isn't a time
 
+            // "after 3 hours" / "after 2 days" (with an explicit unit) is a relative offset, not an absolute date/clock-hour
+            if (prefix.value.trim() == "after" && left.generalTimeTag != null) {
+                return left.copy(
+                    startTime = getDateTimeWithGeneral(
+                        left.generalNumber,
+                        left.generalTimeTag,
+                        left.endTime ?: left.startTime,
+                        config
+                    ),
+                    tagsTimeStart = left.tagsTimeStart + left.generalTimeTag,
+                    generalTimeTag = null,
+                    generalNumber = null,
+                )
+            }
+
             if (left.generalTimeTag == null) {
                 if (prefix.value.trim() == "on") return null
                 if (left.generalNumber !in 0.0..24.0) return null
@@ -96,7 +111,7 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
                     ).copy(
                         minute = 0
                     ),
-                    tagsTimeStart = left.tagsTimeEnd + TimeUnit.HOUR + TimeUnit.MINUTE,
+                    tagsTimeStart = left.tagsTimeStart + TimeUnit.HOUR + TimeUnit.MINUTE,
                     generalTimeTag = null,
                     generalNumber = null,
                 )

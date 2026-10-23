@@ -15,7 +15,7 @@ import ap.panini.kwhen.util.matchAny
  */
 internal class ENGeneralAmount(override val config: ENConfig) : ParserGenericNumbers(config) {
     override val matchPattern: Regex
-        get() = "${super.matchPattern}|(?:(?:a|an)\\s+)?(${amounts.keys.matchAny()})".toRegex()
+        get() = "${super.matchPattern}|(?:(?:a|an)\\s+(?=half|quarter))?(${amounts.keys.matchAny()})".toRegex()
 
     override fun onMatch(match: MatchResult): DateTime {
         val key = match.groupValues[1].ifBlank { match.value }

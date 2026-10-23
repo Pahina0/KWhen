@@ -163,6 +163,7 @@ internal val generalTimesRepeatable = mapOf(
 
 internal val amounts = mapOf(
     "a" to 1.0,
+    "an" to 1.0,
     "one" to 1.0,
     "two" to 2.0,
     "three" to 3.0,

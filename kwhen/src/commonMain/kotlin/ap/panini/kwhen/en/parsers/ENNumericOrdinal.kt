@@ -26,7 +26,7 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
     override val matchPattern: Regex
-        get() = "($between31|(?<!\\d)00?(?!\\d))(?:(th|st|rd|nd)|(?:(?:\\s+|\\s*(:)\\s*)(\\d{1,2}))?\\s*([ap]\\.?m\\.?)?)|((?:(?<=\\bthe\\s+)second|${(ordinal.keys - "second").matchAny()}))".toRegex()
+        get() = "($between31|(?<!\\d)00?(?!\\d))(?:(th|st|rd|nd)|(?:(?:\\s+|\\s*(:)\\s*)(\\d{1,2}))?\\s*([ap](?:\\.m\\.|m))?)|((?:(?<=\\bthe\\s+)second|${(ordinal.keys - "second").matchAny()}))".toRegex()
 
     override fun onMatch(match: MatchResult): DateTime? {
         var date = config.getDateTime()

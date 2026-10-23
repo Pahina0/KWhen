@@ -1,6 +1,7 @@
 package ap.panini.kwhen.common.mergers
 
 import ap.panini.kwhen.DateTime
+import ap.panini.kwhen.TimeUnit
 import ap.panini.kwhen.configs.Config
 
 /**
@@ -27,11 +28,18 @@ internal class MergerConsecutive(override val config: Config) : MergerWhitespace
 
         if (!left.isValidOperand() || !right.isValidOperand()) return null
 
-        if (
-            left.tagsTimeStart.isNotEmpty() &&
-            right.tagsTimeStart.isNotEmpty() &&
-            left.tagsTimeStart.maxOfOrNull { it.ordinal } == right.tagsTimeStart.maxOfOrNull { it.ordinal }
-        ) return null
+        val leftIsTimeOnly = TimeUnit.HOUR in left.tagsTimeStart && left.tagsDayOfWeek.isEmpty()
+        val rightIsTimeOnly = TimeUnit.HOUR in right.tagsTimeStart && right.tagsDayOfWeek.isEmpty()
+        val leftIsDateOnly = TimeUnit.HOUR !in left.tagsTimeStart && left.tagsTimeStart.any { it.ordinal >= TimeUnit.DAY.ordinal }
+        val rightIsDateOnly = TimeUnit.HOUR !in right.tagsTimeStart && right.tagsTimeStart.any { it.ordinal >= TimeUnit.DAY.ordinal }
+
+        if (!(leftIsDateOnly && rightIsTimeOnly) && !(leftIsTimeOnly && rightIsDateOnly)) {
+            if (
+                left.tagsTimeStart.isNotEmpty() &&
+                right.tagsTimeStart.isNotEmpty() &&
+                left.tagsTimeStart.maxOfOrNull { it.ordinal } == right.tagsTimeStart.maxOfOrNull { it.ordinal }
+            ) return null
+        }
 
         return left.merge(right, config = config)
     }

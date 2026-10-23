@@ -79,12 +79,33 @@ internal data class DateTime(
 
         }
 
+        val thisIsDateOnly = TimeUnit.HOUR !in tagsTimeStart && tagsTimeStart.any { it.ordinal >= TimeUnit.DAY.ordinal }
+        val otherIsDateOnly = TimeUnit.HOUR !in other.tagsTimeStart && other.tagsTimeStart.any { it.ordinal >= TimeUnit.DAY.ordinal }
+        val thisIsTime = TimeUnit.HOUR in tagsTimeStart && tagsDayOfWeek.isEmpty()
+        val otherIsTime = TimeUnit.HOUR in other.tagsTimeStart && other.tagsDayOfWeek.isEmpty()
+
+        val mergedStartTime: LocalDateTime
+        val mergedTagsTimeStart: Set<TimeUnit>
+
+        if (thisIsDateOnly && otherIsTime && !pureMerge) {
+            val otherTimeTags = other.tagsTimeStart.filter { it.ordinal <= TimeUnit.HOUR.ordinal }.toSet()
+            mergedStartTime = startTime.mergeTime(other.startTime, otherTimeTags)
+            mergedTagsTimeStart = tagsTimeStart + otherTimeTags
+        } else if (thisIsTime && otherIsDateOnly && !pureMerge) {
+            val thisTimeTags = tagsTimeStart.filter { it.ordinal <= TimeUnit.HOUR.ordinal }.toSet()
+            mergedStartTime = config.nowZeroed().mergeTime(startTime, thisTimeTags).mergeTime(other.startTime, other.tagsTimeStart)
+            mergedTagsTimeStart = thisTimeTags + other.tagsTimeStart
+        } else {
+            mergedStartTime = startTime.mergeTime(other.startTime, other.tagsTimeStart)
+            mergedTagsTimeStart = tagsTimeStart + other.tagsTimeStart
+        }
+
         return copy(
-            startTime = startTime.mergeTime(other.startTime, other.tagsTimeStart),
+            startTime = mergedStartTime,
             endTime = endTime?.mergeTime(other.endTime, other.tagsTimeEnd)
                 ?: other.endTime,
             tagsDayOfWeek = tagsDayOfWeek + other.tagsDayOfWeek,
-            tagsTimeStart = tagsTimeStart + other.tagsTimeStart,
+            tagsTimeStart = mergedTagsTimeStart,
             tagsTimeEnd = tagsTimeEnd + other.tagsTimeEnd,
             repeatTag = repeatTag ?: other.repeatTag,
             repeatOften = repeatOften ?: other.repeatOften,
