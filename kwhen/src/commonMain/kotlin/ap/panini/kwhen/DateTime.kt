@@ -33,9 +33,9 @@ internal data class DateTime(
 
     override fun compareTo(other: DateTime): Int = compareValuesBy(
         this, other,
-        { points + tagsTimeStart.size + tagsTimeEnd.size },
         { it.range.first },
-        { it.range.first - it.range.last }
+        { it.range.first - it.range.last },
+        { -(it.points + it.tagsTimeStart.size + it.tagsTimeEnd.size) }
     )
 
 
