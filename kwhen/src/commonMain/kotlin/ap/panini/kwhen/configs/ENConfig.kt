@@ -14,6 +14,7 @@ import kotlin.time.ExperimentalTime
  * @property afternoon what time afternoon is
  * @property night what time night is
  * @property use24 if 24 hour time should be used or not
+ * @property useEuropeanDate if European date ordering (DD/MM/YYYY) should be used for numeric dates
  * @constructor Create empty En config
  */
 data class ENConfig @OptIn(ExperimentalTime::class) constructor(
@@ -22,6 +23,7 @@ data class ENConfig @OptIn(ExperimentalTime::class) constructor(
     val afternoon: Int = 15,
     val night: Int = 20,
     val use24: Boolean = false,
+    val useEuropeanDate: Boolean = false,
     override val timeZone: TimeZone = TimeZone.currentSystemDefault(),
     override val relativeTo: Long = Clock.System.now().toEpochMilliseconds(),
 ) : Config() {

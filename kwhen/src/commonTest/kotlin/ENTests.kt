@@ -4,15 +4,23 @@ import ap.panini.kwhen.TimeUnit
 import ap.panini.kwhen.configs.ENConfig
 import ap.panini.kwhen.util.copy
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
+import kotlinx.datetime.number
 import kotlinx.datetime.plus
+import kotlinx.datetime.toInstant
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
+@OptIn(ExperimentalTime::class)
 class ENTests {
     private lateinit var timeParser: TimeParserTest
     private lateinit var parserFinal: TimeParser
@@ -159,6 +167,24 @@ class ENTests {
             assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH), it[0].tagsTimeStart)
             assertEquals(
                 dateTime.startTime.run { copy(monthNumber = 2, dayOfMonth = 1) },
+                it[0].startTime
+            )
+        }
+
+        timeParser.parse("the event is on the 2nd of july").let {
+            assertEquals("2nd of july", it[0].text)
+            assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH), it[0].tagsTimeStart)
+            assertEquals(
+                dateTime.startTime.run { copy(monthNumber = 7, dayOfMonth = 2) },
+                it[0].startTime
+            )
+        }
+
+        timeParser.parse("we graduated on 22nd may 2024").let {
+            assertEquals("22nd may 2024", it[0].text)
+            assertEquals(setOf(TimeUnit.DAY, TimeUnit.MONTH, TimeUnit.YEAR), it[0].tagsTimeStart)
+            assertEquals(
+                dateTime.startTime.run { copy(year = 2024, monthNumber = 5, dayOfMonth = 22) },
                 it[0].startTime
             )
         }
@@ -568,6 +594,38 @@ class ENTests {
             assertEquals("every half minute", it.first().text.trim())
             assertEquals(TimeUnit.SECOND, it[0].repeatTag)
             assertEquals(30, it[0].repeatOften)
+        }
+
+        val fixedAnchor = LocalDateTime(2025, 6, 11, 10, 0, 0)
+            .toInstant(TimeZone.UTC)
+            .toEpochMilliseconds()
+        val fixedParser = TimeParser(ENConfig(relativeTo = fixedAnchor, timeZone = TimeZone.UTC))
+
+        fixedParser.parse("I will return in half a day").also {
+            assertEquals(1, it.size)
+            assertEquals(
+                LocalDateTime(2025, 6, 11, 22, 0, 0),
+                it[0].startTime.first(),
+                "'in half a day' should add 12 hours, not 30 hours"
+            )
+        }
+
+        fixedParser.parse("I will return in a quarter of a day").also {
+            assertEquals(1, it.size)
+            assertEquals(
+                LocalDateTime(2025, 6, 11, 16, 0, 0),
+                it[0].startTime.first(),
+                "'in a quarter of a day' should add 6 hours, not 15 hours"
+            )
+        }
+
+        fixedParser.parse("I will return in half a week").also {
+            assertEquals(1, it.size)
+            assertEquals(
+                LocalDateTime(2025, 6, 14, 22, 0, 0),
+                it[0].startTime.first(),
+                "'in half a week' should add 84 hours (3.5 days), not 210 hours"
+            )
         }
     }
 
@@ -1046,6 +1104,38 @@ class ENTests {
             assertEquals(19, it[0].startTime.hour)
             assertEquals(0, it[0].startTime.minute)
         }
+
+        // Reject hours > 12 with pm
+        parserFinal.parse("Meet me at 15pm").let {
+            assertTrue(
+                it.none { p -> p.text.contains("15pm") },
+                "'15pm' is invalid and should not be parsed as 27:00"
+            )
+        }
+
+        parserFinal.parse("Meet me at 13:30pm").let {
+            assertTrue(
+                it.none { p -> p.text.contains("13:30pm") },
+                "'13:30pm' is invalid and should not be parsed"
+            )
+        }
+
+        // Zero hour in 24-hour colon format
+        TimeParser(ENConfig(use24 = true)).parse("The train leaves at 00:30").let {
+            assertEquals(1, it.size, "'00:30' should be parsed as a valid 24-hour time")
+            assertEquals("at 00:30", it[0].text.trim())
+            assertEquals(0, it[0].startTime.first().hour)
+            assertEquals(30, it[0].startTime.first().minute)
+        }
+
+        // Dotted a.m. merging with adjacent date token
+        parserFinal.parse("We have a meeting at 9:00 a.m. today").let {
+            assertEquals(
+                1,
+                it.size,
+                "'at 9:00 a.m. today' should merge into 1 Parsed expression, but got: ${it.map { p -> p.text }}"
+            )
+        }
     }
 
     @Test
@@ -1094,6 +1184,52 @@ class ENTests {
         timeParser.parse("school starts sept. 5").let {
             assertEquals(9, it[0].startTime.monthNumber)
             assertEquals(5, it[0].startTime.dayOfMonth)
+        }
+
+        // Reject invalid numeric months (> 12) in default MM/DD mode
+        parserFinal.parse("Meeting on 25/08/2024").let {
+            assertTrue(it.isEmpty(), "25/08/2024 has month=25 in MM/DD mode and should not parse as a valid date")
+        }
+
+        parserFinal.parse("The store is open 24/7").let {
+            assertTrue(it.isEmpty(), "'24/7' should not parse as a date")
+        }
+
+        parserFinal.parse("She has 20/20 vision").let {
+            assertTrue(it.isEmpty(), "'20/20' should not parse as a date")
+        }
+
+        // European date configuration (DD/MM/YYYY)
+        val euParser = TimeParser(ENConfig(useEuropeanDate = true))
+        euParser.parse("Meeting on 25/08/2024").let {
+            assertEquals(1, it.size, "25/08/2024 should parse in European mode")
+            assertEquals(2024, it[0].startTime.first().year)
+            assertEquals(8, it[0].startTime.first().month.number)
+            assertEquals(25, it[0].startTime.first().day)
+        }
+
+        euParser.parse("Holiday on 05/08").let {
+            assertEquals(1, it.size, "05/08 should parse as 5 August in European mode")
+            assertEquals(8, it[0].startTime.first().month.number)
+            assertEquals(5, it[0].startTime.first().day)
+        }
+
+        euParser.parse("Invalid 05/15/2024").let {
+            assertTrue(it.isEmpty(), "05/15/2024 has month=15 in DD/MM/YYYY mode and should be rejected")
+        }
+
+        // Separator rules (Option 3B-1): 2-part hyphenated "4-6" is a time range when preceded by "from", not April 6th
+        TimeParser(ENConfig(use24 = true)).parse("I am busy from 4-6").let {
+            assertEquals(1, it.size)
+            assertEquals("from 4-6", it[0].text.trim())
+            assertEquals(4, it[0].startTime.first().hour)
+            assertEquals(6, it[0].endTime?.hour)
+            assertTrue(TimeUnit.MONTH !in it[0].tagsTimeStart)
+        }
+
+        // Space-separated bare numbers ("10 12") should not parse as October 12th
+        parserFinal.parse("Check boxes 10 12 in the warehouse").let {
+            assertTrue(it.isEmpty(), "Space-separated bare numbers '10 12' should not parse as October 12th")
         }
     }
 
@@ -1348,6 +1484,81 @@ class ENTests {
         parserFinal.parse("over the years on 12/31").let {
             assertEquals(1, it.size, "Should only extract '12/31' and not treat 'years' as a separate time")
         }
+
+        // Bug 6: DateTime.compareTo score disambiguation & "in 1 second" vs ordinal "second"
+        val lowScore = config.getDateTime(text = "second", range = 0..5, points = 0, tagsTimeStart = emptySet())
+        val highScore = config.getDateTime(
+            text = "second",
+            range = 0..5,
+            points = 5,
+            tagsTimeStart = setOf(TimeUnit.DAY, TimeUnit.MONTH, TimeUnit.YEAR)
+        )
+        assertTrue(
+            lowScore.compareTo(highScore) != 0,
+            "DateTime.compareTo should distinguish tokens with different points/tags at the same range"
+        )
+
+        val fixedAnchor = LocalDateTime(2025, 6, 11, 10, 0, 0)
+            .toInstant(TimeZone.UTC)
+            .toEpochMilliseconds()
+        val fixedParser = TimeParser(ENConfig(relativeTo = fixedAnchor, timeZone = TimeZone.UTC))
+
+        fixedParser.parse("The alarm will trigger in 1 second").let {
+            assertEquals(1, it.size)
+            assertEquals(
+                LocalDateTime(2025, 6, 11, 10, 0, 1),
+                it[0].startTime.first(),
+                "'in 1 second' should add 1 second (10:00:01), not parse as January 2nd"
+            )
+        }
+
+        // Bug 7: ENBegin preserves existing left.tagsTimeStart
+        val enBegin = ap.panini.kwhen.en.mergers.ENBegin(ENConfig(use24 = true, relativeTo = fixedAnchor, timeZone = TimeZone.UTC))
+        val tokenWithStartTag = config.getDateTime(
+            text = "5",
+            tagsTimeStart = setOf(TimeUnit.DAY),
+            tagsTimeEnd = emptySet(),
+            generalNumber = 5.0,
+            generalTimeTag = TimeUnit.HOUR
+        )
+        val mergedBegin = enBegin.onMatch(tokenWithStartTag, null, enBegin.prefixPattern.find(" at "), null)
+        assertContains(
+            mergedBegin!!.tagsTimeStart,
+            TimeUnit.DAY,
+            "ENBegin should preserve existing left.tagsTimeStart instead of copying left.tagsTimeEnd"
+        )
+
+        // Bug 8: "tomorrow at midnight" and "midnight tomorrow" consistency
+        val tmrwMidnight = fixedParser.parse("tomorrow at midnight")
+        val midnightTmrw = fixedParser.parse("midnight tomorrow")
+        assertEquals(tmrwMidnight[0].startTime.first(), midnightTmrw[0].startTime.first())
+        assertEquals(tmrwMidnight[0].tagsTimeStart, midnightTmrw[0].tagsTimeStart)
+
+        // Bug 9: MergerConsecutive allows "tomorrow" to merge with rolled-over time ("at 9:30" at 10pm)
+        val lateNightAnchor = LocalDateTime(2025, 6, 11, 22, 0, 0)
+            .toInstant(TimeZone.UTC)
+            .toEpochMilliseconds()
+        TimeParser(ENConfig(relativeTo = lateNightAnchor, timeZone = TimeZone.UTC))
+            .parse("See you tomorrow at 9:30").let {
+                assertEquals(1, it.size)
+                assertEquals("tomorrow at 9:30", it[0].text.trim())
+            }
+
+        // Bug 10: Unicode case-folding ('İ') does not shift character ranges or throw StringIndexOutOfBoundsException
+        val unicodeInput = "İstanbul İzmir İznik meeting tomorrow at 3pm"
+        fixedParser.parse(unicodeInput).let {
+            assertEquals(1, it.size)
+            assertEquals("tomorrow at 3pm", it[0].text.trim())
+            assertEquals(unicodeInput.substring(it[0].range), it[0].text)
+        }
+
+        // Bug 11: Dense overlapping numbers do not cause O(2^N) merge blowup
+        val denseInput = (1..25).joinToString(" ") { "$it" } + " tomorrow at 5pm"
+        val elapsed = measureTime {
+            val res = fixedParser.parse(denseInput)
+            assertTrue(res.isNotEmpty())
+        }
+        assertTrue(elapsed < 2.seconds, "Parsing dense number tokens took $elapsed (expected < 2s)")
     }
 
     @Test
@@ -1667,6 +1878,29 @@ class ENTests {
             assertEquals(1, it.size)
             assertEquals("after 3 hours", it[0].text.trim())
             assertContains(it[0].tagsTimeStart, TimeUnit.HOUR)
+        }
+
+        val fixedAnchor = LocalDateTime(2025, 6, 11, 10, 0, 0)
+            .toInstant(TimeZone.UTC)
+            .toEpochMilliseconds()
+        val fixedParser = TimeParser(ENConfig(relativeTo = fixedAnchor, timeZone = TimeZone.UTC))
+
+        fixedParser.parse("The contract expires after 2 years").let {
+            assertEquals(1, it.size)
+            assertEquals(
+                LocalDateTime(2027, 6, 11, 10, 0, 0),
+                it[0].startTime.first(),
+                "'after 2 years' should add 2 years (2027), not set absolute year to 0002 AD"
+            )
+        }
+
+        fixedParser.parse("The package arrives after 2 days").let {
+            assertEquals(1, it.size)
+            assertEquals(
+                LocalDateTime(2025, 6, 13, 10, 0, 0),
+                it[0].startTime.first(),
+                "'after 2 days' should add 2 days (June 13), not set day-of-month to June 2nd"
+            )
         }
     }
 }
