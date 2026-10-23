@@ -24,7 +24,7 @@ internal class ENDayMonthYear(override val config: ENConfig) : ParserByWord(conf
     override val matchPattern: Regex
         get() = (
                     "(" +
-                        "$between31(?:th|st|rd)?" + // day
+                        "$between31(?:th|st|rd|nd)?" + // day
                         "|${ordinal.keys.matchAny()}" +
                     ")" +
                     "(?:\\s+(?:of\\s+)?)" +
@@ -66,7 +66,7 @@ internal class ENDayMonthYear(override val config: ENConfig) : ParserByWord(conf
             copy(
                 startTime = startTime.copy(
                     monthNumber = months[month] ?: return null,
-                    dayOfMonth = ordinal[day] ?: day.replace("th|st|rd".toRegex(), "").toInt()
+                    dayOfMonth = ordinal[day] ?: day.replace("th|st|rd|nd".toRegex(), "").toInt()
                 ), tagsTimeStart = tagsTimeStart + TimeUnit.DAY + TimeUnit.MONTH
             )
         }
