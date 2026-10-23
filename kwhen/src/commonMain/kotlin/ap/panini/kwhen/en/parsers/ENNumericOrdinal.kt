@@ -26,7 +26,7 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
     override val matchPattern: Regex
-        get() = "($between31)(?:(th|st|rd|nd)|(?:(?:\\s+|\\s*(:)\\s*)(\\d{1,2}))?\\s*([ap]\\.?m\\.?)?)|(${ordinal.keys.matchAny()})".toRegex()
+        get() = "($between31|(?<!\\d)00?(?!\\d))(?:(th|st|rd|nd)|(?:(?:\\s+|\\s*(:)\\s*)(\\d{1,2}))?\\s*([ap]\\.?m\\.?)?)|(${ordinal.keys.matchAny()})".toRegex()
 
     override fun onMatch(match: MatchResult): DateTime? {
         var date = config.getDateTime()
@@ -56,10 +56,11 @@ internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(co
 
         } else if (isOrdinal) {
             // is date: ex on the 3rd
+            val dayOfMonth = timeHour.toIntOrNull() ?: return null
+            if (dayOfMonth !in 1..31) return null
             date.copy(
                 startTime = date.startTime.copy(
-                    dayOfMonth = timeHour.toIntOrNull() ?: return null
-
+                    dayOfMonth = dayOfMonth
                 ),
 
                 tagsTimeStart = date.tagsTimeStart + TimeUnit.DAY
@@ -72,7 +73,7 @@ internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(co
             // above or equals to 24 hrs
             if (hour >= 24) return null // 13:24am doesn't make sense
             if (amPm == null && !hasColon) return null // remove just numbers
-            if (hour > 12 && amPm == "am") return null
+            if (amPm != null && hour !in 1..12) return null
 
             if ((minute.toIntOrNull() ?: 0) >= 60) return null
         var additionalDays = 0

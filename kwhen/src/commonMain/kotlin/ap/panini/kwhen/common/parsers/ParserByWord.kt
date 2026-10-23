@@ -14,5 +14,5 @@ internal abstract class ParserByWord(override val config: Config) : Parser(confi
 
     @Suppress("RegExpUnnecessaryNonCapturingGroup")
     final override val pattern: Regex
-        get() = "\\b(?:$matchPattern)\\b".toRegex()
+        get() = "\\b(?:$matchPattern)(?:\\b|(?<=\\.)(?!\\w))".toRegex()
 }
