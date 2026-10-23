@@ -17,7 +17,7 @@ import ap.panini.kwhen.util.getDateTimeWithGeneral
  * */
 internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
     override val prefixMatchPattern: Regex
-        get() = "(for|to|till|ends|ending|-|until)".toRegex()
+        get() = "(for|to|till|ends|ending|^\\s*-|until)".toRegex()
 
     override val mergePrefixWithLeft: Boolean
         get() = true

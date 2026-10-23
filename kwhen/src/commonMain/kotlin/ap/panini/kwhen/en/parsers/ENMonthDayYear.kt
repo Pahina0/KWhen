@@ -26,80 +26,102 @@ internal class ENMonthDayYear(override val config: ENConfig) : ParserByWord(conf
     // @formatter:off
     override val matchPattern: Regex
         get() = (
-                    "(" +
-                            "${months.keys.matchAny()}" +
-                            "|$between31" +
-                    ")" +
                     "(?:" +
-                        "(?:\\s+|-|/)" +
                         "(" +
-                            "$between31(?:th|st|rd|nd)?" + // day
-                            "|${ordinal.keys.matchAny()}" +
+                            "${months.keys.matchAny()}" +
                         ")" +
-                    ")?" +
-                    "(?:(?:,|,?\\s+|-|of|/)" +
-                        "(\\d{2,4})" + // year
-                    ")?"
+                        "(?:" +
+                            "(?:\\s+|-|/)" +
+                            "(" +
+                                "$between31(?:th|st|rd|nd)?" + // day
+                                "|${ordinal.keys.matchAny()}" +
+                            ")" +
+                        ")?" +
+                        "(?:(?:,|,?\\s+|-|of|/)" +
+                            "(\\d{2,4})" + // year
+                        ")?" +
+                    ")|(?:" +
+                        "($between31)" +
+                        "(?:" +
+                            "/($between31)(?:/(\\d{2,4}))?" +
+                            "|-($between31)-(\\d{2,4})" +
+                        ")" +
+                    ")"
                 ).toRegex()
     // @formatter:on
 
     override fun onMatch(match: MatchResult): DateTime? {
         var date = config.getDateTime()
 
+        val namedMonth = match.groupValues[1].lowercase()
+        val year = if (namedMonth.isNotBlank()) {
+            match.groupValues[3].lowercase()
+        } else {
+            match.groupValues[6].ifBlank { match.groupValues[8] }.lowercase()
+        }
+
         // checking year
-        val year = match.groupValues[3].lowercase()
         if (year.isNotBlank()) {
+            val yearInt = year.toIntOrNull() ?: return null
             date = date.run {
                 copy(
                     startTime = if (year.length == 2) { // 19th of aug, 98 -> 1998
-                        if (year.toInt() > 50) {
-                            startTime.copy(year = 1900 + year.toInt())
+                        if (yearInt > 50) {
+                            startTime.copy(year = 1900 + yearInt)
                         } else { // 19th of july, 04 -> 2004
-                            startTime.copy(year = 2000 + year.toInt())
+                            startTime.copy(year = 2000 + yearInt)
                         }
                     } else {
-                        startTime.copy(year = year.toInt())
+                        startTime.copy(year = yearInt)
                     },
-
-
                     tagsTimeStart = date.tagsTimeStart + TimeUnit.YEAR
-
                 )
             }
         }
 
-        val month = match.groupValues[1].lowercase()
-        val day = match.groupValues[2].lowercase()
+        if (namedMonth.isNotBlank()) {
+            val monthNum = months[namedMonth] ?: return null
+            val day = match.groupValues[2].lowercase()
 
-
-        if (month.toIntOrNull() == null && day == "") {
-            date = date.run {
-                copy(
-                    startTime = startTime.copy(
-                        monthNumber = months[month]!!,
-                    ),
-                    tagsTimeStart = tagsTimeStart + TimeUnit.MONTH
-                )
-            }
-        } else if (day != "") {
-//            month.toIntOrNull()?.let { m ->
-//                // month 25 is nonsense
-//                if (m > 12 || m < 1) return null
-//            }
-
-            date = date.run {
-                copy(
-                    startTime = startTime.copy(
-                        monthNumber = months[month] ?: (month.toInt()),
-                        dayOfMonth = ordinal[day] ?: day.replace("th|st|rd|nd".toRegex(), "")
-                            .toInt(),
-
+            date = if (day.isBlank()) {
+                date.run {
+                    copy(
+                        startTime = startTime.copy(monthNumber = monthNum),
+                        tagsTimeStart = tagsTimeStart + TimeUnit.MONTH
+                    )
+                }
+            } else {
+                val dayNum = ordinal[day]
+                    ?: day.replace("th|st|rd|nd".toRegex(), "").toIntOrNull()
+                    ?: return null
+                date.run {
+                    copy(
+                        startTime = startTime.copy(
+                            monthNumber = monthNum,
+                            dayOfMonth = dayNum
                         ),
+                        tagsTimeStart = tagsTimeStart + TimeUnit.DAY + TimeUnit.MONTH
+                    )
+                }
+            }
+        } else {
+            val firstNum = match.groupValues[4].toIntOrNull() ?: return null
+            val secondNum = match.groupValues[5].ifBlank { match.groupValues[7] }.toIntOrNull() ?: return null
+
+            val monthNum = if (config.useEuropeanDate) secondNum else firstNum
+            val dayNum = if (config.useEuropeanDate) firstNum else secondNum
+
+            if (monthNum !in 1..12 || dayNum !in 1..31) return null
+
+            date = date.run {
+                copy(
+                    startTime = startTime.copy(
+                        monthNumber = monthNum,
+                        dayOfMonth = dayNum
+                    ),
                     tagsTimeStart = tagsTimeStart + TimeUnit.DAY + TimeUnit.MONTH
                 )
             }
-        } else {
-            return null
         }
 
         return date

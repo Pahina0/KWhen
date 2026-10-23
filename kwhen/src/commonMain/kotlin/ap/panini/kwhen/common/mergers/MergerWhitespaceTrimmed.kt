@@ -16,7 +16,7 @@ internal abstract class MergerWhitespaceTrimmed(override val config: Config) : M
      */
     @Suppress("RegExpUnnecessaryNonCapturingGroup")
     final override val prefixPattern: Regex
-        get() = "(?:\\b|\\s+)(?:$prefixMatchPattern)\\s*$".toRegex()
+        get() = "(?:^|\\b|\\s+)(?:$prefixMatchPattern)\\s*$".toRegex()
 
     /**
      * Between pattern ignores nearby spaces or word borders

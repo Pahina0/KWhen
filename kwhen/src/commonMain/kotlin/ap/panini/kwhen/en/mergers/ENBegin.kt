@@ -61,7 +61,12 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
                 "after"
             ).contains(prefix.value.trim())
         ) {
-            if (left.text == "a") return null // "on a boat" isn't a time
+            if (left.text == "a" || left.text == "an") return null // "on a boat" isn't a time
+
+            if (left.generalTimeTag == null) {
+                if (prefix.value.trim() == "on") return null
+                if (left.generalNumber !in 0.0..24.0) return null
+            }
 
             if (left.generalTimeTag == TimeUnit.HOUR || left.generalTimeTag == null) {
                 var additionalDays = 0
