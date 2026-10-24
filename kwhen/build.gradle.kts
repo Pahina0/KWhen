@@ -74,7 +74,7 @@ android {
  * maven central user & pw should be auth token from maven central
  * */
 mavenPublishing {
-    coordinates("io.github.pahinaa.kwhen", "kwhen", "0.1.2")
+    coordinates("io.github.pahinaa.kwhen", "kwhen", "0.1.3")
 
     publishToMavenCentral()
     signAllPublications()
