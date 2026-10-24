@@ -22,8 +22,11 @@ abstract class Controller(open val config: Config) {
     internal abstract val mergers: List<Merger>
 
 
+    private fun String.lowercaseLengthPreserving(): String =
+        CharArray(length) { this[it].lowercaseChar() }.concatToString()
+
     internal fun parse(input: String): List<DateTime> {
-        val inputLc = input.lowercase()
+        val inputLc = input.lowercaseLengthPreserving()
         val parsed = mutableListOf<DateTime>()
 
         parsers.forEach {
@@ -93,13 +96,13 @@ abstract class Controller(open val config: Config) {
 
                 val prefix =
                     merger.prefixPattern.find(
-                        input.substring(prevIndex + 1 until left.range.first).lowercase()
+                        input.substring(prevIndex + 1 until left.range.first).lowercaseLengthPreserving()
                     )
 
                 val between = merger.betweenPattern.find(
                     input.substring(
                         left.range.last + 1 until (right?.range?.first ?: input.length)
-                    ).lowercase()
+                    ).lowercaseLengthPreserving()
                 )
 
 
@@ -107,7 +110,11 @@ abstract class Controller(open val config: Config) {
                 ++i
 
                 // sees if is possible to merge given data
-                var merged = merger.onMatch(left, right, prefix, between)?.copy(range = left.range)
+                var merged = try {
+                    merger.onMatch(left, right, prefix, between)?.copy(range = left.range)
+                } catch (_: Exception) {
+                    null
+                }
 
                 if (merged == null) {
                     processed += left

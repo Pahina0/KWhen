@@ -17,10 +17,12 @@ internal class ENGeneralAmount(override val config: ENConfig) : ParserGenericNum
     override val matchPattern: Regex
         get() = "${super.matchPattern}|(?:(?:a|an)\\s+(?=half|quarter))?(${amounts.keys.matchAny()})".toRegex()
 
-    override fun onMatch(match: MatchResult): DateTime {
+    override fun onMatch(match: MatchResult): DateTime? {
         val key = match.groupValues[1].ifBlank { match.value }
+        val number = amounts[key] ?: match.value.toDoubleOrNull() ?: return null
+        if (!number.isFinite() || number > 1_000_000) return null
         return config.getDateTime(
-            generalNumber = amounts[key] ?: match.value.toDouble(),
+            generalNumber = number,
             points = if (match.value == "a" || match.value == "an") 0 else 1
         )
     }

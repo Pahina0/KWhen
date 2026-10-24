@@ -13,7 +13,7 @@ internal open class ParserGenericNumbers(override val config: Config) : ParserBy
     override val matchPattern: Regex
         get() = "\\d+".toRegex()
 
-    override fun onMatch(match: MatchResult): DateTime {
+    override fun onMatch(match: MatchResult): DateTime? {
         return config.getDateTime(generalNumber = match.value.toDouble(), points = 0)
     }
 }
