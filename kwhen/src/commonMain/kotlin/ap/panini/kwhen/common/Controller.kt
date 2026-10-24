@@ -5,13 +5,11 @@ import ap.panini.kwhen.Parsed
 import ap.panini.kwhen.TimeUnit
 import ap.panini.kwhen.configs.Config
 import ap.panini.kwhen.util.copy
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.number
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.ExperimentalTime
+import kotlinx.datetime.plus
 
 /**
  * Controller parses, merges, and finalizes times based on parsers and mergers given.
@@ -157,6 +155,9 @@ abstract class Controller(open val config: Config) {
             val ret = mutableListOf<Parsed>()
 
             for (date in curTimes.filter { it.points != 0 }) {
+                // random numbers or unmerged general time words with no tags
+                if (date.tagsTimeStart.isEmpty() && date.tagsTimeEnd.isEmpty() && date.tagsDayOfWeek.isEmpty() && date.repeatTag == null && (date.generalTimeTag != null || date.generalNumber != null)) continue
+
                 if (ret.isNotEmpty() && date.range.first <= ret.last().range.last + 1) {
                     val mergeTo = ret.removeAt(ret.size - 1)
 
@@ -196,9 +197,6 @@ abstract class Controller(open val config: Config) {
                     )
 
                 } else {
-                    // random numbers or unmerged general time words with no tags
-                    if (date.tagsTimeStart.isEmpty() && date.tagsTimeEnd.isEmpty() && date.tagsDayOfWeek.isEmpty() && date.repeatTag == null && (date.generalTimeTag != null || date.generalNumber != null)) continue
-
                     val whole = date.repeatTag?.unPartial(date.repeatOften ?: 0.0)
                     ret += Parsed(
                         date.text,
@@ -220,17 +218,15 @@ abstract class Controller(open val config: Config) {
         return allRet.reduce { l, r -> l union r }.sortedBy { it.range.first }
     }
 
-    @OptIn(ExperimentalTime::class)
     private fun dayOfWeek(start: LocalDateTime, day: DayOfWeek): LocalDateTime {
-        var from = start.toInstant(config.timeZone)
+        var curDate = start.date
         repeat(7) {
-            val time = from.toLocalDateTime(config.timeZone)
-            if (time.dayOfWeek == day) return time
+            if (curDate.dayOfWeek == day) return start.copy(date = curDate)
 
-            from += 24.0.hours
+            curDate = curDate.plus(1, DateTimeUnit.DAY)
         }
 
-        return from.toLocalDateTime(config.timeZone)
+        return start.copy(date = curDate)
     }
 
 }

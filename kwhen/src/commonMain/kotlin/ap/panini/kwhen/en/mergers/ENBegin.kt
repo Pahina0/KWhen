@@ -6,11 +6,9 @@ import ap.panini.kwhen.common.mergers.MergerWhitespaceTrimmed
 import ap.panini.kwhen.configs.ENConfig
 import ap.panini.kwhen.util.copy
 import ap.panini.kwhen.util.getDateTimeWithGeneral
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.number
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Duration.Companion.days
-import kotlin.time.ExperimentalTime
+import kotlinx.datetime.plus
 
 /**
  * En begin finds words that come before times that can be merged with times
@@ -25,7 +23,6 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
     override val mergePrefixWithLeft: Boolean
         get() = true
 
-    @OptIn(ExperimentalTime::class)
     override fun onMatch(
         left: DateTime?,
         right: DateTime?,
@@ -118,10 +115,9 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
 
                 // calculates the next day since things like at 4, when its already 5, you would want to go next day
                 return if (additionalDays > 0) {
-                    val newTime =
-                        (tempDate.startTime.toInstant(config.timeZone) + additionalDays.days).toLocalDateTime(
-                            config.timeZone
-                        )
+                    val newTime = tempDate.startTime.copy(
+                        date = tempDate.startTime.date.plus(additionalDays, DateTimeUnit.DAY)
+                    )
 
                     val newTags = tempDate.tagsTimeStart.toMutableSet()
                     newTags += TimeUnit.DAY

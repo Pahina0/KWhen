@@ -8,11 +8,9 @@ import ap.panini.kwhen.en.ordinal
 import ap.panini.kwhen.util.between31
 import ap.panini.kwhen.util.copy
 import ap.panini.kwhen.util.matchAny
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.number
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Duration.Companion.days
-import kotlin.time.ExperimentalTime
+import kotlinx.datetime.plus
 
 /**
  * En numeric ordinal finds time units that only have numbers in them
@@ -23,10 +21,9 @@ import kotlin.time.ExperimentalTime
  * @property config
  * @constructor Create empty E n numeric ordinal
  */
-@OptIn(ExperimentalTime::class)
 internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(config) {
     override val matchPattern: Regex
-        get() = "($between31|(?<!\\d)00?(?!\\d))(?:(th|st|rd|nd)|(?:(?:\\s+|\\s*(:)\\s*)(\\d{1,2}))?\\s*([ap](?:\\.m\\.|m))?)|((?:(?<=\\bthe\\s+)second|${(ordinal.keys - "second").matchAny()}))".toRegex()
+        get() = "($between31|(?<!\\d)00?(?!\\d))(?:(th|st|rd|nd)|(?:(?:\\s+|\\s*(:)\\s*)(\\d{1,2}))?(?:\\s*([ap](?:\\.m\\.|m)))?)|((?:(?<=\\bthe\\s+)second|${(ordinal.keys - "second").matchAny()}))".toRegex()
 
     override fun onMatch(match: MatchResult): DateTime? {
         var date = config.getDateTime()
@@ -122,10 +119,9 @@ internal class ENNumericOrdinal(override val config: ENConfig) : ParserByWord(co
 
             // calculates the next day since things like at 4, when its already 5, you would want to go next day
             return if (additionalDays > 0) {
-                val newTime =
-                    (tempDate.startTime.toInstant(config.timeZone) + additionalDays.days).toLocalDateTime(
-                        config.timeZone
-                    )
+                val newTime = tempDate.startTime.copy(
+                    date = tempDate.startTime.date.plus(additionalDays, DateTimeUnit.DAY)
+                )
 
                 val newTags = tempDate.tagsTimeStart.toMutableSet()
                 newTags += TimeUnit.DAY
