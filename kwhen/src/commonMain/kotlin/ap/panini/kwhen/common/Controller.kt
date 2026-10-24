@@ -213,9 +213,10 @@ abstract class Controller(open val config: Config) {
                         )
                     } else listOf(date.startTime)
                     var et = date.endTime
-                    if (et != null && st.isNotEmpty() && st.first() > et) {
+                    if (et != null && st.isNotEmpty() && st.first() >= et) {
                         if (TimeUnit.WEEK in date.tagsTimeEnd) {
-                            val resolvedEndDateTime = ap.panini.kwhen.util.resolveDayOfWeek(st.first(), et.dayOfWeek)
+                            val nextStart = st.first().copy(date = st.first().date.plus(1, kotlinx.datetime.DateTimeUnit.DAY))
+                            val resolvedEndDateTime = ap.panini.kwhen.util.resolveDayOfWeek(nextStart, et.dayOfWeek)
                             et = et.copy(date = resolvedEndDateTime.date)
                         }
                     }

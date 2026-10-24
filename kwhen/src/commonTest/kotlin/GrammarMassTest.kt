@@ -475,4 +475,174 @@ class GrammarMassTest {
                 failures.take(30).joinToString("\n")
         )
     }
+
+    @Test
+    fun testMassNaturalDurationRanges() {
+        val failures = mutableListOf<String>()
+        var totalCases = 0
+        val parser = TimeParser(ENConfig(relativeTo = anchorMillis, timeZone = zone))
+
+        val starts = listOf(
+            "June 3rd",
+            "tomorrow at 3pm",
+            "today at 10am",
+            "on Monday"
+        )
+        val durations = listOf(
+            "for 2 hours",
+            "for 3 days",
+            "for 30 minutes",
+            "for 1 week"
+        )
+
+        for (start in starts) {
+            for (dur in durations) {
+                // Natural order: <start> <dur>
+                val naturalSentence = "Event $start $dur"
+                totalCases++
+                val resNat = parser.parse(naturalSentence)
+                if (resNat.size != 1) {
+                    failures += "NATURAL DURATION COUNT MISMATCH on '$naturalSentence': got ${resNat.size}"
+                } else {
+                    val p = resNat.first()
+                    if (p.endTime == null) {
+                        failures += "NATURAL DURATION NULL END on '$naturalSentence'"
+                    } else if (p.endTime!! <= p.startTime.first()) {
+                        failures += "NATURAL DURATION END <= START on '$naturalSentence': start=${p.startTime.first()} end=${p.endTime}"
+                    }
+                }
+
+                // Reversed order: <dur> <start>
+                val revSentence = "Event $dur $start"
+                totalCases++
+                val resRev = parser.parse(revSentence)
+                if (resRev.size != 1) {
+                    failures += "REVERSED DURATION COUNT MISMATCH on '$revSentence': got ${resRev.size}"
+                } else {
+                    val p = resRev.first()
+                    if (p.endTime == null) {
+                        failures += "REVERSED DURATION NULL END on '$revSentence'"
+                    } else if (p.endTime!! <= p.startTime.first()) {
+                        failures += "REVERSED DURATION END <= START on '$revSentence': start=${p.startTime.first()} end=${p.endTime}"
+                    }
+                }
+            }
+        }
+
+        assertTrue(
+            failures.isEmpty(),
+            "Failed ${failures.size} / $totalCases Natural Duration Range cases:\n" +
+                failures.take(30).joinToString("\n")
+        )
+    }
+
+    @Test
+    fun testMassWeekdayRanges() {
+        val failures = mutableListOf<String>()
+        var totalCases = 0
+        val parser = TimeParser(ENConfig(relativeTo = anchorMillis, timeZone = zone))
+
+        val days = listOf(
+            "Monday" to kotlinx.datetime.DayOfWeek.MONDAY,
+            "Tuesday" to kotlinx.datetime.DayOfWeek.TUESDAY,
+            "Wednesday" to kotlinx.datetime.DayOfWeek.WEDNESDAY,
+            "Thursday" to kotlinx.datetime.DayOfWeek.THURSDAY,
+            "Friday" to kotlinx.datetime.DayOfWeek.FRIDAY,
+            "Saturday" to kotlinx.datetime.DayOfWeek.SATURDAY,
+            "Sunday" to kotlinx.datetime.DayOfWeek.SUNDAY
+        )
+
+        for ((startName, startDow) in days) {
+            for ((endName, endDow) in days) {
+                for (connector in listOf("from $startName to $endName", "starting $startName until $endName")) {
+                    val sentence = "Workshop $connector"
+                    totalCases++
+                    val parsed = parser.parse(sentence)
+                    if (parsed.size != 1) {
+                        failures += "WEEKDAY RANGE COUNT MISMATCH on '$sentence': got ${parsed.size}"
+                        continue
+                    }
+                    val item = parsed.first()
+                    if (item.startTime.first().dayOfWeek != startDow) {
+                        failures += "START DOW MISMATCH on '$sentence': expected $startDow, got ${item.startTime.first().dayOfWeek}"
+                    }
+                    if (item.endTime == null) {
+                        failures += "END TIME NULL on '$sentence'"
+                    } else {
+                        if (item.endTime!!.dayOfWeek != endDow) {
+                            failures += "END DOW MISMATCH on '$sentence': expected $endDow, got ${item.endTime!!.dayOfWeek}"
+                        }
+                        if (item.endTime!! <= item.startTime.first()) {
+                            failures += "END <= START on '$sentence': start=${item.startTime.first()}, end=${item.endTime}"
+                        }
+                    }
+                }
+            }
+        }
+
+        assertTrue(
+            failures.isEmpty(),
+            "Failed ${failures.size} / $totalCases Weekday Range cases:\n" +
+                failures.take(30).joinToString("\n")
+        )
+    }
+
+    @Test
+    fun testMassSpecificAndVagueTimeOfDayDisambiguation() {
+        val failures = mutableListOf<String>()
+        var totalCases = 0
+        val parser = TimeParser(ENConfig(relativeTo = anchorMillis, timeZone = zone))
+
+        data class TimePair(
+            val clockStr: String,
+            val vagueStr: String,
+            val expectedHour: Int,
+            val expectedMinute: Int
+        )
+
+        val pairs = listOf(
+            TimePair("at 8am", "in the morning", 8, 0),
+            TimePair("at 8:30am", "in the morning", 8, 30),
+            TimePair("at 7", "in the evening", 19, 0),
+            TimePair("at 7:45", "in the evening", 19, 45),
+            TimePair("at 8", "at night", 20, 0),
+            TimePair("at 11:59pm", "at night", 23, 59),
+            TimePair("at 3", "in the afternoon", 15, 0),
+            TimePair("at 2:15", "in the afternoon", 14, 15)
+        )
+
+        for ((clock, vague, expectedH, expectedM) in pairs) {
+            // Clock then vague: "meeting at 8am in the morning"
+            val order1 = "meeting $clock $vague"
+            totalCases++
+            val res1 = parser.parse(order1)
+            if (res1.size != 1) {
+                failures += "COUNT MISMATCH on '$order1': got ${res1.size}"
+            } else {
+                val st = res1.first().startTime.first()
+                if (st.hour != expectedH || st.minute != expectedM) {
+                    failures += "TIME MISMATCH on '$order1': expected $expectedH:$expectedM, got ${st.hour}:${st.minute}"
+                }
+            }
+
+            // Vague then clock: "meeting in the morning at 8am"
+            val order2 = "meeting $vague $clock"
+            totalCases++
+            val res2 = parser.parse(order2)
+            if (res2.size != 1) {
+                failures += "COUNT MISMATCH on '$order2': got ${res2.size}"
+            } else {
+                val st = res2.first().startTime.first()
+                if (st.hour != expectedH || st.minute != expectedM) {
+                    failures += "TIME MISMATCH on '$order2': expected $expectedH:$expectedM, got ${st.hour}:${st.minute}"
+                }
+            }
+        }
+
+        assertTrue(
+            failures.isEmpty(),
+            "Failed ${failures.size} / $totalCases Specific+Vague Time of Day cases:\n" +
+                failures.take(30).joinToString("\n")
+        )
+    }
 }
