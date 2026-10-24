@@ -27,12 +27,12 @@ internal class MergerGeneralTags(override val config: Config) : MergerWhitespace
     ): DateTime? {
         if (left == null || right == null || between == null) return null
 
-        val generalTag = left.generalTimeTag ?: right.generalTimeTag ?: return null
-        val generalNumber = right.generalNumber ?: left.generalNumber ?: return null
+        if (left.generalNumber == null || left.generalTimeTag != null) return null
+        if (right.generalTimeTag == null || right.generalNumber != null) return null
 
         return config.getDateTime(
-            generalNumber = generalNumber,
-            generalTimeTag = generalTag
+            generalNumber = left.generalNumber,
+            generalTimeTag = right.generalTimeTag
         )
     }
 }

@@ -360,7 +360,88 @@ class GrammarMassTest {
                 if (i == j) continue
                 val first = expressions[i]
                 val second = expressions[j]
-                val sentence = "Primary schedule is $first, and the backup option is $second."
+                for (sentence in listOf(
+                    "Primary schedule is $first, and the backup option is $second.",
+                    "We have a meeting $first and a follow-up call $second."
+                )) {
+                    totalCases++
+
+                    val parsed = try {
+                        parser.parse(sentence)
+                    } catch (e: Exception) {
+                        failures += "CRASH on '$sentence': ${e::class.simpleName}: ${e.message}"
+                        continue
+                    }
+
+                    if (parsed.size != 2) {
+                        failures += "MULTI-EXPR COUNT MISMATCH on '$sentence': expected 2 expressions ('$first' and '$second'), got ${parsed.size}: ${parsed.map { "'${it.text}'" }}"
+                        continue
+                    }
+
+                    if (!parsed[0].text.trim().equals(first, ignoreCase = true)) {
+                        failures += "FIRST EXPR MISMATCH on '$sentence': expected '$first', got '${parsed[0].text.trim()}'"
+                    }
+                    if (!parsed[1].text.trim().equals(second, ignoreCase = true)) {
+                        failures += "SECOND EXPR MISMATCH on '$sentence': expected '$second', got '${parsed[1].text.trim()}'"
+                    }
+                }
+            }
+        }
+
+        assertTrue(
+            failures.isEmpty(),
+            "Failed ${failures.size} / $totalCases Multi-Expression combinations:\n" +
+                failures.take(30).joinToString("\n")
+        )
+    }
+
+    @Test
+    fun testMassDistractorNumbersAndArticlesSurroundingExpressions() {
+        val failures = mutableListOf<String>()
+        var totalCases = 0
+        val parser = TimeParser(ENConfig(use24 = true, relativeTo = anchorMillis, timeZone = zone))
+
+        val expressions = listOf(
+            "today",
+            "tomorrow at 3:15pm",
+            "on Monday",
+            "on July 4th",
+            "on the 2nd of July",
+            "on 09/25 at 10:30am",
+            "from 8am to 4pm",
+            "in 5 minutes",
+            "in 2 hours",
+            "in a week",
+            "for 3 hours",
+            "for 2 days",
+            "every Friday at 9am"
+        )
+
+        // Contexts packed with distractor 'a', 'an', bare numbers, and preposition+distractor traps
+        val distractorFrames = listOf(
+            "We are in a meeting " to " with 2 people",
+            "Going to a movie " to " and a dinner after",
+            "Waiting for a friend " to " in room 401",
+            "Table for 2 " to " for a birthday party",
+            "There are 3 groups in 2 rooms " to " and a guest",
+            "The 5 dogs and the next 2 people arrive " to " at a park",
+            "After a long talk, " to " a bell rings",
+            "In a rush, " to " when 3 people arrived",
+            "With 40 guests, " to " while 50 people waited",
+            "Book 1 ticket " to ", a seat is open",
+            "Buy 4 items " to " and a gift"
+        )
+
+        for (expr in expressions) {
+            val baseline = parser.parse(expr)
+            if (baseline.size != 1) {
+                failures += "BASELINE FAILED on '$expr': got ${baseline.size}"
+                continue
+            }
+            val expected = baseline.first()
+
+            for ((prefix, suffix) in distractorFrames) {
+                val sentence = "$prefix$expr$suffix"
                 totalCases++
 
                 val parsed = try {
@@ -370,23 +451,27 @@ class GrammarMassTest {
                     continue
                 }
 
-                if (parsed.size != 2) {
-                    failures += "MULTI-EXPR COUNT MISMATCH on '$sentence': expected 2 expressions ('$first' and '$second'), got ${parsed.size}: ${parsed.map { "'${it.text}'" }}"
+                if (parsed.size != 1) {
+                    failures += "DISTRACTOR COUNT MISMATCH on '$sentence': expected only ['$expr'], got ${parsed.size}: ${parsed.map { "'${it.text}'" }}"
                     continue
                 }
 
-                if (!parsed[0].text.trim().equals(first, ignoreCase = true)) {
-                    failures += "FIRST EXPR MISMATCH on '$sentence': expected '$first', got '${parsed[0].text.trim()}'"
+                val actual = parsed.first()
+                if (!actual.text.trim().equals(expr, ignoreCase = true)) {
+                    failures += "DISTRACTOR TEXT CORRUPTION on '$sentence': expected '$expr', got '${actual.text.trim()}'"
                 }
-                if (!parsed[1].text.trim().equals(second, ignoreCase = true)) {
-                    failures += "SECOND EXPR MISMATCH on '$sentence': expected '$second', got '${parsed[1].text.trim()}'"
+                if (actual.startTime != expected.startTime) {
+                    failures += "DISTRACTOR START_TIME CORRUPTION on '$sentence': expected ${expected.startTime}, got ${actual.startTime}"
+                }
+                if (actual.endTime != expected.endTime) {
+                    failures += "DISTRACTOR END_TIME CORRUPTION on '$sentence': expected ${expected.endTime}, got ${actual.endTime}"
                 }
             }
         }
 
         assertTrue(
             failures.isEmpty(),
-            "Failed ${failures.size} / $totalCases Multi-Expression combinations:\n" +
+            "Failed ${failures.size} / $totalCases Distractor Number & Article cases:\n" +
                 failures.take(30).joinToString("\n")
         )
     }

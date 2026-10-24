@@ -23,9 +23,9 @@ internal open class MergerList(override val config: ENConfig) : MergerWhitespace
     ): DateTime? {
         if (left == null || right == null || between == null) return null
 
+        if (left.tagsTimeStart.isEmpty() || right.tagsTimeStart.isEmpty()) return null
+
         if (
-            left.tagsTimeStart.isNotEmpty() &&
-            right.tagsTimeStart.isNotEmpty() &&
             left.tagsTimeStart.maxOfOrNull { it.ordinal } != right.tagsTimeStart.maxOfOrNull { it.ordinal }
         ) return null
 

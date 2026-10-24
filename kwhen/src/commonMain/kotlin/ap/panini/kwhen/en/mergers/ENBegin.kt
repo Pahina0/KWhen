@@ -50,18 +50,21 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
             return left.copy()
         }
 
+        if (left.text == "a" || left.text == "an") return null // "on a boat" / "in a meeting" isn't a time
+
+        val prep = prefix.groupValues[1].lowercase()
+        val hasThe = prefix.value.trim().endsWith("the") || prefix.value.trim() == "the"
+
         if (setOf(
                 "from",
                 "on",
                 "at",
                 "during",
                 "after"
-            ).contains(prefix.value.trim())
+            ).contains(prep) && !hasThe
         ) {
-            if (left.text == "a" || left.text == "an") return null // "on a boat" isn't a time
-
             // "after 3 hours" / "after 2 days" (with an explicit unit) is a relative offset, not an absolute date/clock-hour
-            if (prefix.value.trim() == "after" && left.generalTimeTag != null) {
+            if (prep == "after" && left.generalTimeTag != null) {
                 return left.copy(
                     startTime = getDateTimeWithGeneral(
                         left.generalNumber,
@@ -76,7 +79,7 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
             }
 
             if (left.generalTimeTag == null) {
-                if (prefix.value.trim() == "on") return null
+                if (prep == "on" || prep == "during") return null
                 if (left.generalNumber !in 0.0..24.0) return null
             }
 
@@ -154,14 +157,16 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
             )
         }
 
+        if (prep != "in" || hasThe || left.generalTimeTag == null) return null
+
         return left.copy(
             startTime = getDateTimeWithGeneral(
                 left.generalNumber,
-                left.generalTimeTag ?: TimeUnit.HOUR,
+                left.generalTimeTag,
                 left.endTime ?: left.startTime,
                 config
             ),
-            tagsTimeStart = left.tagsTimeStart + (left.generalTimeTag ?: TimeUnit.HOUR),
+            tagsTimeStart = left.tagsTimeStart + left.generalTimeTag,
             generalTimeTag = null,
             generalNumber = null,
         )

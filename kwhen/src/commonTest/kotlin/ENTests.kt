@@ -1743,6 +1743,53 @@ class ENTests {
             assertEquals(1, it.size, "Should only extract 'tomorrow at noon' and ignore 911")
             assertEquals(12, it[0].startTime.first().hour)
         }
+
+        val fixedAnchor = LocalDateTime(2025, 6, 11, 10, 0, 0)
+            .toInstant(TimeZone.UTC)
+            .toEpochMilliseconds()
+        val fixedParser = TimeParser(ENConfig(use24 = true, relativeTo = fixedAnchor, timeZone = TimeZone.UTC))
+
+        // "In 5 minutes a bell rings" -> trailing 'a' must not overwrite '5' in MergerGeneralTags
+        fixedParser.parse("In 5 minutes a bell rings").let {
+            assertEquals(1, it.size)
+            assertEquals("In 5 minutes", it[0].text.trim())
+            assertEquals(LocalDateTime(2025, 6, 11, 10, 5, 0), it[0].startTime.first())
+        }
+
+        // "In 2 hours 3 people arrived" -> trailing '3' must not overwrite '2' in MergerGeneralTags
+        fixedParser.parse("In 2 hours 3 people arrived").let {
+            assertEquals(1, it.size)
+            assertEquals("In 2 hours", it[0].text.trim())
+            assertEquals(LocalDateTime(2025, 6, 11, 12, 0, 0), it[0].startTime.first())
+        }
+
+        // "Table for 2 at 7pm" -> "for 2" without a time unit is not a time
+        fixedParser.parse("Table for 2 at 7pm").let {
+            assertEquals(1, it.size)
+            assertEquals("at 7pm", it[0].text.trim())
+            assertEquals(19, it[0].startTime.first().hour)
+        }
+
+        // "We are in a Friday meeting" -> "in a" before a date is not "in 1 hour"
+        fixedParser.parse("We are in a Friday meeting").let {
+            assertEquals(1, it.size)
+            assertEquals("Friday", it[0].text.trim())
+            assertEquals(setOf(TimeUnit.WEEK), it[0].tagsTimeStart)
+        }
+
+        // "I have a meeting at 3pm and a call at 5pm" -> "and a" must not be swallowed into "at 3pm"
+        fixedParser.parse("I have a meeting at 3pm and a call at 5pm").let {
+            assertEquals(2, it.size)
+            assertEquals("at 3pm", it[0].text.trim())
+            assertEquals("at 5pm", it[1].text.trim())
+        }
+
+        // "We studied for 3 hours" -> relative duration (10:00 + 3h = 13:00), not absolute clock hour 3:00
+        fixedParser.parse("We studied for 3 hours").let {
+            assertEquals(1, it.size)
+            assertEquals("for 3 hours", it[0].text.trim())
+            assertEquals(LocalDateTime(2025, 6, 11, 13, 0, 0), it[0].endTime)
+        }
     }
 
     @Test

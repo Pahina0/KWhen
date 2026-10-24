@@ -40,8 +40,27 @@ internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(co
             )
         }
 
+        if (left.text == "a" || left.text == "an") return null
+
+        // relative time duration (go on a trip for 3 days [this ends in 3 days])
+        if (prefix.groupValues[1] == "for") {
+            if (left.generalTimeTag == null) return null
+            return left.copy(
+                endTime = getDateTimeWithGeneral(
+                    left.generalNumber,
+                    left.generalTimeTag,
+                    right?.startTime ?: left.startTime,
+                    config
+                ),
+                tagsTimeStart = setOf(),
+                tagsTimeEnd = left.tagsTimeEnd + left.generalTimeTag,
+                generalTimeTag = null,
+                generalNumber = null,
+            )
+        }
 
         if (left.generalTimeTag == TimeUnit.HOUR || left.generalTimeTag == null) {
+            if (left.generalTimeTag == null && left.generalNumber !in 0.0..24.0) return null
             val currentHour =
                 config.now().hour
             val hour = if (config.use24) {
@@ -69,23 +88,6 @@ internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(co
                 generalTimeTag = null,
                 generalNumber = null,
             )
-        }
-
-        // relative time duration (go on a trip for 3 days [this ends in 3 days])
-        if (prefix.groupValues[1] == "for") {
-            return left.copy(
-                endTime = getDateTimeWithGeneral(
-                    left.generalNumber,
-                    left.generalTimeTag,
-                    right?.startTime ?: left.startTime,
-                    config
-                ),
-                tagsTimeStart = setOf(),
-                tagsTimeEnd = left.tagsTimeEnd + left.generalTimeTag,
-                generalTimeTag = null,
-                generalNumber = null,
-            )
-
         }
 
         return left.copy(
