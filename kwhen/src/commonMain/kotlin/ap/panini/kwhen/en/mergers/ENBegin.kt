@@ -18,7 +18,7 @@ import kotlinx.datetime.plus
  */
 internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(config) {
     override val prefixMatchPattern: Regex
-        get() = "(?:starting\\s+)?(from|on|at|during|in|after)(?:\\s+the)?|the|next".toRegex()
+        get() = "(?:starting\\s+)?(starting|from|on|at|during|in|after)(?:\\s+the)?|the|next|this".toRegex()
 
     override val mergePrefixWithLeft: Boolean
         get() = true
@@ -31,7 +31,9 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
     ): DateTime? {
         if (left == null || prefix == null) return null
 
-        if (prefix.value.trim() == "next" && left.generalTimeTag != null) {
+        val prefixTrimmed = prefix.value.trim().lowercase()
+
+        if (prefixTrimmed == "next" && left.generalTimeTag != null) {
 
             return left.copy(
                 startTime = getDateTimeWithGeneral(
@@ -40,6 +42,14 @@ internal class ENBegin(override val config: ENConfig) : MergerWhitespaceTrimmed(
                     left.startTime,
                     config
                 ),
+                tagsTimeStart = left.tagsTimeStart + left.generalTimeTag,
+                generalTimeTag = null,
+                generalNumber = null,
+            )
+        }
+
+        if (prefixTrimmed == "this" && left.generalTimeTag != null) {
+            return left.copy(
                 tagsTimeStart = left.tagsTimeStart + left.generalTimeTag,
                 generalTimeTag = null,
                 generalNumber = null,

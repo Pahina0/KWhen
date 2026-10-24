@@ -32,11 +32,23 @@ internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(co
 
         // has an unknown number
         if (left.generalNumber == null) {
+            val resolvedEnd = if (left.tagsDayOfWeek.isNotEmpty()) {
+                val dow = kotlinx.datetime.DayOfWeek.entries[left.tagsDayOfWeek.first().ordinal]
+                ap.panini.kwhen.util.resolveDayOfWeek(right?.startTime ?: left.startTime, dow)
+            } else {
+                left.startTime
+            }
+            val endTags = if (left.tagsDayOfWeek.isNotEmpty()) {
+                left.tagsTimeStart + setOf(TimeUnit.WEEK, TimeUnit.DAY)
+            } else {
+                left.tagsTimeStart
+            }
             return left.copy(
                 startTime = config.getDateTime().startTime,
-                endTime = left.startTime,
+                endTime = resolvedEnd,
+                tagsDayOfWeek = setOf(),
                 tagsTimeStart = setOf(),
-                tagsTimeEnd = left.tagsTimeStart,
+                tagsTimeEnd = left.tagsTimeEnd + endTags,
             )
         }
 
@@ -49,13 +61,13 @@ internal class ENEnd(override val config: ENConfig) : MergerWhitespaceTrimmed(co
                 endTime = getDateTimeWithGeneral(
                     left.generalNumber,
                     left.generalTimeTag,
-                    right?.startTime ?: left.startTime,
+                    left.startTime,
                     config
                 ),
                 tagsTimeStart = setOf(),
                 tagsTimeEnd = left.tagsTimeEnd + left.generalTimeTag,
-                generalTimeTag = null,
-                generalNumber = null,
+                generalTimeTag = left.generalTimeTag,
+                generalNumber = left.generalNumber,
             )
         }
 

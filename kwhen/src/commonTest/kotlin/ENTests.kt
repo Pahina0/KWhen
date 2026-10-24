@@ -1949,5 +1949,187 @@ class ENTests {
                 "'after 2 days' should add 2 days (June 13), not set day-of-month to June 2nd"
             )
         }
+
+        // 6. Written number words above ten
+        fixedParser.parse("alarm in fifteen minutes").let {
+            assertEquals(1, it.size)
+            assertEquals("in fifteen minutes", it[0].text.trim())
+            assertEquals(LocalDateTime(2025, 6, 11, 10, 15, 0), it[0].startTime.first())
+        }
+
+        fixedParser.parse("meeting in twenty minutes").let {
+            assertEquals(1, it.size)
+            assertEquals("in twenty minutes", it[0].text.trim())
+            assertEquals(LocalDateTime(2025, 6, 11, 10, 20, 0), it[0].startTime.first())
+        }
+
+        fixedParser.parse("leaves in forty-five minutes").let {
+            assertEquals(1, it.size)
+            assertEquals("in forty-five minutes", it[0].text.trim())
+            assertEquals(LocalDateTime(2025, 6, 11, 10, 45, 0), it[0].startTime.first())
+        }
+
+        // 7. Relative offset from weekday: "3 days from Monday" -> Thursday
+        fixedParser.parse("appointment is 3 days from Monday").let {
+            assertEquals(1, it.size)
+            assertEquals("3 days from Monday", it[0].text.trim())
+            assertEquals(2025, it[0].startTime.first().year)
+            assertEquals(6, it[0].startTime.first().monthNumber)
+            assertEquals(19, it[0].startTime.first().dayOfMonth) // June 16 (Mon) + 3 days = June 19 (Thu)
+            assertEquals(kotlinx.datetime.DayOfWeek.THURSDAY, it[0].startTime.first().dayOfWeek)
+        }
+    }
+
+    @Test
+    fun testMonthRolloverTomorrowYesterday() {
+        // Jan 31 boundary: tomorrow is Feb 1
+        val jan31Anchor = LocalDateTime(2025, 1, 31, 8, 0, 0).toInstant(TimeZone.UTC).toEpochMilliseconds()
+        val jan31Parser = TimeParser(ENConfig(relativeTo = jan31Anchor, timeZone = TimeZone.UTC))
+
+        jan31Parser.parse("meeting at 3pm tomorrow").let {
+            assertEquals(1, it.size)
+            assertEquals(LocalDateTime(2025, 2, 1, 15, 0, 0), it[0].startTime.first())
+        }
+        jan31Parser.parse("meeting tomorrow at 3pm").let {
+            assertEquals(1, it.size)
+            assertEquals(LocalDateTime(2025, 2, 1, 15, 0, 0), it[0].startTime.first())
+        }
+
+        // Mar 1 boundary: yesterday is Feb 28
+        val mar1Anchor = LocalDateTime(2025, 3, 1, 8, 0, 0).toInstant(TimeZone.UTC).toEpochMilliseconds()
+        val mar1Parser = TimeParser(ENConfig(relativeTo = mar1Anchor, timeZone = TimeZone.UTC))
+
+        mar1Parser.parse("happened at 3pm yesterday").let {
+            assertEquals(1, it.size)
+            assertEquals(LocalDateTime(2025, 2, 28, 15, 0, 0), it[0].startTime.first())
+        }
+        mar1Parser.parse("happened yesterday at 3pm").let {
+            assertEquals(1, it.size)
+            assertEquals(LocalDateTime(2025, 2, 28, 15, 0, 0), it[0].startTime.first())
+        }
+
+        // Dec 31 boundary: tomorrow is Jan 1 of next year
+        val dec31Anchor = LocalDateTime(2025, 12, 31, 8, 0, 0).toInstant(TimeZone.UTC).toEpochMilliseconds()
+        val dec31Parser = TimeParser(ENConfig(relativeTo = dec31Anchor, timeZone = TimeZone.UTC))
+
+        dec31Parser.parse("party at 3pm tomorrow").let {
+            assertEquals(1, it.size)
+            assertEquals(LocalDateTime(2026, 1, 1, 15, 0, 0), it[0].startTime.first())
+        }
+        dec31Parser.parse("party tomorrow at 3pm").let {
+            assertEquals(1, it.size)
+            assertEquals(LocalDateTime(2026, 1, 1, 15, 0, 0), it[0].startTime.first())
+        }
+    }
+
+    @Test
+    fun testNaturalOrderDurationRanges() {
+        val anchor = LocalDateTime(2025, 6, 11, 8, 0, 0).toInstant(TimeZone.UTC).toEpochMilliseconds()
+        val parser = TimeParser(ENConfig(relativeTo = anchor, timeZone = TimeZone.UTC))
+
+        // Natural order: <start> for <duration>
+        parser.parse("Vacation from June 3rd for 3 days").let {
+            assertEquals(1, it.size)
+            assertEquals("from June 3rd for 3 days", it[0].text.trim())
+            assertEquals(LocalDateTime(2025, 6, 3, 8, 0, 0), it[0].startTime.first())
+            assertEquals(LocalDateTime(2025, 6, 6, 8, 0, 0), it[0].endTime)
+        }
+
+        parser.parse("Event tomorrow at 3pm for 2 hours").let {
+            assertEquals(1, it.size)
+            assertEquals("tomorrow at 3pm for 2 hours", it[0].text.trim())
+            assertEquals(LocalDateTime(2025, 6, 12, 15, 0, 0), it[0].startTime.first())
+            assertEquals(LocalDateTime(2025, 6, 12, 17, 0, 0), it[0].endTime)
+        }
+
+        // Reversed order: for <duration> <start>
+        parser.parse("Event for 2 hours tomorrow at 3pm").let {
+            assertEquals(1, it.size)
+            assertEquals(LocalDateTime(2025, 6, 12, 15, 0, 0), it[0].startTime.first())
+            assertEquals(LocalDateTime(2025, 6, 12, 17, 0, 0), it[0].endTime)
+        }
+    }
+
+    @Test
+    fun testWeekdayRangesAndPrefixes() {
+        val anchor = LocalDateTime(2025, 6, 11, 8, 0, 0).toInstant(TimeZone.UTC).toEpochMilliseconds()
+        val parser = TimeParser(ENConfig(relativeTo = anchor, timeZone = TimeZone.UTC))
+
+        // "from Monday to Friday"
+        parser.parse("The workshop runs from Monday to Friday").let {
+            assertEquals(1, it.size)
+            assertEquals("from Monday to Friday", it[0].text.trim())
+            assertEquals(kotlinx.datetime.DayOfWeek.MONDAY, it[0].startTime.first().dayOfWeek)
+            assertEquals(kotlinx.datetime.DayOfWeek.FRIDAY, it[0].endTime!!.dayOfWeek)
+            assertTrue(it[0].endTime!! > it[0].startTime.first())
+        }
+
+        // "starting Monday until Friday"
+        parser.parse("Course starting Monday until Friday").let {
+            assertEquals(1, it.size)
+            assertEquals("starting Monday until Friday", it[0].text.trim())
+            assertEquals(kotlinx.datetime.DayOfWeek.MONDAY, it[0].startTime.first().dayOfWeek)
+            assertEquals(kotlinx.datetime.DayOfWeek.FRIDAY, it[0].endTime!!.dayOfWeek)
+        }
+
+        // "this Saturday" / "this week"
+        parser.parse("Join us this Saturday").let {
+            assertEquals(1, it.size)
+            assertEquals("this Saturday", it[0].text.trim())
+            assertEquals(kotlinx.datetime.DayOfWeek.SATURDAY, it[0].startTime.first().dayOfWeek)
+        }
+
+        parser.parse("Sync this week").let {
+            assertEquals(1, it.size)
+            assertEquals("this week", it[0].text.trim())
+            assertContains(it[0].tagsTimeStart, TimeUnit.WEEK)
+        }
+
+        // "sat." dot notation followed by time
+        parser.parse("Meet on sat. at 3pm").let {
+            assertEquals(1, it.size)
+            assertEquals("on sat. at 3pm", it[0].text.trim())
+            assertEquals(15, it[0].startTime.first().hour)
+            assertEquals(kotlinx.datetime.DayOfWeek.SATURDAY, it[0].startTime.first().dayOfWeek)
+        }
+    }
+
+    @Test
+    fun testSpecificTimeAndVagueTimeOfDayDisambiguation() {
+        val anchor = LocalDateTime(2025, 6, 11, 8, 0, 0).toInstant(TimeZone.UTC).toEpochMilliseconds()
+        val parser = TimeParser(ENConfig(relativeTo = anchor, timeZone = TimeZone.UTC))
+
+        // "at 8am in the morning" -> single expression at 08:00
+        parser.parse("flight is at 8am in the morning").let {
+            assertEquals(1, it.size)
+            assertEquals("at 8am in the morning", it[0].text.trim())
+            assertEquals(8, it[0].startTime.first().hour)
+            assertEquals(0, it[0].startTime.first().minute)
+        }
+
+        // "in the morning at 8am" -> single expression at 08:00
+        parser.parse("flight is in the morning at 8am").let {
+            assertEquals(1, it.size)
+            assertEquals("in the morning at 8am", it[0].text.trim())
+            assertEquals(8, it[0].startTime.first().hour)
+            assertEquals(0, it[0].startTime.first().minute)
+        }
+
+        // "at 7 in the evening" -> 19:00
+        parser.parse("dinner at 7 in the evening").let {
+            assertEquals(1, it.size)
+            assertEquals("at 7 in the evening", it[0].text.trim())
+            assertEquals(19, it[0].startTime.first().hour)
+            assertEquals(0, it[0].startTime.first().minute)
+        }
+
+        // "tomorrow at 11:59pm at night" -> 23:59, does not overwrite with 20:00
+        parser.parse("deadline is tomorrow at 11:59pm at night").let {
+            assertEquals(1, it.size)
+            assertEquals("tomorrow at 11:59pm at night", it[0].text.trim())
+            assertEquals(23, it[0].startTime.first().hour)
+            assertEquals(59, it[0].startTime.first().minute)
+            assertEquals(LocalDateTime(2025, 6, 12, 23, 59, 0), it[0].startTime.first())
+        }
     }
 }

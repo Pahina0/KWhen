@@ -33,7 +33,12 @@ internal class MergerConsecutive(override val config: Config) : MergerWhitespace
         val leftIsDateOnly = TimeUnit.HOUR !in left.tagsTimeStart && left.tagsTimeStart.any { it.ordinal >= TimeUnit.DAY.ordinal }
         val rightIsDateOnly = TimeUnit.HOUR !in right.tagsTimeStart && right.tagsTimeStart.any { it.ordinal >= TimeUnit.DAY.ordinal }
 
-        if (!(leftIsDateOnly && rightIsTimeOnly) && !(leftIsTimeOnly && rightIsDateOnly)) {
+        val leftHasMinute = TimeUnit.MINUTE in left.tagsTimeStart
+        val rightHasMinute = TimeUnit.MINUTE in right.tagsTimeStart
+        val oneIsSpecificTimeAndOtherIsVague = (leftHasMinute && !rightHasMinute && TimeUnit.HOUR in right.tagsTimeStart) ||
+                (rightHasMinute && !leftHasMinute && TimeUnit.HOUR in left.tagsTimeStart)
+
+        if (!(leftIsDateOnly && rightIsTimeOnly) && !(leftIsTimeOnly && rightIsDateOnly) && !oneIsSpecificTimeAndOtherIsVague) {
             if (
                 left.tagsTimeStart.isNotEmpty() &&
                 right.tagsTimeStart.isNotEmpty() &&

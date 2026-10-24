@@ -23,7 +23,21 @@ import kotlin.time.ExperimentalTime
  * @param T the tpe of list
  * @return a regex string that matches any value in the list
  */
-internal fun <T> Collection<T>.matchAny(): Regex = joinToString("|").replace(".", "\\.").toRegex()
+internal fun <T> Collection<T>.matchAny(): Regex =
+    map { it.toString() }
+        .sortedByDescending { it.length }
+        .joinToString("|")
+        .replace(".", "\\.")
+        .toRegex()
+
+internal fun resolveDayOfWeek(start: LocalDateTime, day: kotlinx.datetime.DayOfWeek): LocalDateTime {
+    var curDate = start.date
+    repeat(7) {
+        if (curDate.dayOfWeek == day) return start.copy(date = curDate)
+        curDate = curDate.plus(1, kotlinx.datetime.DateTimeUnit.DAY)
+    }
+    return start.copy(date = curDate)
+}
 
 internal val between31 = "(?<!\\d)(?:0?[1-9]|[12][0-9]|3[01])(?!\\d)".toRegex()
 

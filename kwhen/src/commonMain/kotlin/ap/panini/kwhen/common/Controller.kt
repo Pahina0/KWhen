@@ -200,20 +200,30 @@ abstract class Controller(open val config: Config) {
                         range = mergeTo.range.first..date.range.last,
                         text = mergeTo.text + date.text.substring(mergeTo.range.last - date.range.first + 1),
                         startTime = st + mergedStartTime,
-                        tagsTimeStart = date.tagsTimeStart + mergeTo.tagsTimeStart
+                        endTime = mergeTo.endTime ?: date.endTime,
+                        tagsTimeStart = date.tagsTimeStart + mergeTo.tagsTimeStart,
+                        tagsTimeEnd = mergeTo.tagsTimeEnd + date.tagsTimeEnd
                     )
 
                 } else {
                     val whole = date.repeatTag?.unPartial(date.repeatOften ?: 0.0)
+                    val st = if (date.tagsDayOfWeek.isNotEmpty()) date.tagsDayOfWeek.map {
+                        dayOfWeek(
+                            date.startTime, DayOfWeek.entries[it.ordinal]
+                        )
+                    } else listOf(date.startTime)
+                    var et = date.endTime
+                    if (et != null && st.isNotEmpty() && st.first() > et) {
+                        if (TimeUnit.WEEK in date.tagsTimeEnd) {
+                            val resolvedEndDateTime = ap.panini.kwhen.util.resolveDayOfWeek(st.first(), et.dayOfWeek)
+                            et = et.copy(date = resolvedEndDateTime.date)
+                        }
+                    }
                     ret += Parsed(
                         date.text,
                         date.range,
-                        if (date.tagsDayOfWeek.isNotEmpty()) date.tagsDayOfWeek.map {
-                            dayOfWeek(
-                                date.startTime, DayOfWeek.entries[it.ordinal]
-                            )
-                        } else listOf(date.startTime),
-                        date.endTime,
+                        st,
+                        et,
                         date.tagsTimeStart,
                         date.tagsTimeEnd,
                         whole?.first,
@@ -225,15 +235,7 @@ abstract class Controller(open val config: Config) {
         return allRet.reduce { l, r -> l union r }.sortedBy { it.range.first }
     }
 
-    private fun dayOfWeek(start: LocalDateTime, day: DayOfWeek): LocalDateTime {
-        var curDate = start.date
-        repeat(7) {
-            if (curDate.dayOfWeek == day) return start.copy(date = curDate)
-
-            curDate = curDate.plus(1, DateTimeUnit.DAY)
-        }
-
-        return start.copy(date = curDate)
-    }
+    private fun dayOfWeek(start: LocalDateTime, day: DayOfWeek): LocalDateTime =
+        ap.panini.kwhen.util.resolveDayOfWeek(start, day)
 
 }
