@@ -1846,7 +1846,7 @@ class ENTests {
             assertContains(it[0].tagsTimeStart, TimeUnit.MINUTE)
         }
 
-        parserFinal.parse("alarms sound 45 minutes after 2:00").let {
+        parserFinal.parse("alarms sound 45 minutes after 2:00am").let {
             assertEquals(1, it.size)
             assertEquals(2, it[0].startTime.first().hour)
             assertEquals(45, it[0].startTime.first().minute)

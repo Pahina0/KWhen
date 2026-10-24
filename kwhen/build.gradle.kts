@@ -75,10 +75,12 @@ android {
  * maven central user & pw should be auth token from maven central
  * */
 mavenPublishing {
-    coordinates("io.github.pahinaa.kwhen", "kwhen", "0.1.3")
+    coordinates("io.github.pahinaa.kwhen", "kwhen", "0.1.4")
 
     publishToMavenCentral()
-    signAllPublications()
+    if (project.hasProperty("signingInMemoryKey") || project.hasProperty("signing.keyId")) {
+        signAllPublications()
+    }
 
     configure(
         KotlinMultiplatform(
