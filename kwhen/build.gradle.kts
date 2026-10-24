@@ -39,7 +39,7 @@ kotlin {
         commonMain {
             dependencies {
                 // dependencies for main
-                implementation(libs.kotlinx.datetime)
+                api(libs.kotlinx.datetime)
             }
         }
 
